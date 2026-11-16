@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>5개년 로드맵 도식 — 60개월을 한 장에</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --ink: #0b1a1e; --ink-2: #112a2f; --ink-3: #18383e;
+    --paper: #f7f6f0; --paper-2: #efece2; --white: #fff;
+    --lime: #d9f55f; --lime-soft: #f2facd;
+    --green: #0e6b4e; --green-soft: #e3f1e9;
+    --blue: #2f5fe0; --blue-soft: #e9eefc;
+    --clay: #c25a34; --clay-soft: #f9e9e1;
+    --violet: #6a55c8; --violet-soft: #efeafb;
+    --gold: #b98514; --gold-soft: #f8efd7;
+    --text: #15272b; --muted: #5d6d71; --muted-2: #859396;
+    --line: #e1ded3;
+    --font: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: #e9e6dc;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+  .page { width: min(1240px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 64px; }
+
+  .hero {
+    position: relative; overflow: hidden;
+    background: var(--ink); color: #fff;
+    border-radius: 28px; padding: 44px 48px 40px;
+  }
+  .hero::before {
+    content: ""; position: absolute; right: -140px; top: -180px;
+    width: 520px; height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,245,95,.16), transparent 68%);
+  }
+  .eyebrow {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--lime); border: 1px solid rgba(217,245,95,.35);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 18px;
+  }
+  .hero h1 {
+    position: relative; margin: 0 0 10px; font-size: 38px; line-height: 1.18;
+    font-weight: 800; letter-spacing: -0.035em;
+  }
+  .hero h1 em { font-style: normal; color: var(--lime); }
+  .hero p { position: relative; margin: 0; color: rgba(255,255,255,.62); font-size: 14px; max-width: 780px; }
+  .hero .fx { position: relative; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+  .hero .fx span {
+    font-size: 12px; font-variant-numeric: tabular-nums;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    padding: 7px 12px; border-radius: 8px; color: rgba(255,255,255,.8);
+  }
+
+  .card {
+    background: var(--white); border: 1px solid var(--line);
+    border-radius: 24px; padding: 30px 32px 34px; margin-top: 18px;
+  }
+  .card-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .num {
+    font-size: 12px; font-weight: 800; color: var(--ink);
+    background: var(--lime); border-radius: 6px; padding: 3px 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card h2 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .card .sub { margin: 6px 0 22px; color: var(--muted); font-size: 13px; }
+
+  .note {
+    margin-top: 18px; padding: 13px 17px; border-radius: 12px;
+    background: var(--blue-soft); color: #14307a; font-size: 12.5px; line-height: 1.6;
+    border-left: 3px solid var(--blue);
+  }
+  .note.warn { background: var(--clay-soft); color: #7a3819; border-left-color: var(--clay); }
+
+  .chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+
+  /* gantt */
+  .gantt { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .gantt th {
+    font-size: 10.5px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em;
+    padding: 0 0 8px; text-align: center; border-bottom: 1px solid var(--line);
+  }
+  .gantt th.track { text-align: left; width: 92px; }
+  .gantt th small { display: block; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted-2); }
+  .gantt td { padding: 7px 0; border-bottom: 1px solid #f0ede5; vertical-align: middle; }
+  .gantt td.track { font-size: 12px; font-weight: 800; padding-right: 10px; }
+  .gantt td.track small { display: block; font-size: 10px; font-weight: 500; color: var(--muted-2); }
+  .cell { position: relative; height: 30px; margin: 0 4px; border-radius: 6px; background: var(--paper); }
+  .cell b {
+    position: absolute; inset: 3px 0; display: flex; align-items: center;
+    padding: 0 7px; border-radius: 5px; font-size: 10px; font-weight: 700;
+    color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .c-green b { background: var(--green); }
+  .c-blue b { background: var(--blue); }
+  .c-violet b { background: var(--violet); }
+  .c-gold b { background: var(--gold); }
+  .c-clay b { background: var(--clay); }
+  .cell.empty { background: repeating-linear-gradient(135deg, #f4f2ea, #f4f2ea 6px, #eeece3 6px, #eeece3 12px); }
+
+  /* gates */
+  .gates { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .gate {
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 13px;
+    background: var(--paper);
+  }
+  .gate .g { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--blue); }
+  .gate .t { font-size: 12px; font-weight: 800; margin: 2px 0 3px; }
+  .gate .d { font-size: 10.5px; color: var(--muted); line-height: 1.45; }
+
+  table.data { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.data th, table.data td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+  table.data th { font-size: 10.5px; color: var(--muted); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+  tr.total td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 800; }
+
+  footer { margin-top: 22px; text-align: center; font-size: 11px; color: var(--muted-2); }
+
+  @media (max-width: 900px) {
+    .hero { padding: 30px 26px; }
+    .hero h1 { font-size: 26px; }
+    .grid2 { grid-template-columns: 1fr; }
+    .gates { grid-template-columns: 1fr 1fr; }
+    .card { padding: 22px 20px 26px; }
+    .gantt th.track { width: 66px; }
+  }
+
+  @page { size: A4 landscape; margin: 10mm; }
+  @media print {
+    body { background: #fff; }
+    .page { width: 100%; padding: 0; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Roadmap · 2027—2031</span>
+    <h1>5년은 짧다 · <em>60개월을 한 장에</em></h1>
+    <p>주니어 운동선수 성장 기록 플랫폼 — 매출 0.3억에서 24억, 7개국 21만 명, 5년차 현금흐름 +11.78억. 시장·제품·조직·자금을 같은 시간축에 놓았다.</p>
+    <div class="fx">
+      <span>M0 = 2027.01</span>
+      <span>5년 누적 매출 42.0억</span>
+      <span>최대 적자 9.67억 (M48)</span>
+      <span>5년차 OCF +11.78억</span>
+    </div>
+  </header>
+
+  <!-- 01 -->
+  <section class="card">
+    <div class="card-head"><span class="num">01</span><h2>매출은 5년차에 80배, 적자는 4년차에 끝난다</h2></div>
+    <p class="sub">왼쪽은 연차별 매출·비용(억 원), 오른쪽은 영업현금흐름(억 원). Y5에 매출이 비용을 처음으로 넘는다.</p>
+
+    <div class="grid2">
+      <div>
+        <svg class="chart" viewBox="0 0 460 300" role="img" aria-label="연차별 매출과 비용 막대 그래프">
+          <g stroke="#ece9df" stroke-width="1">
+            <line x1="46" y1="250" x2="450" y2="250" />
+            <line x1="46" y1="210" x2="450" y2="210" />
+            <line x1="46" y1="170" x2="450" y2="170" />
+            <line x1="46" y1="130" x2="450" y2="130" />
+            <line x1="46" y1="90"  x2="450" y2="90" />
+            <line x1="46" y1="50"  x2="450" y2="50" />
+          </g>
+          <g fill="#859396" font-size="9.5" font-family="Pretendard, sans-serif" text-anchor="end">
+            <text x="40" y="253">0</text>
+            <text x="40" y="213">5</text>
+            <text x="40" y="173">10</text>
+            <text x="40" y="133">15</text>
+            <text x="40" y="93">20</text>
+            <text x="40" y="53">25</text>
+          </g>
+
+          <!-- Y1 -->
+          <rect x="66"  y="247.6" width="24" height="2.4"  fill="#0e6b4e" />
+          <rect x="94"  y="226.4" width="24" height="23.6" fill="#c9c4b4" />
+          <text x="78"  y="266" fill="#5d6d71" font-size="10" text-anchor="middle" font-family="Pretendard, sans-serif">Y1</text>
+          <!-- Y2 -->
+          <rect x="146" y="234"   width="24" height="16"   fill="#0e6b4e" />
+          <rect x="174" y="206.96" width="24" height="43.04" fill="#c9c4b4" />
+          <text x="158" y="266" fill="#5d6d71" font-size="10" text-anchor="middle" font-family="Pretendard, sans-serif">Y2</text>
+          <!-- Y3 -->
+          <rect x="226" y="212.4" width="24" height="37.6" fill="#0e6b4e" />
+          <rect x="254" y="193.04" width="24" height="56.96" fill="#c9c4b4" />
+          <text x="238" y="266" fill="#5d6d71" font-size="10" text-anchor="middle" font-family="Pretendard, sans-serif">Y3</text>
+          <!-- Y4 -->
+          <rect x="306" y="162"   width="24" height="88"   fill="#0e6b4e" />
+          <rect x="334" y="152.24" width="24" height="97.76" fill="#c9c4b4" />
+          <text x="318" y="266" fill="#5d6d71" font-size="10" text-anchor="middle" font-family="Pretendard, sans-serif">Y4</text>
+          <!-- Y5 -->
+          <rect x="386" y="58"    width="24" height="192"  fill="#0e6b4e" />
+          <rect x="414" y="152.24" width="24" height="97.76" fill="#c9c4b4" />
+          <text x="398" y="266" fill="#5d6d71" font-size="10" text-anchor="middle" font-family="Pretendard, sans-serif">Y5</text>
+
+          <g font-size="9.5" font-weight="700" font-family="Pretendard, sans-serif" text-anchor="middle" fill="#0e6b4e">
+            <text x="78"  y="242">0.3</text>
+            <text x="158" y="229">2.0</text>
+            <text x="238" y="207">4.7</text>
+            <text x="318" y="157">11.0</text>
+            <text x="398" y="53">24.0</text>
+          </g>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#0e6b4e"></i>매출</span>
+          <span><i style="background:#c9c4b4"></i>비용</span>
+        </div>
+      </div>
+
+      <div>
+        <svg class="chart" viewBox="0 0 460 300" role="img" aria-label="연차별 영업현금흐름 선 그래프">
+          <g stroke="#ece9df" stroke-width="1">
+            <line x1="46" y1="170" x2="450" y2="170" stroke="#b9b4a4" />
+            <line x1="46" y1="85"  x2="450" y2="85" />
+            <line x1="46" y1="127.5" x2="450" y2="127.5" />
+            <line x1="46" y1="212.5" x2="450" y2="212.5" />
+            <line x1="46" y1="255" x2="450" y2="255" />
+          </g>
+          <g fill="#859396" font-size="9.5" font-family="Pretendard, sans-serif" text-anchor="end">
+            <text x="40" y="174">0</text>
+            <text x="40" y="131">+5</text>
+            <text x="40" y="89">+10</text>
+            <text x="40" y="216">−5</text>
+          </g>
+          <polyline points="90,192.5 200,198.7 310,186.3 420,180.4" fill="none" stroke="#c25a34" stroke-width="2.4" />
+          <polyline points="420,180.4 430,69.9" fill="none" stroke="#0e6b4e" stroke-width="2.6" />
+          <g fill="#c25a34">
+            <circle cx="90"  cy="192.5" r="4" />
+            <circle cx="200" cy="198.7" r="4" />
+            <circle cx="310" cy="186.3" r="4" />
+            <circle cx="420" cy="180.4" r="4" />
+          </g>
+          <circle cx="430" cy="69.9" r="5" fill="#0e6b4e" />
+          <g font-size="10" font-family="Pretendard, sans-serif" fill="#5d6d71" text-anchor="middle">
+            <text x="90"  y="278">Y1</text>
+            <text x="200" y="278">Y2</text>
+            <text x="310" y="278">Y3</text>
+            <text x="420" y="276">Y4</text>
+            <text x="430" y="292">Y5</text>
+          </g>
+          <g font-size="9.5" font-weight="700" font-family="Pretendard, sans-serif" text-anchor="middle">
+            <text x="90"  y="184" fill="#c25a34">−2.65</text>
+            <text x="200" y="190" fill="#c25a34">−3.38</text>
+            <text x="310" y="178" fill="#c25a34">−1.92</text>
+            <text x="420" y="172" fill="#c25a34">−1.22</text>
+            <text x="430" y="60"  fill="#0e6b4e">+11.78</text>
+          </g>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#c25a34"></i>적자 구간</span>
+          <span><i style="background:#0e6b4e"></i>흑자 전환</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>구조</strong> — Y4는 매출이 2배(11억)로 늘어도 현금은 여전히 마이너스다. 대만·호주 진입 비용이 먼저 나가기 때문이다.
+      이 구간을 <strong>미리 예산에 넣어둔 것</strong>이 계획의 핵심이고, Y5에 한 번에 뒤집힌다.
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="card">
+    <div class="card-head"><span class="num">02</span><h2>네 개의 트랙 — 시장 · 제품 · 조직 · 자금</h2></div>
+    <p class="sub">같은 5년을 네 관점으로 나눴다. 각 칸은 그 해의 대표 사건 하나다.</p>
+
+    <table class="gantt">
+      <thead>
+        <tr>
+          <th class="track">트랙</th>
+          <th>Y1 2027<small>증명</small></th>
+          <th>Y2 2028<small>반복</small></th>
+          <th>Y3 2029<small>복제</small></th>
+          <th>Y4 2030<small>다각화</small></th>
+          <th>Y5 2031<small>자립</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="track">시장<small>Market</small></td>
+          <td><div class="cell c-green"><b>한국 파일럿 → 유료화(M3)</b></div></td>
+          <td><div class="cell c-green"><b>한국 3종목 · 일본 PoC 5곳</b></div></td>
+          <td><div class="cell c-green"><b>일본 30곳 · 중국 1건</b></div></td>
+          <td><div class="cell c-blue"><b>대만 · 호주</b></div></td>
+          <td><div class="cell c-blue"><b>캐나다 · 영국</b></div></td>
+        </tr>
+        <tr>
+          <td class="track">제품<small>Product</small></td>
+          <td><div class="cell c-violet"><b>야구 MVP v1.0</b></div></td>
+          <td><div class="cell c-violet"><b>3종목 v1.5 · 아카데미</b></div></td>
+          <td><div class="cell c-violet"><b>진학 프로필 v2.0 · 중국 모드</b></div></td>
+          <td><div class="cell c-violet"><b>6종목 v3.5 · B2G</b></div></td>
+          <td><div class="cell c-violet"><b>AI v5.0 · 영어권</b></div></td>
+        </tr>
+        <tr>
+          <td class="track">조직<small>People</small></td>
+          <td><div class="cell c-gold"><b>3 → 5명</b></div></td>
+          <td><div class="cell c-gold"><b>8명</b></div></td>
+          <td><div class="cell c-gold"><b>8명 (도쿄 2 포함)</b></div></td>
+          <td><div class="cell c-gold"><b>14명 (싱가포르 3 포함)</b></div></td>
+          <td><div class="cell c-gold"><b>14명 (M60 이후 25)</b></div></td>
+        </tr>
+        <tr>
+          <td class="track">자금<small>Funding</small></td>
+          <td><div class="cell c-clay"><b>Seed 3 + 정부 0.7</b></div></td>
+          <td><div class="cell c-clay"><b>Pre-A 10 + R&amp;D 1.4</b></div></td>
+          <td><div class="cell c-clay"><b>Series A 30</b></div></td>
+          <td><div class="cell empty"></div></td>
+          <td><div class="cell c-clay"><b>Series B 60 (선택)</b></div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note warn">
+      <strong>Y5의 선택</strong> — Series B 60억은 <strong>없어도 되는 돈</strong>이다. Y5 현금흐름이 +11.78억이므로, B를 받지 않으면 미국 진입이 12개월 늦어질 뿐 사업은 계속된다.
+      이 협상력이 5년 계획의 최종 산출물이다.
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="card">
+    <div class="card-head"><span class="num">03</span><h2>게이트 8개 — 다음 돈을 쓰는 허가</h2></div>
+    <p class="sub">게이트를 통과하지 못하면 다음 단계로 가지 않는다. "일단 하고 보자"를 막는 장치다.</p>
+
+    <div class="gates">
+      <div class="gate"><div class="g">G1 · M6</div><div class="t">입력률 30%</div><div class="d">파일럿 3곳 · 미달 시 제품 재설계</div></div>
+      <div class="gate"><div class="g">G2 · M12</div><div class="t">파트너 100 · 유료 300</div><div class="d">미달 시 채널 전환</div></div>
+      <div class="gate"><div class="g">G3 · M18</div><div class="t">선수 3,000 · 리텐션 50%</div><div class="d">미달 시 마케팅 중단</div></div>
+      <div class="gate"><div class="g">G4 · M24</div><div class="t">일본 파트너 5곳</div><div class="d">미달 시 일본 축소</div></div>
+      <div class="gate"><div class="g">G5 · M30</div><div class="t">러닝레이트 4.7억 · 일본 유료 10곳</div><div class="d">미달 시 Wave 2 연기</div></div>
+      <div class="gate"><div class="g">G6 · M36</div><div class="t">현금흐름 −2억 이내</div><div class="d">미달 시 비용 20% 감축</div></div>
+      <div class="gate"><div class="g">G7 · M48</div><div class="t">3개국 · 매출 11억</div><div class="d">미달 시 확장 동결</div></div>
+      <div class="gate"><div class="g">G8 · M60</div><div class="t">흑자 · 해외 42%</div><div class="d">미달 시 B 없이 5년 더</div></div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="card">
+    <div class="card-head"><span class="num">04</span><h2>숫자로 본 5년</h2></div>
+    <p class="sub">매출·비용·현금흐름·인원은 모두 같은 원본에서 나온 값이다. 누적 매출 42.0억은 TAM의 0.009%다.</p>
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th>연차</th><th>국가</th><th class="n">관리 선수</th><th class="n">매출</th><th class="n">비용</th>
+          <th class="n">영업현금흐름</th><th class="n">연말 현금</th><th class="n">인원</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Y1</strong> 2027</td><td>한국</td><td class="n">3,000</td><td class="n">0.3억</td><td class="n">2.95억</td><td class="n">−2.65억</td><td class="n">12.45억</td><td class="n">5명</td></tr>
+        <tr><td><strong>Y2</strong> 2028</td><td>한국</td><td class="n">8,000</td><td class="n">2.0억</td><td class="n">5.38억</td><td class="n">−3.38억</td><td class="n">9.07억</td><td class="n">8명</td></tr>
+        <tr><td><strong>Y3</strong> 2029</td><td>한·일·중</td><td class="n">20,000</td><td class="n">4.7억</td><td class="n">7.12억</td><td class="n">−2.42억</td><td class="n">36.65억</td><td class="n">8명</td></tr>
+        <tr><td><strong>Y4</strong> 2030</td><td>5개국</td><td class="n">60,000</td><td class="n">11.0억</td><td class="n">12.22억</td><td class="n">−1.22억</td><td class="n">35.43억</td><td class="n">14명</td></tr>
+        <tr><td><strong>Y5</strong> 2031</td><td>7개국</td><td class="n">210,000</td><td class="n">24.0억</td><td class="n">12.22억</td><td class="n">+11.78억</td><td class="n">47.21억</td><td class="n">14명</td></tr>
+        <tr class="total"><td>5년 누적</td><td>7개국</td><td class="n">210,000</td><td class="n">42.0억</td><td class="n">39.89억</td><td class="n">+2.11억</td><td class="n">—</td><td class="n">—</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>읽는 법</strong> — 5년 누적 매출 42.0억은 <strong>TAM 44조 4,150억의 0.009%</strong>다. 숫자가 작아 보이는 이유는 계획이 작아서가 아니라
+      <strong>시장이 크기 때문</strong>이다. 이 계획의 목표는 점유율이 아니라 <strong>반복 가능한 공식</strong>을 만드는 것이다.
+    </div>
+  </section>
+
+  <footer>Sports Grow · 5개년 로드맵 도식 v1.0 · 상세 근거는 <strong>사업계획서-로드맵.md</strong> · 수치는 가정 기반 추정</footer>
+</div>
+</body>
+</html>

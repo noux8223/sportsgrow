@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>운영 관리자 — Sports Grow</title>
+<meta name="description" content="Sports Grow 사이트 운영 관리자 콘솔. 회원관리, 학생 훈련·성장 데이터, 월간·연간 요금 입금 현황, 공지·문의·활동 로그를 통합 관리합니다." />
+<meta name="theme-color" content="#0b1a1e" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sports Grow" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="stylesheet" href="css/pwa.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230b1a1e'/%3E%3Cpath d='M9 28l7-7 5 4 10-11' fill='none' stroke='%23d9f55f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='14' r='3' fill='%23d9f55f'/%3E%3C/svg%3E" />
+</head>
+<body class="app-body admin-body" data-role="admin">
+<script>document.documentElement.classList.add("js");</script>
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+<div class="app">
+  <aside class="app-sidebar" id="sidebar" aria-label="사이트 운영 관리자 메뉴">
+    <button class="icon-btn sidebar__close" id="sidebarClose" type="button" aria-label="메뉴 닫기">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <div class="sidebar__brand">
+      <a class="brand" href="index.html" aria-label="Sports Grow 홈">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M9 28.5 16.5 21l5 4L31.5 14.5" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="31.5" cy="14.5" r="3.1" fill="currentColor"/><path d="M9 33h22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".38"/></svg>
+        </span>
+        <span class="brand__text"><strong>SPORTS GROW</strong><small>Operations</small></span>
+      </a>
+    </div>
+
+    <div class="role-chip role-chip--admin">
+      <span class="role-chip__ico"><svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg></span>
+      <div><span>Operations console</span><strong>사이트 운영 관리자</strong></div>
+    </div>
+
+    <nav class="sidebar__nav" aria-label="관리자 메뉴">
+      <p class="sidebar__label">사이트 운영</p>
+      <a class="sidebar__link is-active" href="#overview" data-admin-view="overview"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>대시보드</a>
+      <a class="sidebar__link" href="#members" data-admin-view="members"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>회원관리 <em id="navMemberCount">30</em></a>
+      <a class="sidebar__link" href="#data" data-admin-view="data"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>데이터 관리</a>
+      <a class="sidebar__link" href="#billing" data-admin-view="billing"><svg class="icon" aria-hidden="true"><use href="#i-file" /></svg>요금 관리 <em id="navUnpaidCount">0</em></a>
+      <p class="sidebar__label">운영 도구</p>
+      <a class="sidebar__link" href="#operations" data-admin-view="operations"><svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>공지 · 문의</a>
+      <a class="sidebar__link" href="#settings" data-admin-view="settings"><svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg>사이트 설정</a>
+      <p class="sidebar__label">바로가기</p>
+      <a class="sidebar__link" href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-globe" /></svg>서비스 소개</a>
+      <a class="sidebar__link" href="academy.html"><svg class="icon" aria-hidden="true"><use href="#i-building" /></svg>아카데미 화면</a>
+    </nav>
+
+    <div class="sidebar__spacer"></div>
+
+    <div class="sidebar-tip">
+      <div class="sidebar-tip__head"><svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>Admin only</div>
+      <strong>개인정보 접근 권한</strong>
+      <p>회원 상세와 입금 정보는 운영자만 열람할 수 있습니다. 모든 변경은 활동 로그에 기록됩니다.</p>
+      <a href="#operations" data-admin-view="operations">활동 로그 확인 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+    </div>
+
+    <div class="sidebar__user">
+      <span class="sidebar__avatar" data-user-initial>운</span>
+      <div><strong data-user-name>스포츠그로우 운영팀</strong><span data-user-org>사이트 운영 관리자</span></div>
+      <a class="sidebar__logout" href="#" data-logout aria-label="로그아웃">
+        <svg class="icon" aria-hidden="true"><use href="#i-logout" /></svg>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <button class="topbar__menu" id="sidebarToggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sidebar">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+      </button>
+      <div class="breadcrumb">
+        <span>관리자</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+        <strong id="adminCrumb">대시보드</strong>
+      </div>
+      <div class="topbar__actions">
+        <span class="topbar__date"><svg class="icon" aria-hidden="true"><use href="#i-calendar" /></svg><span data-today>2026.11.10 (화)</span></span>
+        <button class="topbar__icon" type="button" id="adminNotifications" aria-label="운영 알림">
+          <svg class="icon" aria-hidden="true"><use href="#i-bell" /></svg>
+          <span class="topbar__dot" aria-hidden="true"></span>
+        </button>
+        <div class="topbar__user">
+          <div><strong data-user-name>스포츠그로우 운영팀</strong><span>사이트 운영자</span></div>
+          <span class="topbar__avatar" data-user-initial>운</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-content" id="main">
+      <!-- ======================= OVERVIEW ======================= -->
+      <section class="dash-section admin-view" id="overview" data-admin-panel="overview" aria-labelledby="overview-title">
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Operations overview <span class="tag tag--green">실시간 데모 데이터</span></p>
+            <h1 id="overview-title">사이트 운영 현황입니다</h1>
+            <p class="page-head__desc">회원·훈련 데이터·입금 현황을 한눈에 확인하세요. 미납과 미답변 문의처럼 먼저 처리할 항목을 상단에 모았습니다.</p>
+          </div>
+          <div class="page-head__actions">
+            <button class="btn btn--outline btn--sm" type="button" id="overviewRefresh">
+              <svg class="icon" aria-hidden="true"><use href="#i-refresh" /></svg>
+              새로고침
+            </button>
+            <button class="btn btn--dark btn--sm" type="button" data-admin-view="billing">
+              <svg class="icon" aria-hidden="true"><use href="#i-file" /></svg>
+              입금 관리
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat stat--green">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg></span>
+              <span class="stat__label">전체 회원</span>
+            </div>
+            <div class="stat__value" id="adminKpiMembers">30<small>명</small></div>
+            <div class="stat__foot" id="adminKpiMembersFoot">학생 14 · 학부모 7 · 코치 5 · 기관 4</div>
+          </div>
+          <div class="stat stat--lime">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-file" /></svg></span>
+              <span class="stat__label">이번 달 입금</span>
+            </div>
+            <div class="stat__value" id="adminKpiRevenue">0<small>원</small></div>
+            <div class="stat__foot" id="adminKpiRevenueFoot">2026년 11월 기준</div>
+          </div>
+          <div class="stat stat--clay">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg></span>
+              <span class="stat__label">미납 · 연체</span>
+            </div>
+            <div class="stat__value" id="adminKpiUnpaid">0<small>건</small></div>
+            <div class="stat__foot" id="adminKpiUnpaidFoot">확인이 필요한 청구서</div>
+          </div>
+          <div class="stat stat--blue">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-activity" /></svg></span>
+              <span class="stat__label">이번 달 훈련 기록</span>
+            </div>
+            <div class="stat__value" id="adminKpiActivity">0<small>건</small></div>
+            <div class="stat__foot" id="adminKpiActivityFoot">학생 훈련·성장 데이터</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>월별 입금 추이</h2>
+                <p class="panel__sub">최근 6개월 · 입금 완료 기준</p>
+              </div>
+              <span class="tag tag--outline" id="overviewRevenueTotal">합계 0원</span>
+            </div>
+            <div class="bar-chart admin-bars" id="overviewRevenueChart" role="img" aria-label="최근 6개월 입금 추이 막대 그래프"></div>
+            <div class="panel__foot">
+              <span>연간 구독 매출 비중 <b id="overviewAnnualShare">0%</b></span>
+              <span class="legend-inline"><span><i class="is-lime"></i>월간</span><span><i class="is-blue"></i>연간</span></span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>회원 유형 분포</h2>
+                <p class="panel__sub">전체 계정 기준</p>
+              </div>
+              <a class="panel__link" href="#members" data-admin-view="members">회원관리 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+            </div>
+            <div class="admin-mix" id="memberMix"></div>
+            <div class="panel__foot">
+              <span>이번 달 신규 <b id="overviewNewMembers">0명</b></span>
+              <span>휴면·대기 <b id="overviewIdleMembers">0명</b></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg>최근 가입 회원</h2>
+                <p class="panel__sub">가입일 최신순</p>
+              </div>
+              <a class="panel__link" href="#members" data-admin-view="members">전체 보기 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table data-table--compact">
+                <thead><tr><th>회원</th><th>유형</th><th>소속</th><th>가입일</th><th>상태</th></tr></thead>
+                <tbody id="recentMembersBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>처리 필요 항목</h2>
+                <p class="panel__sub">미납 · 문의 · 공지</p>
+              </div>
+              <span class="tag tag--gold">우선 확인</span>
+            </div>
+            <div class="admin-alert-list" id="overviewAlerts"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= MEMBERS ======================= -->
+      <section class="dash-section admin-view" id="members" data-admin-panel="members" aria-labelledby="members-title" hidden>
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Member management</p>
+            <h1 id="members-title">회원관리</h1>
+            <p class="page-head__desc">학생·학부모·코치·아카데미 계정을 유형별로 조회하고, 상세 정보와 이용 상태를 확인합니다.</p>
+          </div>
+          <div class="page-head__actions">
+            <button class="btn btn--outline btn--sm" type="button" id="memberExport">
+              <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+              CSV 내보내기
+            </button>
+            <button class="btn btn--dark btn--sm" type="button" data-modal-open="memberFormModal">
+              <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+              회원 추가
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-tabs" role="tablist" aria-label="회원 유형 선택">
+          <button class="admin-tab is-active" type="button" role="tab" aria-selected="true" data-member-tab="students">학생 <span id="memberTabStudents">14</span></button>
+          <button class="admin-tab" type="button" role="tab" aria-selected="false" data-member-tab="parents">학부모 <span id="memberTabParents">7</span></button>
+          <button class="admin-tab" type="button" role="tab" aria-selected="false" data-member-tab="coaches">코치 <span id="memberTabCoaches">5</span></button>
+          <button class="admin-tab" type="button" role="tab" aria-selected="false" data-member-tab="academies">아카데미 <span id="memberTabAcademies">4</span></button>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+              <input type="search" id="memberSearch" placeholder="이름 · 이메일 · 소속 검색" aria-label="회원 검색" />
+            </div>
+            <select class="filter-select" id="memberStatus" aria-label="회원 상태 필터">
+              <option value="all">전체 상태</option>
+              <option value="활성">활성</option>
+              <option value="대기">대기</option>
+              <option value="휴면">휴면</option>
+            </select>
+            <select class="filter-select" id="memberPlan" aria-label="요금제 필터">
+              <option value="all">전체 요금제</option>
+              <option value="월간">월간</option>
+              <option value="연간">연간</option>
+              <option value="무료">무료</option>
+            </select>
+            <span class="toolbar__spacer"></span>
+            <span class="tag tag--outline" id="memberCount">14명</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="memberTable">
+              <thead id="memberTableHead"></thead>
+              <tbody id="memberBody"></tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" id="memberPagination"></div>
+        </div>
+
+        <div class="admin-note">
+          <svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>
+          <p>회원 상세 정보는 운영자 권한으로 열람하며, 조회·수정 이력은 활동 로그에 기록됩니다. 데모 데이터는 이 브라우저에만 저장됩니다.</p>
+        </div>
+      </section>
+
+      <!-- ======================= DATA ======================= -->
+      <section class="dash-section admin-view" id="data" data-admin-panel="data" aria-labelledby="data-title" hidden>
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Training &amp; growth data</p>
+            <h1 id="data-title">학생 데이터 관리</h1>
+            <p class="page-head__desc">학생별 훈련량과 성장 지표를 기간별로 비교합니다. 훈련 기록과 성장 추이를 확인하고 CSV로 내려받을 수 있습니다.</p>
+          </div>
+          <div class="page-head__actions">
+            <select class="filter-select" id="dataStudent" aria-label="학생 선택"></select>
+            <div class="segmented" role="group" aria-label="데이터 기간 선택" id="dataPeriodGroup">
+              <button class="segmented__btn" type="button" data-data-period="1" aria-pressed="false">1개월</button>
+              <button class="segmented__btn is-active" type="button" data-data-period="3" aria-pressed="true">3개월</button>
+              <button class="segmented__btn" type="button" data-data-period="6" aria-pressed="false">6개월</button>
+            </div>
+            <button class="btn btn--outline btn--sm" type="button" id="dataExport">
+              <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+              훈련 기록 CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat stat--green">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-activity" /></svg></span><span class="stat__label">훈련 세션</span></div>
+            <div class="stat__value" id="dataKpiSessions">0<small>회</small></div>
+            <div class="stat__foot" id="dataKpiSessionsFoot">선택 기간 합계</div>
+          </div>
+          <div class="stat stat--blue">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg></span><span class="stat__label">총 훈련 시간</span></div>
+            <div class="stat__value" id="dataKpiMinutes">0<small>시간</small></div>
+            <div class="stat__foot" id="dataKpiMinutesFoot">세션당 평균 0분</div>
+          </div>
+          <div class="stat stat--lime">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg></span><span class="stat__label">평균 출석률</span></div>
+            <div class="stat__value" id="dataKpiAttendance">0<small>%</small></div>
+            <div class="stat__foot" id="dataKpiAttendanceFoot">참석 · 지각 포함</div>
+          </div>
+          <div class="stat stat--clay">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg></span><span class="stat__label">성장 지수</span></div>
+            <div class="stat__value" id="dataKpiGrowth">0<small>점</small></div>
+            <div class="stat__foot" id="dataKpiGrowthFoot">최근 6개월 기준</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg>성장 추이</h2>
+                <p class="panel__sub" id="growthSub">선택 학생 · 최근 3개월</p>
+              </div>
+              <span class="tag tag--green" id="growthDelta">+0.0</span>
+            </div>
+            <div class="line-chart" id="growthChart" role="img" aria-label="학생 성장 지수 추이 선 그래프"></div>
+            <div class="panel__foot">
+              <span id="growthSummary">성장 지수 평균 0점</span>
+              <span class="legend-inline"><span><i></i>성장 지수</span><span><i class="is-clay"></i>목표 80점</span></span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-bars" /></svg>기간별 훈련량</h2>
+                <p class="panel__sub" id="trainingSub">최근 6주 · 주간 세션</p>
+              </div>
+              <span class="tag tag--outline" id="trainingTotal">0회</span>
+            </div>
+            <div class="bar-chart admin-bars" id="trainingChart" role="img" aria-label="주간 훈련 세션 막대 그래프"></div>
+            <div class="panel__foot">
+              <span id="trainingSummary">주당 평균 0회</span>
+              <span>높은 강도 <b id="trainingHigh">0회</b></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>성장 지표</h2>
+                <p class="panel__sub" id="growthMetricSub">선택 학생의 최근 측정값</p>
+              </div>
+              <span class="tag tag--outline" id="growthUpdated">2026.11.08</span>
+            </div>
+            <div id="growthMetrics"></div>
+            <p class="chart-note"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>성장 지표는 코치가 입력한 훈련·경기 기록을 바탕으로 계산된 데모 점수입니다.</p>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-activity" /></svg>최근 훈련 기록</h2>
+                <p class="panel__sub" id="recordSub">선택 기간 · 최신순</p>
+              </div>
+              <span class="tag tag--outline" id="recordCount">0건</span>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table data-table--compact">
+                <thead><tr><th>날짜</th><th>훈련</th><th>시간</th><th>강도</th><th>상태</th></tr></thead>
+                <tbody id="trainingRecordBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>학생별 훈련·성장 요약</h2>
+              <p class="panel__sub">훈련 세션 · 출석률 · 성장 지수 · 관리 상태</p>
+            </div>
+            <span class="tag tag--outline" id="dataSummaryCount">14명</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>학생</th><th>소속</th><th>훈련 세션</th><th>훈련 시간</th><th>출석률</th><th>성장 지수</th><th>상태</th><th></th></tr></thead>
+              <tbody id="dataStudentBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= BILLING ======================= -->
+      <section class="dash-section admin-view" id="billing" data-admin-panel="billing" aria-labelledby="billing-title" hidden>
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Billing management</p>
+            <h1 id="billing-title">요금 관리</h1>
+            <p class="page-head__desc">월간·연간 구독의 청구와 입금 현황을 관리합니다. 상태를 변경하면 합계와 미납 건수가 즉시 갱신됩니다.</p>
+          </div>
+          <div class="page-head__actions">
+            <button class="btn btn--outline btn--sm" type="button" id="billingExport">
+              <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+              입금 내역 CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat stat--green">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-file" /></svg></span><span class="stat__label">청구 금액</span></div>
+            <div class="stat__value" id="billingKpiBilled">0<small>원</small></div>
+            <div class="stat__foot" id="billingKpiBilledFoot">현재 필터 기준</div>
+          </div>
+          <div class="stat stat--lime">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg></span><span class="stat__label">입금 완료</span></div>
+            <div class="stat__value" id="billingKpiPaid">0<small>원</small></div>
+            <div class="stat__foot" id="billingKpiPaidFoot">입금률 0%</div>
+          </div>
+          <div class="stat stat--clay">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg></span><span class="stat__label">미납 · 연체</span></div>
+            <div class="stat__value" id="billingKpiUnpaid">0<small>건</small></div>
+            <div class="stat__foot" id="billingKpiUnpaidFoot">금액 0원</div>
+          </div>
+          <div class="stat stat--blue">
+            <div class="stat__top"><span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-refresh" /></svg></span><span class="stat__label">연간 구독 비중</span></div>
+            <div class="stat__value" id="billingKpiAnnual">0<small>%</small></div>
+            <div class="stat__foot" id="billingKpiAnnualFoot">금액 기준</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>월별 입금 · 미납 추이</h2>
+                <p class="panel__sub">최근 6개월 · 전체 요금제</p>
+              </div>
+              <span class="tag tag--outline" id="billingChartTotal">0원</span>
+            </div>
+            <div class="bar-chart admin-bars" id="billingChart" role="img" aria-label="월별 입금 금액 막대 그래프"></div>
+            <div class="panel__foot">
+              <span id="billingChartSummary">최근 6개월 입금 합계 0원</span>
+              <span class="legend-inline"><span><i class="is-lime"></i>입금 완료</span><span><i class="is-clay"></i>미납 · 연체</span></span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>요금제 현황</h2>
+                <p class="panel__sub">현재 판매 중인 구독 플랜</p>
+              </div>
+            </div>
+            <div class="admin-plan-list">
+              <div class="admin-plan">
+                <div><strong>학생 월간</strong><span>3,000원 / 월</span></div>
+                <span class="tag tag--green" id="planStudentMonthly">0명</span>
+              </div>
+              <div class="admin-plan">
+                <div><strong>학생 연간</strong><span>36,000원 / 연</span></div>
+                <span class="tag tag--blue" id="planStudentAnnual">0명</span>
+              </div>
+              <div class="admin-plan">
+                <div><strong>코치 · 기관</strong><span>30,000원~ / 월</span></div>
+                <span class="tag tag--clay" id="planOrg">0곳</span>
+              </div>
+            </div>
+            <p class="chart-note"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>요금제 금액은 랜딩 페이지의 데모 요금을 기준으로 하며 실제 결제와 무관합니다.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="segmented" role="group" aria-label="요금제 기간 필터" id="billingPlanGroup">
+              <button class="segmented__btn is-active" type="button" data-billing-plan="all" aria-pressed="true">전체</button>
+              <button class="segmented__btn" type="button" data-billing-plan="monthly" aria-pressed="false">월간</button>
+              <button class="segmented__btn" type="button" data-billing-plan="annual" aria-pressed="false">연간</button>
+            </div>
+            <select class="filter-select" id="billingMonth" aria-label="청구 월 필터">
+              <option value="all">전체 청구 월</option>
+              <option value="2026-11">2026년 11월</option>
+              <option value="2026-10">2026년 10월</option>
+              <option value="2026-09">2026년 9월</option>
+            </select>
+            <select class="filter-select" id="billingStatus" aria-label="입금 상태 필터">
+              <option value="all">전체 상태</option>
+              <option value="입금완료">입금완료</option>
+              <option value="입금대기">입금대기</option>
+              <option value="연체">연체</option>
+              <option value="환불">환불</option>
+            </select>
+            <div class="search-box">
+              <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+              <input type="search" id="billingSearch" placeholder="회원 · 청구번호 검색" aria-label="입금 내역 검색" />
+            </div>
+            <span class="toolbar__spacer"></span>
+            <span class="tag tag--outline" id="billingCount">0건</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>청구번호</th><th>회원</th><th>유형</th><th>플랜</th><th>금액</th><th>청구월</th><th>입금일</th><th>수단</th><th>상태</th><th>관리</th></tr></thead>
+              <tbody id="billingBody"></tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" id="billingPagination"></div>
+        </div>
+      </section>
+
+      <!-- ======================= OPERATIONS ======================= -->
+      <section class="dash-section admin-view" id="operations" data-admin-panel="operations" aria-labelledby="operations-title" hidden>
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Site operations</p>
+            <h1 id="operations-title">공지 · 문의 · 활동 로그</h1>
+            <p class="page-head__desc">사이트 공지사항과 1:1 문의를 처리하고, 운영자 변경 이력을 확인합니다. 모든 상태 변경은 로그에 자동 기록됩니다.</p>
+          </div>
+          <div class="page-head__actions">
+            <button class="btn btn--dark btn--sm" type="button" data-modal-open="noticeModal">
+              <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+              공지 작성
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-tabs" role="tablist" aria-label="운영 관리 항목">
+          <button class="admin-tab is-active" type="button" role="tab" aria-selected="true" data-ops-tab="notices">공지사항 <span id="opsTabNotices">0</span></button>
+          <button class="admin-tab" type="button" role="tab" aria-selected="false" data-ops-tab="inquiries">1:1 문의 <span id="opsTabInquiries">0</span></button>
+          <button class="admin-tab" type="button" role="tab" aria-selected="false" data-ops-tab="logs">활동 로그 <span id="opsTabLogs">0</span></button>
+        </div>
+
+        <div class="panel admin-op-panel" data-ops-panel="notices">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>공지사항</h2>
+              <p class="panel__sub">게시 중 · 예약 · 종료 공지를 관리합니다.</p>
+            </div>
+            <select class="filter-select" id="noticeFilter" aria-label="공지 상태 필터">
+              <option value="all">전체 상태</option>
+              <option value="게시중">게시중</option>
+              <option value="예약">예약</option>
+              <option value="종료">종료</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>제목</th><th>분류</th><th>상태</th><th>게시일</th><th>조회</th><th>관리</th></tr></thead>
+              <tbody id="noticeBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel admin-op-panel" data-ops-panel="inquiries" hidden>
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-mail" /></svg>1:1 문의</h2>
+              <p class="panel__sub">학부모·코치·기관의 문의와 처리 상태입니다.</p>
+            </div>
+            <select class="filter-select" id="inquiryFilter" aria-label="문의 상태 필터">
+              <option value="all">전체 상태</option>
+              <option value="답변 대기">답변 대기</option>
+              <option value="처리 중">처리 중</option>
+              <option value="답변 완료">답변 완료</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>문의</th><th>보낸 사람</th><th>분류</th><th>접수일</th><th>우선순위</th><th>상태</th></tr></thead>
+              <tbody id="inquiryBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel admin-op-panel" data-ops-panel="logs" hidden>
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>활동 로그</h2>
+              <p class="panel__sub">운영자 작업 이력 · 최신순</p>
+            </div>
+            <span class="tag tag--outline" id="logCount">0건</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table data-table--compact">
+              <thead><tr><th>일시</th><th>작업자</th><th>활동</th><th>대상</th></tr></thead>
+              <tbody id="logBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= SETTINGS ======================= -->
+      <section class="dash-section admin-view" id="settings" data-admin-panel="settings" aria-labelledby="settings-title" hidden>
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Site settings</p>
+            <h1 id="settings-title">사이트 설정</h1>
+            <p class="page-head__desc">서비스 기본 정보와 요금 청구 기준, 회원 가입 정책을 관리합니다. 설정은 이 브라우저에 저장됩니다.</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-settings" /></svg>서비스 기본 정보</h2>
+                <p class="panel__sub">랜딩·로그인·고객 문의에 사용되는 정보</p>
+              </div>
+            </div>
+            <form id="settingsForm">
+              <div class="field">
+                <label for="settingSiteName">서비스 이름</label>
+                <input class="input" type="text" id="settingSiteName" value="Sports Grow" />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="settingSupportEmail">고객센터 이메일</label>
+                  <input class="input" type="email" id="settingSupportEmail" value="hello@sportsgrow.kr" />
+                </div>
+                <div class="field">
+                  <label for="settingSupportPhone">고객센터 전화</label>
+                  <input class="input" type="tel" id="settingSupportPhone" value="02-1234-5678" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="settingAdminEmail">운영자 연락 이메일</label>
+                <input class="input" type="email" id="settingAdminEmail" value="ops@sportsgrow.kr" />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="settingDueDay">입금 마감일</label>
+                  <select class="select" id="settingDueDay">
+                    <option value="5">매월 5일</option>
+                    <option value="10">매월 10일</option>
+                    <option value="15">매월 15일</option>
+                    <option value="25">매월 25일</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="settingAutoRenew">자동 갱신 안내</label>
+                  <select class="select" id="settingAutoRenew">
+                    <option value="on">만료 7일 전 안내</option>
+                    <option value="off">안내하지 않음</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-check-list">
+                <label class="check"><input type="checkbox" id="settingApproval" checked /> 신규 아카데미 가입 시 운영자 승인 필요</label>
+                <label class="check"><input type="checkbox" id="settingMaintenance" /> 점검 모드 (관리자 외 접속 차단 안내)</label>
+              </div>
+              <div class="admin-form-actions">
+                <button class="btn btn--dark" type="submit">
+                  <svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
+                  설정 저장
+                </button>
+                <button class="btn btn--outline" type="button" id="settingsReset">
+                  <svg class="icon" aria-hidden="true"><use href="#i-refresh" /></svg>
+                  데모 데이터 초기화
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="panel__head">
+                <div>
+                  <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>운영자 계정</h2>
+                  <p class="panel__sub">현재 로그인한 관리자 세션</p>
+                </div>
+                <span class="tag tag--green">인증됨</span>
+              </div>
+              <div class="admin-account">
+                <span class="admin-account__avatar" data-user-initial>운</span>
+                <div>
+                  <strong data-user-name>스포츠그로우 운영팀</strong>
+                  <span data-user-email>ops@sportsgrow.kr</span>
+                </div>
+              </div>
+              <div class="info-list admin-info-list">
+                <div><span>권한</span><span>사이트 운영 관리자</span></div>
+                <div><span>접근 범위</span><span>회원 · 데이터 · 요금 · 운영</span></div>
+                <div><span>2단계 인증</span><span>데모 미적용</span></div>
+                <div><span>최근 로그인</span><span id="adminLastLogin">-</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel__head">
+                <div>
+                  <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>데이터 저장 안내</h2>
+                  <p class="panel__sub">이 데모가 브라우저에 저장하는 항목</p>
+                </div>
+              </div>
+              <ul class="admin-storage-list">
+                <li><code>sportsgrow.admin.members.v1</code><span>회원 추가·상세</span></li>
+                <li><code>sportsgrow.admin.payments.v1</code><span>입금 상태 변경</span></li>
+                <li><code>sportsgrow.admin.notices.v1</code><span>공지사항</span></li>
+                <li><code>sportsgrow.admin.inquiries.v1</code><span>문의 처리 상태</span></li>
+                <li><code>sportsgrow.admin.logs.v1</code><span>활동 로그</span></li>
+                <li><code>sportsgrow.admin.settings.v1</code><span>사이트 설정</span></li>
+              </ul>
+              <p class="chart-note"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>모든 데이터는 데모용이며 서버로 전송되지 않습니다. 초기화하면 이 브라우저의 관리자 변경 내용이 삭제됩니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ======================= MEMBER DETAIL MODAL ======================= -->
+<div class="modal" id="memberDetailModal" hidden>
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__dialog admin-modal" role="dialog" aria-modal="true" aria-labelledby="memberDetailTitle">
+    <button class="modal__close" type="button" data-modal-close aria-label="닫기">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <div id="memberDetailContent"></div>
+  </div>
+</div>
+
+<!-- ======================= MEMBER FORM MODAL ======================= -->
+<div class="modal" id="memberFormModal" hidden>
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__dialog admin-modal admin-modal--sm" role="dialog" aria-modal="true" aria-labelledby="memberFormTitle">
+    <button class="modal__close" type="button" data-modal-close aria-label="닫기">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <div class="modal__head">
+      <h2 id="memberFormTitle">회원 추가</h2>
+      <p>데모 회원을 등록하면 회원 목록과 대시보드 집계에 반영됩니다.</p>
+    </div>
+    <form id="memberForm" novalidate>
+      <div class="field-row">
+        <div class="field">
+          <label for="newMemberType">회원 유형</label>
+          <select class="select" id="newMemberType">
+            <option value="students">학생</option>
+            <option value="parents">학부모</option>
+            <option value="coaches">코치</option>
+            <option value="academies">아카데미</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="newMemberName">이름 / 기관명</label>
+          <input class="input" type="text" id="newMemberName" placeholder="예: 김하람" required />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="newMemberEmail">이메일</label>
+          <input class="input" type="email" id="newMemberEmail" placeholder="name@sportsgrow.kr" required />
+        </div>
+        <div class="field">
+          <label for="newMemberPhone">연락처</label>
+          <input class="input" type="tel" id="newMemberPhone" placeholder="010-0000-0000" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="newMemberOrg">소속 / 팀</label>
+        <input class="input" type="text" id="newMemberOrg" placeholder="예: 한빛중학교 야구부" />
+      </div>
+      <div class="form-alert" id="memberFormError" role="alert" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>
+        <span></span>
+      </div>
+      <div class="admin-form-actions">
+        <button class="btn btn--dark" type="submit">회원 등록</button>
+        <button class="btn btn--outline" type="button" data-modal-close>취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= NOTICE MODAL ======================= -->
+<div class="modal" id="noticeModal" hidden>
+  <div class="modal__backdrop" data-modal-close></div>
+  <div class="modal__dialog admin-modal" role="dialog" aria-modal="true" aria-labelledby="noticeModalTitle">
+    <button class="modal__close" type="button" data-modal-close aria-label="닫기">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <div class="modal__head">
+      <h2 id="noticeModalTitle">공지사항 작성</h2>
+      <p>작성한 공지는 즉시 게시되며 활동 로그에 기록됩니다.</p>
+    </div>
+    <form id="noticeForm" novalidate>
+      <div class="field">
+        <label for="noticeTitle">제목</label>
+        <input class="input" type="text" id="noticeTitle" placeholder="예: 11월 정기 점검 안내" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="noticeCategory">분류</label>
+          <select class="select" id="noticeCategory">
+            <option>공지</option>
+            <option>점검</option>
+            <option>업데이트</option>
+            <option>이벤트</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="noticeStatus">게시 상태</label>
+          <select class="select" id="noticeStatus">
+            <option>게시중</option>
+            <option>예약</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="noticeContent">내용</label>
+        <textarea class="textarea" id="noticeContent" placeholder="공지 내용을 입력하세요." required></textarea>
+      </div>
+      <label class="check"><input type="checkbox" id="noticePinned" /> 상단 고정</label>
+      <div class="admin-form-actions">
+        <button class="btn btn--dark" type="submit">공지 게시</button>
+        <button class="btn btn--outline" type="button" data-modal-close>취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/icons.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/app-shell.js" defer></script>
+<script src="js/admin.js" defer></script>
+<script src="js/pwa.js" defer></script>
+</body>
+</html>

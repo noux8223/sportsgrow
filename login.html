@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>로그인 — Sports Grow</title>
+<meta name="description" content="Sports Grow 역할별 로그인. 학생, 학부모, 코치, 아카데미·연맹 계정으로 각각 다른 성장 관리 화면을 이용하세요." />
+<meta name="theme-color" content="#0b1a1e" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sports Grow" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/login.css" />
+<link rel="stylesheet" href="css/pwa.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230b1a1e'/%3E%3Cpath d='M9 28l7-7 5 4 10-11' fill='none' stroke='%23d9f55f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='14' r='3' fill='%23d9f55f'/%3E%3C/svg%3E" />
+</head>
+<body>
+<script>document.documentElement.classList.add("js");</script>
+<a class="skip-link" href="#login-main">로그인 폼으로 바로가기</a>
+
+<div class="login-page">
+  <aside class="login-aside" aria-label="서비스 안내">
+    <div class="login-aside__top">
+      <a class="brand" href="index.html" aria-label="Sports Grow 홈">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" role="presentation" focusable="false">
+            <path d="M9 28.5 16.5 21l5 4L31.5 14.5" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="31.5" cy="14.5" r="3.1" fill="currentColor"/>
+            <path d="M9 33h22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".38"/>
+          </svg>
+        </span>
+        <span class="brand__text"><strong>SPORTS GROW</strong><small>스포츠 그로우</small></span>
+      </a>
+      <a class="login-back" href="index.html">
+        <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+        홈으로
+      </a>
+    </div>
+
+    <div class="login-aside__body">
+      <p class="login-aside__eyebrow">Sign in</p>
+      <h1 class="login-aside__title">기록을 맡기고,<br />성장을 <span class="accent">확인</span>하세요.</h1>
+      <p class="login-aside__desc">
+        하나의 서비스, 네 개의 계정. 학생과 학부모는 같은 성장 기록을 보되
+        수정 권한은 학생에게만 있으며, 학부모는 응원과 요청으로 함께합니다.
+      </p>
+      <ul class="login-roles">
+        <li class="login-role-item">
+          <span class="login-role-item__ico"><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg></span>
+          <div><strong>학생</strong><span>프로필 · 훈련량 · 경기 기록 관리</span></div>
+          <em>01</em>
+        </li>
+        <li class="login-role-item">
+          <span class="login-role-item__ico"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg></span>
+          <div><strong>학부모</strong><span>기록 열람 · 응원 · 코치 요청</span></div>
+          <em>02</em>
+        </li>
+        <li class="login-role-item">
+          <span class="login-role-item__ico"><svg class="icon" aria-hidden="true"><use href="#i-coach" /></svg></span>
+          <div><strong>코치 · 감독</strong><span>선수 관리 · 목표 · 피드백</span></div>
+          <em>03</em>
+        </li>
+        <li class="login-role-item">
+          <span class="login-role-item__ico"><svg class="icon" aria-hidden="true"><use href="#i-building" /></svg></span>
+          <div><strong>아카데미 · 연맹</strong><span>통합 관리 · 통계 · 보고서</span></div>
+          <em>04</em>
+        </li>
+      </ul>
+    </div>
+
+    <div class="login-aside__foot">
+      <span><span class="dot" aria-hidden="true"></span>미성년 선수 정보는 기본 비공개</span>
+      <span>© 2026 Sports Grow</span>
+    </div>
+  </aside>
+
+  <main class="login-main" id="login-main">
+    <div class="login-card">
+      <div class="session-bar" id="sessionBar" hidden>
+        <svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg>
+        <span><strong data-continue-name>로그인됨</strong> · 이전에 로그인한 계정이 있습니다.</span>
+        <button type="button" data-continue-go>계속하기</button>
+        <button type="button" data-continue-logout>로그아웃</button>
+      </div>
+
+      <div class="login-head">
+        <p class="eyebrow">Log in</p>
+        <h1>어떤 역할로<br />로그인할까요?</h1>
+        <p>역할을 선택하면 해당 계정의 대시보드로 이동합니다. 계정이 없다면 <a href="index.html#pricing">요금제</a>를 먼저 확인해 보세요.</p>
+      </div>
+
+      <form class="login-form" id="loginForm" data-role="player" novalidate>
+        <div class="role-options" role="group" aria-label="로그인 역할 선택">
+          <button type="button" class="role-option is-active" data-role-option="player" aria-pressed="true">
+            <span class="role-option__ico"><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg></span>
+            <strong>학생</strong>
+            <span>Student</span>
+          </button>
+          <button type="button" class="role-option" data-role-option="parent" aria-pressed="false">
+            <span class="role-option__ico"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg></span>
+            <strong>학부모</strong>
+            <span>Parent</span>
+          </button>
+          <button type="button" class="role-option" data-role-option="coach" aria-pressed="false">
+            <span class="role-option__ico"><svg class="icon" aria-hidden="true"><use href="#i-coach" /></svg></span>
+            <strong>코치</strong>
+            <span>Coach</span>
+          </button>
+          <button type="button" class="role-option" data-role-option="academy" aria-pressed="false">
+            <span class="role-option__ico"><svg class="icon" aria-hidden="true"><use href="#i-building" /></svg></span>
+            <strong>아카데미 · 연맹</strong>
+            <span>Academy</span>
+          </button>
+        </div>
+
+        <p class="login-form__rolehint">
+          <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>
+          <span id="roleHint">프로필, 훈련량, 경기·성장 기록을 관리합니다.</span>
+        </p>
+
+        <div class="field">
+          <label for="loginEmail">이메일</label>
+          <input class="input" type="email" id="loginEmail" name="email" autocomplete="username" inputmode="email" placeholder="name@sportsgrow.kr" required />
+        </div>
+
+        <div class="field">
+          <label for="loginPassword">비밀번호</label>
+          <div class="login-password-wrap">
+            <input class="input" type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="비밀번호를 입력하세요" required />
+            <button class="password-toggle" type="button" id="passwordToggle" aria-label="비밀번호 표시" aria-pressed="false">
+              <svg class="icon" aria-hidden="true"><use href="#i-eye" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="login-row">
+          <label class="check">
+            <input type="checkbox" id="keepLogin" checked />
+            로그인 상태 유지
+          </label>
+          <a class="link-quiet" href="#" id="forgotPassword">비밀번호를 잊으셨나요?</a>
+        </div>
+
+        <div class="form-alert" id="loginError" role="alert" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>
+          <span></span>
+        </div>
+
+        <button class="btn btn--dark btn--block login-submit" type="submit">
+          <span id="loginSubmitLabel">학생으로 로그인</span>
+          <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+        </button>
+
+        <div class="demo-box">
+          <div class="demo-box__head">
+            <svg class="icon" aria-hidden="true"><use href="#i-key" /></svg>
+            체험 계정
+            <span id="demoRoleName">학생</span>
+          </div>
+          <dl>
+            <dt>이메일</dt>
+            <dd id="demoEmail">player@sportsgrow.kr</dd>
+            <dt>비밀번호</dt>
+            <dd id="demoPassword">grow1234</dd>
+          </dl>
+          <div class="demo-box__actions">
+            <button class="btn btn--outline btn--sm" type="button" id="demoFill">체험 계정 정보 채우기</button>
+            <span>데모용 계정입니다.<br />실제 결제·개인정보와 무관합니다.</span>
+          </div>
+        </div>
+
+        <p class="login-security">
+          <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+          <span>로그인 정보는 데모 환경에서만 사용되며 서버로 전송되지 않습니다. 실제 서비스에서는 역할별 접근 제어와 전송 구간 암호화를 적용합니다.</span>
+        </p>
+      </form>
+
+      <div class="login-foot">
+        <span>도움이 필요하신가요? <a href="mailto:hello@sportsgrow.kr">hello@sportsgrow.kr</a></span>
+        <a href="index.html">서비스 소개로 돌아가기</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/icons.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/pwa.js" defer></script>
+</body>
+</html>

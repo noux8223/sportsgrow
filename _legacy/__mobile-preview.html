@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<style>
+  html, body { margin: 0; padding: 0; background: #fff; }
+  iframe { display: block; width: 390px; height: 14000px; border: 0; }
+  pre { position: fixed; top: 0; left: 0; z-index: 9; background: #fff; font-size: 8px; }
+</style>
+</head>
+<body>
+<iframe src="index.html" title="mobile preview"></iframe>
+<script>
+  var f = document.querySelector("iframe");
+  f.addEventListener("load", function () {
+    var w = f.contentWindow;
+    var d = f.contentDocument;
+    var pick = function (sel) {
+      var el = d.querySelector(sel);
+      var r = el.getBoundingClientRect();
+      return { left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width) };
+    };
+    var out = {
+      innerWidth: w.innerWidth,
+      scrollWidth: d.documentElement.scrollWidth,
+      hero: pick(".hero"),
+      heroInner: pick(".hero__inner"),
+      heroCopy: pick(".hero__copy"),
+      heroVisual: pick(".hero__visual"),
+      dash: pick(".dash"),
+      title: pick(".hero__title")
+    };
+    var pre = document.createElement("pre");
+    pre.id = "metrics";
+    pre.textContent = JSON.stringify(out);
+    document.body.appendChild(pre);
+  });
+</script>
+</body>
+</html>

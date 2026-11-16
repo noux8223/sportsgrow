@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>수익 흐름 — 회사와 학부모·코치·아카데미</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font-family: "Malgun Gothic", "맑은 고딕", sans-serif; color: #222; }
+  .wrap { width: 1040px; padding: 30px 32px 26px; border: 1px solid #D9D9D9; }
+  .kicker { font-size: 13px; letter-spacing: 2px; color: #7F7F7F; font-weight: 700; }
+  h1 { font-size: 25px; margin: 6px 0 4px; color: #17365D; letter-spacing: -0.5px; }
+  .lead { font-size: 13.5px; color: #595959; margin-bottom: 14px; line-height: 1.5; }
+  .lead b { color: #1F4E79; }
+
+  .stage { position: relative; width: 976px; height: 440px; }
+  .stage svg { position: absolute; left: 0; top: 0; z-index: 0; }
+
+  .payer { position: absolute; left: 42px; width: 236px; height: 120px; border-radius: 10px; background: #fff; border: 1px solid #DCE6F1; border-left-width: 5px; padding: 10px 12px; z-index: 2; }
+  .p1 { top: 14px; border-left-color: #1F4E79; }
+  .p2 { top: 152px; border-left-color: #2E75B6; }
+  .p3 { top: 290px; border-left-color: #548235; }
+  .pt { display: flex; justify-content: space-between; align-items: center; }
+  .pt b { font-size: 14px; color: #1F3864; }
+  .tag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+  .p1 .tag { background: #DEEBF7; color: #1F4E79; }
+  .p2 .tag { background: #DEEBF7; color: #2E75B6; }
+  .p3 .tag { background: #E2EFDA; color: #375623; }
+  .pm { font-size: 13.5px; font-weight: 700; margin-top: 3px; }
+  .p1 .pm { color: #1F4E79; } .p2 .pm { color: #2E75B6; } .p3 .pm { color: #375623; }
+  .ps { font-size: 10px; color: #7F7F7F; margin-top: 1px; }
+  .pv { font-size: 10px; color: #595959; margin-top: 4px; line-height: 1.45; }
+  .pv em { font-style: normal; color: #9E9E9E; }
+
+  .strip { position: absolute; left: 4px; top: 56px; width: 26px; height: 304px; z-index: 2; }
+
+  .co { position: absolute; left: 408px; top: 44px; width: 236px; height: 336px; border-radius: 12px; background: #17365D; color: #fff; z-index: 2; text-align: center; padding: 20px 16px; display: flex; flex-direction: column; justify-content: center; }
+  .co-k { font-size: 10.5px; letter-spacing: 2.5px; color: #9DC3E6; font-weight: 700; }
+  .co-n { font-size: 19px; font-weight: 800; margin-top: 4px; letter-spacing: -.5px; }
+  .co-line { height: 1px; background: #3A5A80; margin: 15px 6px; }
+  .co-big { font-size: 34px; font-weight: 800; letter-spacing: -1px; color: #fff; }
+  .co-cap { font-size: 11px; color: #BDD7EE; margin-top: 2px; }
+  .co-f { font-size: 12px; color: #fff; font-weight: 700; }
+  .co-f em { font-style: normal; color: #FFD966; }
+  .co-s { font-size: 9.5px; color: #8EA9C1; margin-top: 4px; }
+
+  .uses { position: absolute; left: 700px; top: 0; width: 276px; height: 336px; z-index: 2; }
+  .uses-h { position: absolute; left: 0; top: 0; font-size: 11.5px; font-weight: 700; color: #7F7F7F; letter-spacing: 1px; }
+  .ucard { position: absolute; left: 0; width: 276px; height: 82px; border: 1px solid #DCE6F1; border-radius: 9px; background: #FBFCFE; padding: 11px 13px; display: flex; flex-direction: column; justify-content: center; }
+  .ucard .n { font-size: 13px; font-weight: 700; color: #1F3864; }
+  .ucard .d { font-size: 10.5px; color: #595959; margin-top: 2px; line-height: 1.4; }
+  .ucard .d b { color: #C55A11; }
+
+  .legend { position: absolute; left: 42px; top: 418px; width: 934px; display: flex; gap: 18px; justify-content: flex-end; font-size: 11px; color: #595959; align-items: center; }
+  .legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid #1F4E79; margin-right: 5px; vertical-align: middle; }
+  .legend i.dash { border-top: 2px dashed #A6B8CC; }
+  .legend i.up { width: 0; height: 12px; border-top: none; border-left: 3px solid #B4B4B4; }
+
+  .arpu { margin-top: 2px; border-top: 1px solid #E3E9F2; padding-top: 14px; }
+  .arpu-h { font-size: 14px; font-weight: 700; color: #1F4E79; margin-bottom: 9px; }
+  .arpu-h span { font-weight: 400; color: #7F7F7F; font-size: 11.5px; margin-left: 6px; }
+  .bar { display: flex; height: 48px; border-radius: 8px; overflow: hidden; }
+  .seg { display: flex; flex-direction: column; justify-content: center; padding-left: 11px; color: #fff; border-right: 2px solid #fff; }
+  .seg:last-child { border-right: none; }
+  .seg b { font-size: 12.5px; font-weight: 700; }
+  .seg span { font-size: 9.5px; opacity: .92; margin-top: 1px; white-space: nowrap; }
+  .s1 { background: #1F4E79; }
+  .s2 { background: #2E75B6; }
+  .s3 { background: #548235; }
+  .s4 { background: #C55A11; }
+  .arpu-note { font-size: 10.5px; color: #7F7F7F; margin-top: 8px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">3-7. 비즈니스 모델</div>
+  <h1>돈은 세 곳에서 들어오고, 가치는 한 곳에서 나옵니다</h1>
+  <div class="lead">학부모는 <b>기록</b>을, 코치는 <b>시간</b>을, 아카데미는 <b>관리</b>를 삽니다. 세 주체가 같은 데이터를 공유하므로 <b>선수 1명이 세 번 수익화</b>됩니다.</div>
+
+  <div class="stage">
+    <svg width="976" height="440" viewBox="0 0 976 440">
+      <defs>
+        <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1F4E79"/>
+        </marker>
+        <marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2E75B6"/>
+        </marker>
+        <marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#548235"/>
+        </marker>
+        <marker id="mv" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M10,0 L0,5 L10,10 z" fill="#A6B8CC"/>
+        </marker>
+      </defs>
+
+      <!-- 유입 경로 (B2B2C): 아카데미 → 코치 → 학부모 -->
+      <line x1="17" y1="350" x2="17" y2="62" stroke="#B4B4B4" stroke-width="3"/>
+      <path d="M17,56 L11,68 L23,68 z" fill="#B4B4B4"/>
+      <line x1="17" y1="74" x2="42" y2="74" stroke="#D9D9D9" stroke-width="2"/>
+      <line x1="17" y1="212" x2="42" y2="212" stroke="#D9D9D9" stroke-width="2"/>
+      <line x1="17" y1="350" x2="42" y2="350" stroke="#D9D9D9" stroke-width="2"/>
+
+      <!-- 결제: 고객 → 회사 (실선) -->
+      <line x1="280" y1="66" x2="402" y2="66" stroke="#1F4E79" stroke-width="3" marker-end="url(#m1)"/>
+      <line x1="280" y1="204" x2="402" y2="204" stroke="#2E75B6" stroke-width="3" marker-end="url(#m2)"/>
+      <line x1="280" y1="342" x2="402" y2="342" stroke="#548235" stroke-width="3" marker-end="url(#m3)"/>
+
+      <!-- 제공 가치: 회사 → 고객 (점선) -->
+      <line x1="402" y1="88" x2="282" y2="88" stroke="#A6B8CC" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#mv)"/>
+      <line x1="402" y1="226" x2="282" y2="226" stroke="#A6B8CC" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#mv)"/>
+      <line x1="402" y1="364" x2="282" y2="364" stroke="#A6B8CC" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#mv)"/>
+
+      <!-- 회사 → 사용처 -->
+      <line x1="648" y1="67" x2="696" y2="67" stroke="#9DB2C8" stroke-width="2.5" marker-end="url(#mv)"/>
+      <line x1="648" y1="179" x2="696" y2="179" stroke="#9DB2C8" stroke-width="2.5" marker-end="url(#mv)"/>
+      <line x1="648" y1="291" x2="696" y2="291" stroke="#9DB2C8" stroke-width="2.5" marker-end="url(#mv)"/>
+    </svg>
+
+    <div class="strip"></div>
+
+    <div class="payer p1">
+      <div class="pt"><b>학부모 · 선수</b><span class="tag">지불자</span></div>
+      <div class="pm">3,000원/월</div>
+      <div class="ps">연 36,000원</div>
+      <div class="pv"><em>받는 것</em> · 무제한 기록, 주간 리포트, 시즌 결산</div>
+    </div>
+
+    <div class="payer p2">
+      <div class="pt"><b>코치</b><span class="tag">유통 채널</span></div>
+      <div class="pm">30,000원/월</div>
+      <div class="ps">연 36만 원 · 선수 20명 기준</div>
+      <div class="pv"><em>받는 것</em> · 대시보드, 과제, 검증 배지</div>
+    </div>
+
+    <div class="payer p3">
+      <div class="pt"><b>아카데미 · 클럽</b><span class="tag">기관 고객</span></div>
+      <div class="pm">100,000원/월~</div>
+      <div class="ps">연 120만 원~ · 선수 100명 기준</div>
+      <div class="pv"><em>받는 것</em> · 기관 리포트, 브랜딩, 공지</div>
+    </div>
+
+    <div class="co">
+      <div class="co-k">COMPANY</div>
+      <div class="co-n">스포츠 그로우</div>
+      <div class="co-line"></div>
+      <div class="co-big">94,000원</div>
+      <div class="co-cap">선수 1명당 연 매출 (ARPU)</div>
+      <div class="co-line"></div>
+      <div class="co-f">Y1 0.3억 → <em>Y5 24억</em></div>
+      <div class="co-s">결제 주체 3곳 · 데이터 1개</div>
+    </div>
+
+    <div class="uses">
+      <div class="uses-h">매출의 사용처</div>
+      <div class="ucard" style="top:26px">
+        <div class="n">제품 · 운영</div>
+        <div class="d">인건비 <b>Y5 6.67억</b>, 클라우드, 고객지원</div>
+      </div>
+      <div class="ucard" style="top:138px">
+        <div class="n">성장 투자</div>
+        <div class="d">마케팅, 일본·중국 PoC, 6종목 확장</div>
+      </div>
+      <div class="ucard" style="top:250px">
+        <div class="n">현금 · 이익</div>
+        <div class="d">Y5 영업현금흐름 <b>+11.78억</b></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i></i>결제 (현금 흐름)</span>
+      <span><i class="dash"></i>제공 가치 (서비스 흐름)</span>
+      <span><i class="up"></i>유입 경로 (B2B2C)</span>
+    </div>
+  </div>
+
+  <div class="arpu">
+    <div class="arpu-h">선수 1명당 연 94,000원의 구성 <span>세 주체의 구독료를 선수 1명 기준으로 환산</span></div>
+    <div class="bar">
+      <div class="seg s1" style="width:360px"><b>36,000원</b><span>학부모 구독 · 38.3%</span></div>
+      <div class="seg s2" style="width:180px"><b>18,000원</b><span>코치 · 19.1%</span></div>
+      <div class="seg s3" style="width:120px"><b>12,000원</b><span>아카데미 · 12.8%</span></div>
+      <div class="seg s4" style="width:280px"><b>28,000원</b><span>애드온 · 29.8%</span></div>
+    </div>
+    <div class="arpu-note">‘코치·아카데미 배분’은 회사가 지급하는 수수료가 아니라, 각 구독료를 선수 1명 기준으로 나눈 <b>매출 귀속액</b>입니다. 애드온은 시즌 포토북·진학 프로필·팀 리포트의 연간 평균 구매액입니다.</div>
+  </div>
+</div>
+</body>
+</html>

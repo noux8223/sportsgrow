@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>시장 규모 도식 — PAM / 글로벌 TAM / 중국·일본 SAM / 국내 SOM / 야구·축구 RAM / LAM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --ink: #0b1a1e; --ink-2: #112a2f; --ink-3: #18383e;
+    --paper: #f7f6f0; --paper-2: #efece2; --white: #fff;
+    --lime: #d9f55f; --lime-soft: #f2facd;
+    --green: #0e6b4e; --green-soft: #e3f1e9;
+    --blue: #2f5fe0; --blue-soft: #e9eefc;
+    --clay: #c25a34; --clay-soft: #f9e9e1;
+    --violet: #6a55c8; --violet-soft: #efeafb;
+    --gold: #b98514; --gold-soft: #f8efd7;
+    --text: #15272b; --muted: #5d6d71; --muted-2: #859396;
+    --line: #e1ded3;
+    --font: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: #e9e6dc;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+  .page { width: min(1240px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 64px; }
+
+  /* ---------- header ---------- */
+  .hero {
+    position: relative; overflow: hidden;
+    background: var(--ink); color: #fff;
+    border-radius: 28px; padding: 44px 48px 40px;
+  }
+  .hero::before {
+    content: ""; position: absolute; right: -140px; top: -180px;
+    width: 520px; height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,245,95,.16), transparent 68%);
+  }
+  .eyebrow {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--lime); border: 1px solid rgba(217,245,95,.35);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 18px;
+  }
+  .hero h1 {
+    position: relative; margin: 0 0 10px; font-size: 31px; line-height: 1.2;
+    font-weight: 800; letter-spacing: -0.035em;
+  }
+  .hero h1 em { font-style: normal; color: var(--lime); }
+  .hero p { position: relative; margin: 0; color: rgba(255,255,255,.62); font-size: 14px; max-width: 720px; }
+  .hero .fx {
+    position: relative; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px;
+  }
+  .fx span {
+    font-size: 12px; font-variant-numeric: tabular-nums;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    padding: 7px 12px; border-radius: 8px; color: rgba(255,255,255,.8);
+  }
+
+  /* ---------- cards ---------- */
+  .card {
+    background: var(--white); border: 1px solid var(--line);
+    border-radius: 24px; padding: 30px 32px 34px; margin-top: 18px;
+  }
+  .card-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .num {
+    font-size: 12px; font-weight: 800; color: var(--ink);
+    background: var(--lime); border-radius: 6px; padding: 3px 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card h2 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .card .sub { margin: 6px 0 24px; color: var(--muted); font-size: 13px; }
+  .src { margin-top: 18px; font-size: 11.5px; color: var(--muted-2); line-height: 1.6; }
+
+  /* ---------- ladder ---------- */
+  .ladder { display: flex; flex-direction: column; gap: 8px; }
+  .rung {
+    position: relative; display: grid; width: 100%;
+    grid-template-columns: 76px minmax(0, 1fr) 208px;
+    align-items: center; gap: 18px;
+    padding: 16px 20px; border-radius: 14px;
+  }
+  .rung .tag {
+    font-size: 11px; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; opacity: .85;
+  }
+  .rung .name { font-size: 15.5px; font-weight: 700; }
+  .rung .name small { display: block; font-size: 11.5px; font-weight: 500; opacity: .68; margin-top: 2px; }
+  .rung .amt { text-align: right; font-variant-numeric: tabular-nums; }
+  .rung .amt b { display: block; font-size: 21px; font-weight: 800; letter-spacing: -0.03em; }
+  .rung .amt span { font-size: 11px; opacity: .65; }
+
+  .rung.pam { background: #fff; color: var(--muted); border: 1px dashed var(--muted-2); width: calc(100% - 4%); min-width: min(100%, 500px); }
+  .rung.pam .amt b { color: var(--muted); font-size: 16px; }
+  .rung.tam { background: var(--ink); color: #fff; }
+  .rung.tam .amt b { color: var(--lime); }
+  .rung.sam { background: var(--blue-soft); color: #14307a; width: calc(100% - 10%); min-width: min(100%, 480px); }
+  .rung.sam .amt b { color: var(--blue); }
+  .rung.som { background: var(--green-soft); color: #0a4a36; width: calc(100% - 30%); min-width: min(100%, 460px); }
+  .rung.som .amt b { color: var(--green); }
+  .rung.som1 { background: var(--paper-2); color: var(--ink); width: calc(100% - 40%); min-width: min(100%, 450px); }
+  .rung.act { background: var(--gold-soft); color: #6b4d0d; width: calc(100% - 50%); min-width: min(100%, 430px); }
+  .rung.win { background: var(--lime-soft); color: var(--ink); width: calc(100% - 58%); min-width: min(100%, 420px); }
+
+  .scale { display: flex; justify-content: flex-end; font-size: 10.5px; color: var(--muted-2); margin-top: 10px; }
+
+  .note {
+    margin-top: 20px; padding: 14px 18px; border-radius: 12px;
+    background: var(--clay-soft); color: #7a3819; font-size: 12.5px; line-height: 1.6;
+    border-left: 3px solid var(--clay);
+  }
+
+  /* ---------- compare ---------- */
+  .compare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .col { border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .col h3 { margin: 0 0 2px; font-size: 14px; }
+  .col .flag { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+  .bar { height: 9px; border-radius: 999px; background: var(--paper-2); overflow: hidden; margin-bottom: 6px; }
+  .bar i { display: block; height: 100%; border-radius: 999px; }
+  .row { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+  .row b { color: var(--text); font-weight: 700; }
+
+  /* ---------- timeline ---------- */
+  .tl { position: relative; padding: 30px 0 8px; }
+  .tl-line { position: absolute; left: 0; right: 0; top: 46px; height: 2px; background: var(--line); }
+  .stages { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; position: relative; }
+  .stage { text-align: left; }
+  .stage .dot {
+    width: 13px; height: 13px; border-radius: 50%; background: var(--white);
+    border: 2px solid var(--muted-2); margin-bottom: 14px;
+  }
+  .stage.done .dot { background: var(--green); border-color: var(--green); }
+  .stage.now .dot { background: var(--lime); border-color: var(--ink); box-shadow: 0 0 0 4px rgba(217,245,95,.45); }
+  .stage .m { font-size: 10.5px; font-weight: 800; color: var(--muted-2); letter-spacing: .06em; margin-bottom: 4px; }
+  .stage .t { font-size: 12.5px; font-weight: 700; line-height: 1.35; }
+  .stage .d { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+
+  /* ---------- truth table ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+  tr.total td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 800; }
+
+  footer { margin-top: 22px; text-align: center; font-size: 11px; color: var(--muted-2); }
+
+  @media (max-width: 860px) {
+    .hero h1 { font-size: 27px; }
+    .rung { grid-template-columns: 60px 1fr; }
+    .rung .amt { grid-column: 1 / -1; text-align: left; margin-top: 6px; }
+    .rung.sam, .rung.som, .rung.som1, .rung.act, .rung.win { width: 100%; min-width: 0; }
+    .compare { grid-template-columns: 1fr; }
+    .stages { grid-template-columns: repeat(2, 1fr); }
+    .tl-line { display: none; }
+    .card { padding: 22px 20px 26px; }
+  }
+
+  @page { size: A4 landscape; margin: 10mm; }
+  @media print {
+    body { background: #fff; }
+    .page { width: 100%; padding: 0; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Market Map · 2026</span>
+    <h1><em>PAM</em> · 글로벌 <em>TAM</em> · 중국·일본 <em>SAM</em> · 국내 <em>SOM</em> · 야구·축구 <em>RAM</em> · <em>LAM</em></h1>
+    <p>주니어 운동선수 성장 기록 플랫폼 — 시장을 크기가 아니라 <strong>진입 순서</strong>로 나눈 6계층 구조.</p>
+    <div class="fx">
+      <span>1 USD = 1,340원</span>
+      <span>1 CNY = 201원</span>
+      <span>1 JPY = 8.49원</span>
+      <span>기준 2026-10-28 ECB</span>
+    </div>
+  </header>
+
+  <!-- 1. 계층 -->
+  <section class="card">
+    <div class="card-head"><span class="num">01</span><h2>시장 계층 — 도달 상한</h2></div>
+    <p class="sub">각 지역의 주니어 선수 전원이 유료 상품을 쓸 때의 매출. 막대 길이는 실제 비율이 아니라 가독성을 위한 축소다.</p>
+
+    <div class="ladder">
+      <div class="rung pam">
+        <div class="tag">PAM</div>
+        <div class="name">글로벌 주니어 스포츠 · 교육 결합
+          <small>스포츠 + 교육 + 진로 잠재 시장 · 확장 옵션</small>
+        </div>
+        <div class="amt"><b>별도 산정 전</b><span>매출 계획에서 제외</span></div>
+      </div>
+
+      <div class="rung tam">
+        <div class="tag">TAM</div>
+        <div class="name">글로벌 주니어 운동선수
+          <small>9억 4,500만 명 · ARPU 4.7만 원</small>
+        </div>
+        <div class="amt"><b>44조 4,150억</b><span>전체 시장 76조 5,810억</span></div>
+      </div>
+
+      <div class="rung sam">
+        <div class="tag">SAM</div>
+        <div class="name">중국 + 일본
+          <small>중국 1억 1,160만 · 일본 778만 7,000명</small>
+        </div>
+        <div class="amt"><b>4조 9,338억</b><span>중국 4조 2,408억 · 일본 6,930억</span></div>
+      </div>
+
+      <div class="rung som">
+        <div class="tag">SOM</div>
+        <div class="name">국내 전체
+          <small>221만 6,160명 · ARPU 9.4만 원</small>
+        </div>
+        <div class="amt"><b>2,083억</b><span>체육 사교육 2조 3,188억</span></div>
+      </div>
+
+      <div class="rung som1">
+        <div class="tag">RAM</div>
+        <div class="name">국내 야구 · 축구 주니어
+          <small>44만 3,232명 · SOM의 20% 가정</small>
+        </div>
+        <div class="amt"><b>417억</b><span>실제 공략 시장</span></div>
+      </div>
+
+      <div class="rung act">
+        <div class="tag">LAM</div>
+        <div class="name">12개월 실행 — RAM의 10%
+          <small>44,723명 · 1년차 실행 범위</small>
+        </div>
+        <div class="amt"><b>42억</b><span>RAM의 10.09%</span></div>
+      </div>
+
+      <div class="rung win">
+        <div class="tag">획득</div>
+        <div class="name">3년차 목표
+          <small>유료 3,000 · 코치 500 · 아카데미 120</small>
+        </div>
+        <div class="amt"><b>4.7억</b><span>RAM의 1.13%</span></div>
+      </div>
+    </div>
+
+    <div class="scale"><span>막대 폭은 계층 관계를 보여주기 위한 축소이며, 실제 면적 비율과 다르다.</span></div>
+
+    <div class="note">
+      <strong>구조 주의</strong> — SOM(국내)은 SAM(중국·일본)에 포함되지 않는다. 시장을 크기로 나눈 것이 아니라
+      <strong>진입 순서</strong>로 나눴기 때문이다. PAM ⊃ TAM ⊃ SAM, TAM ⊃ SOM ⊃ RAM ⊃ LAM이며, SAM과 SOM은 형제 관계다.
+    </div>
+  </section>
+
+  <!-- 2. 두 개의 자 -->
+  <section class="card">
+    <div class="card-head"><span class="num">02</span><h2>전체 시장 vs 도달 상한 — 재는 자가 다르다</h2></div>
+    <p class="sub">발표기관 수치는 학원비·용품·대회를 포함하고, 도달 상한은 우리 구독·애드온만 센다. 그래서 전체 시장은 계층별로 인용만 하고 합산하지 않는다.</p>
+
+    <div class="compare">
+      <div class="col">
+        <h3>글로벌</h3>
+        <div class="flag">Youth Sports Market · 2025</div>
+        <div class="bar"><i style="width:100%;background:var(--ink)"></i></div>
+        <div class="row"><span>전체 시장</span><b>76조 5,810억</b></div>
+        <div class="bar"><i style="width:58%;background:var(--blue)"></i></div>
+        <div class="row"><span>도달 상한</span><b>44조 4,150억</b></div>
+      </div>
+      <div class="col">
+        <h3>중국</h3>
+        <div class="flag">青少年体育培训 · 2025</div>
+        <div class="bar"><i style="width:100%;background:var(--clay)"></i></div>
+        <div class="row"><span>전체 시장</span><b>50조 8,731억</b></div>
+        <div class="bar"><i style="width:8.3%;background:var(--blue)"></i></div>
+        <div class="row"><span>도달 상한</span><b>4조 2,408억</b></div>
+      </div>
+      <div class="col">
+        <h3>한국</h3>
+        <div class="flag">예체능·체육 사교육 · 2024</div>
+        <div class="bar"><i style="width:100%;background:var(--green)"></i></div>
+        <div class="row"><span>전체 지출</span><b>2조 3,188억</b></div>
+        <div class="bar"><i style="width:9%;background:var(--blue)"></i></div>
+        <div class="row"><span>도달 상한</span><b>2,083억</b></div>
+      </div>
+    </div>
+
+    <table style="margin-top:22px">
+      <thead>
+        <tr><th>계층</th><th>자료</th><th style="text-align:right">값</th><th>정의</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>TAM</b></td><td>Global Growth Insights</td><td class="n">76조 5,810억</td><td>용품 + 대회 + 시설 + 프로그램</td></tr>
+        <tr><td><b>SAM</b></td><td>《2025年青少年体育培训行业报告》</td><td class="n">50조 8,731억</td><td>훈련 수업료(课消)만</td></tr>
+        <tr><td><b>SOM</b></td><td>2024 초중고 사교육비조사</td><td class="n">2조 3,188억</td><td>예체능·취미교양 중 체육 1/3 가정</td></tr>
+        <tr class="total"><td colspan="2">합산</td><td class="n">불가</td><td>모집단·범위·결제주체가 다름</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 3. 진입 순서 -->
+  <section class="card">
+    <div class="card-head"><span class="num">03</span><h2>진입 순서 — 크기가 아니라 실행 가능성</h2></div>
+    <p class="sub">종합 점수 = 규모 25 · 난이도 20 · 규제 20 · ARPU 15 · 파트너 10 · 경쟁 10</p>
+
+    <div class="tl">
+      <div class="tl-line"></div>
+      <div class="stages">
+        <div class="stage done"><div class="dot"></div><div class="m">M0–6</div><div class="t">한국 파일럿</div><div class="d">야구 1종목<br>코치 20 · 3곳</div></div>
+        <div class="stage done"><div class="dot"></div><div class="m">M6–12</div><div class="t">한국 유료화</div><div class="d">파트너 100<br>유료 300</div></div>
+        <div class="stage done"><div class="dot"></div><div class="m">M12–18</div><div class="t">한국 3종목</div><div class="d">수영·육상<br>선수 3,000</div></div>
+        <div class="stage now"><div class="dot"></div><div class="m">M18–24</div><div class="t">일본 PoC</div><div class="d">少年野球 5곳<br>유료 50</div></div>
+        <div class="stage"><div class="dot"></div><div class="m">M24–30</div><div class="t">일본 확장</div><div class="d">파트너 50<br>매출 1.5억</div></div>
+        <div class="stage"><div class="dot"></div><div class="m">M30–36</div><div class="t">중국 PoC</div><div class="d">white-label<br>계약 1건</div></div>
+        <div class="stage"><div class="dot"></div><div class="m">M36–48</div><div class="t">중국 확장</div><div class="d">계약 3건<br>선수 5만</div></div>
+      </div>
+    </div>
+
+    <div class="note" style="background:var(--blue-soft);color:#14307a;border-left-color:var(--blue)">
+      <strong>점수</strong> — 한국 83.5 · 일본 69.8 · 중국 51.3 · SAM 외 53.3.
+      중국은 규모 1위(100)지만 규제·데이터 점수(30)가 최하위다. 그래서 직접 B2C가 아니라
+      <strong>현지 아카데미 체인에 소프트웨어를 공급</strong>하는 라이선스 구조로 들어간다.
+    </div>
+  </section>
+
+  <footer>SPORTS GROW — 시장 규모 도식 · 상세 산정은 docs/사업계획서-시장규모.md, 진입 전략은 docs/사업계획서-목표시장-진입전략.md</footer>
+</div>
+</body>
+</html>

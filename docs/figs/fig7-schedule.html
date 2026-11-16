@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 사업 추진 일정 선형그래프</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font-family: "Malgun Gothic", "맑은 고딕", sans-serif; color: #222; }
+  .wrap { width: 1040px; padding: 30px 32px 26px; border: 1px solid #D9D9D9; }
+  .kicker { font-size: 13px; letter-spacing: 2px; color: #7F7F7F; font-weight: 700; }
+  h1 { font-size: 25px; margin: 6px 0 4px; color: #17365D; letter-spacing: -0.5px; }
+  .lead { font-size: 13.5px; color: #595959; margin-bottom: 18px; }
+
+  .gantt { border: 1px solid #DCE6F1; border-radius: 10px; padding: 14px 16px 10px; background: #FBFCFE; }
+  .ghead, .grow, .gmark { display: grid; grid-template-columns: 188px repeat(12, 1fr); align-items: center; }
+  .ghead { border-bottom: 2px solid #C9D6E8; padding-bottom: 6px; margin-bottom: 4px; }
+  .ghead div { text-align: center; font-size: 11.5px; font-weight: 700; color: #7F7F7F; }
+  .grow { min-height: 42px; border-bottom: 1px dashed #E3E9F2; }
+  .grow:last-of-type { border-bottom: none; }
+  .lbl { padding-right: 12px; }
+  .lbl b { display: block; font-size: 13.5px; color: #1F3864; }
+  .lbl span { display: block; font-size: 10.5px; color: #7F7F7F; margin-top: 2px; }
+  .bar { height: 30px; border-radius: 6px; color: #fff; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; white-space: nowrap; padding: 0 6px; }
+  .b1 { background: #1F4E79; }
+  .b2 { background: #2E75B6; }
+  .b3 { background: #548235; }
+  .b4 { background: #C55A11; }
+  .b5 { background: #7030A0; }
+  .b6 { background: #BF9000; }
+
+  .gmark { margin-top: 6px; }
+  .gmark .d { text-align: center; }
+  .diamond { display: inline-block; width: 11px; height: 11px; background: #C00000; transform: rotate(45deg); }
+  .mlegend { margin-top: 8px; font-size: 11.5px; color: #595959; text-align: right; }
+  .mlegend b { color: #C00000; }
+
+  .divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 12px; }
+  .divider .t { font-size: 12.5px; font-weight: 700; color: #1F4E79; letter-spacing: .5px; white-space: nowrap; }
+  .divider .line { flex: 1; height: 1px; background: #C9D6E8; }
+
+  .years { display: grid; grid-template-columns: repeat(5, 1fr); position: relative; }
+  .years:before { content: ""; position: absolute; left: 8%; right: 8%; top: 22px; height: 3px; background: #BDD7EE; }
+  .year { position: relative; text-align: center; padding-top: 8px; }
+  .dot { width: 30px; height: 30px; margin: 0 auto 8px; border-radius: 50%; background: #1F4E79; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; border: 4px solid #fff; box-shadow: 0 0 0 1px #1F4E79; }
+  .year .y { font-size: 14px; font-weight: 800; color: #1F3864; }
+  .year .s { font-size: 11px; color: #7F7F7F; margin-top: 1px; }
+  .year .rev { font-size: 13.5px; font-weight: 700; color: #C55A11; margin-top: 6px; }
+  .year .ppl { font-size: 11px; color: #595959; margin-top: 2px; }
+
+  .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid #E3E9F2; font-size: 11.5px; color: #7F7F7F; }
+  .foot b { color: #1F4E79; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">3-10. 전체 사업 추진 일정</div>
+  <h1>3개월 MVP·유료화 → 6개월 개발 완료 → 5개년 확장</h1>
+  <div class="lead">위쪽은 협약기간 12개월 중 <b>3개월 MVP·유료화</b>, <b>6개월 개발 완료</b>, <b>M9 정식 출시</b> 일정이고, 아래쪽은 5개년 시장·매출·조직의 확장 경로입니다.</div>
+
+  <div class="gantt">
+    <div class="ghead">
+      <div></div><div>M1</div><div>M2</div><div>M3</div><div>M4</div><div>M5</div><div>M6</div>
+      <div>M7</div><div>M8</div><div>M9</div><div>M10</div><div>M11</div><div>M12</div>
+    </div>
+
+    <div class="grow">
+      <div class="lbl"><b>1. 설계 · 지표 정의</b><span>요구사항·야구 24개 지표·권한</span></div>
+      <div class="bar b1" style="grid-column: 2 / span 2">설계</div>
+    </div>
+    <div class="grow">
+      <div class="lbl"><b>2. MVP 개발 · 유료화</b><span>기록·통계·학부모 리포트</span></div>
+      <div class="bar b2" style="grid-column: 3 / span 2">MVP·유료화 (M2~M3)</div>
+    </div>
+    <div class="grow">
+      <div class="lbl"><b>3. 코치 · 기관 기능</b><span>대시보드·기관 통계·보고서</span></div>
+      <div class="bar b3" style="grid-column: 5 / span 3">코치·기관 (M4~M6)</div>
+    </div>
+    <div class="grow">
+      <div class="lbl"><b>4. QA · 보안</b><span>부하 테스트·개인정보·백업</span></div>
+      <div class="bar b1" style="grid-column: 7 / span 2">QA</div>
+    </div>
+    <div class="grow">
+      <div class="lbl"><b>5. 파일럿 운영</b><span>아카데미 10곳·선수 300명</span></div>
+      <div class="bar b4" style="grid-column: 8 / span 2">파일럿</div>
+    </div>
+    <div class="grow">
+      <div class="lbl"><b>6. 정식 출시</b><span>구독 결제·요금제·CS</span></div>
+      <div class="bar b5" style="grid-column: 10 / span 1">출시</div>
+    </div>
+    <div class="grow">
+      <div class="lbl"><b>7. 고도화 · 확장 설계</b><span>OCR·음성, 수영·육상, 일본 PoC</span></div>
+      <div class="bar b6" style="grid-column: 11 / span 3">고도화·확장</div>
+    </div>
+
+    <div class="gmark">
+      <div></div>
+      <div class="d"></div><div class="d"></div><div class="d"><span class="diamond"></span></div>
+      <div class="d"></div><div class="d"></div><div class="d"><span class="diamond"></span></div>
+      <div class="d"></div><div class="d"></div><div class="d"><span class="diamond"></span></div>
+      <div class="d"></div><div class="d"></div><div class="d"><span class="diamond"></span></div>
+    </div>
+    <div class="mlegend"><b>◆</b> M3 유료화 · M6 개발 완료 · M9 정식 출시 · M12 결과보고</div>
+  </div>
+
+  <div class="divider"><div class="t">5개년 확장 경로</div><div class="line"></div></div>
+
+  <div class="years">
+    <div class="year">
+      <div class="dot">Y1</div>
+      <div class="y">2027</div><div class="s">한국 야구 파일럿</div>
+      <div class="rev">0.3억</div><div class="ppl">3 → 5명</div>
+    </div>
+    <div class="year">
+      <div class="dot">Y2</div>
+      <div class="y">2028</div><div class="s">한국 3종목 · 일본 PoC</div>
+      <div class="rev">2.0억</div><div class="ppl">5 → 8명</div>
+    </div>
+    <div class="year">
+      <div class="dot">Y3</div>
+      <div class="y">2029</div><div class="s">일본 확장 · 중국 1건</div>
+      <div class="rev">4.7억</div><div class="ppl">8명</div>
+    </div>
+    <div class="year">
+      <div class="dot">Y4</div>
+      <div class="y">2030</div><div class="s">대만 · 호주 · 6종목</div>
+      <div class="rev">11.0억</div><div class="ppl">14명</div>
+    </div>
+    <div class="year">
+      <div class="dot">Y5</div>
+      <div class="y">2031</div><div class="s">캐나다 · 영국 · AI</div>
+      <div class="rev">24.0억</div><div class="ppl">14 → 25명</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div>5년 누적 매출 <b>42.0억 원</b> · 최대 적자 <b>9.67억 원(M48)</b> · Y5 영업현금흐름 <b>+11.78억 원</b></div>
+    <div>M0 = 2027년 1월</div>
+  </div>
+</div>
+</body>
+</html>

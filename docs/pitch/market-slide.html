@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>주니어 운동선수 시장 — TAM / SAM / SOM / RAM</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; }
+  body { font-family: "Malgun Gothic", "맑은 고딕", "Segoe UI", sans-serif; }
+
+  .slide {
+    position: relative; width: 1280px; height: 720px; overflow: hidden;
+    background: #08080A; color: #fff;
+  }
+
+  /* 배경 세계지도 */
+  .map {
+    position: absolute; left: -70px; top: 8px; width: 1440px; height: auto;
+    filter: invert(1) grayscale(1) brightness(1.05);
+    opacity: .38; z-index: 0;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 82%, transparent 100%);
+  }
+  .vignette {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(115% 85% at 63% 40%, rgba(0,0,0,0) 28%, rgba(8,8,10,.80) 76%, #08080A 100%),
+      linear-gradient(180deg, rgba(8,8,10,.72) 0%, rgba(8,8,10,0) 30%, rgba(8,8,10,0) 58%, rgba(8,8,10,.95) 100%);
+  }
+
+  header { position: absolute; left: 56px; top: 42px; width: 620px; z-index: 3; }
+  .kicker { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: #FF3B30; }
+  .kicker span { color: #6E6E73; letter-spacing: 2px; font-weight: 600; }
+  h1 { font-size: 41px; line-height: 1.22; letter-spacing: -1.4px; margin-top: 12px; font-weight: 800; }
+  h1 .red { color: #E10600; }
+  .sub { margin-top: 14px; font-size: 13.5px; line-height: 1.68; color: #9C9CA3; width: 566px; }
+  .sub b { color: #E8E8EA; font-weight: 700; }
+
+  .keyline {
+    margin-top: 15px; padding-left: 14px; border-left: 3px solid #E10600;
+    font-size: 13px; line-height: 1.6; color: #CFCFD4;
+  }
+  .keyline b { color: #fff; }
+  .keyline em { font-style: normal; color: #FF3B30; font-weight: 700; }
+
+  /* 진입 순서 */
+  .order { position: absolute; left: 56px; top: 330px; z-index: 3; }
+  .o-label { font-size: 10px; letter-spacing: 3px; color: #6E6E73; font-weight: 700; margin-bottom: 8px; }
+  .o-row { display: flex; align-items: center; gap: 8px; }
+  .o-item {
+    border: 1px solid #2C2C31; border-radius: 4px; padding: 8px 12px 7px;
+    font-size: 12.5px; font-weight: 700; color: #B9B9BE; white-space: nowrap;
+  }
+  .o-item b { color: #6E6E73; margin-right: 4px; font-weight: 800; }
+  .o-item span { display: block; font-size: 9px; font-weight: 400; color: #6E6E73; margin-top: 2px; letter-spacing: .2px; }
+  .o-item.now { background: rgba(225,6,0,.12); border-color: #E10600; color: #fff; }
+  .o-item.now b { color: #FF3B30; }
+  .o-item.now span { color: #E8A7A1; }
+  .o-arrow { color: #4A4A50; font-size: 13px; }
+  .o-note { margin-top: 9px; font-size: 10.5px; color: #6E6E73; }
+  .o-note b { color: #B9B9BE; }
+
+  /* 벤다이어그램 */
+  .venn { position: absolute; left: 640px; top: 76px; width: 566px; height: 404px; z-index: 3; }
+  .venn svg { width: 100%; height: 100%; }
+  .vlabel { font-family: "Malgun Gothic", sans-serif; }
+
+  /* 시장 카드 */
+  .cards {
+    position: absolute; left: 56px; right: 56px; bottom: 82px; height: 152px;
+    display: flex; gap: 14px; z-index: 3;
+  }
+  .card {
+    flex: 1; background: rgba(18,18,21,.94); border: 1px solid #26262B;
+    border-top: 3px solid #E10600; border-radius: 4px; padding: 15px 16px 13px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative;
+  }
+  .card.hot { background: rgba(38,10,10,.92); border-color: #4A1614; border-top-color: #FF3B30; }
+  .card .top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .card .tag { font-size: 10px; font-weight: 800; letter-spacing: 2.5px; color: #FF3B30; }
+  .card .icon { width: 44px; height: 44px; margin-top: -2px; }
+  .card .name { font-size: 17px; font-weight: 800; letter-spacing: -.3px; margin-top: 2px; }
+  .card .amount { font-size: 23px; font-weight: 800; letter-spacing: -1px; color: #fff; margin-top: 2px; }
+  .card .amount small { font-size: 12.5px; font-weight: 700; color: #FF3B30; margin-left: 4px; letter-spacing: 0; }
+  .card .desc { font-size: 10.5px; color: #8E8E95; line-height: 1.4; margin-top: 2px; }
+  .card .src { position: absolute; right: 14px; bottom: 11px; font-size: 9px; color: #5E5E64; }
+
+  /* 출처 */
+  footer {
+    position: absolute; left: 56px; right: 56px; bottom: 18px; z-index: 3;
+    border-top: 1px solid #1E1E22; padding-top: 8px;
+  }
+  .src-line { font-size: 9.2px; line-height: 1.6; color: #6B6B72; letter-spacing: -.1px; }
+  .src-line b { color: #9A9AA1; font-weight: 700; }
+  .src-line span { color: #4E4E55; margin: 0 5px; }
+  .note { font-size: 9px; color: #5A5A61; margin-top: 1px; }
+</style>
+</head>
+<body>
+<div class="slide">
+  <img class="map" src="../figs/world-map.svg" alt="">
+  <div class="vignette"></div>
+
+  <header>
+    <div class="kicker">MARKET SIZE <span>· 2025 · KRW</span></div>
+    <h1>글로벌 <span class="red">76.6조</span>의 시장,<br>우리는 <span class="red">417억</span>에서 시작합니다</h1>
+    <div class="sub">주니어 운동선수의 기록이 상품이 되는 시장은 아직 비어 있습니다. <b>TAM은 글로벌, SAM은 중국·일본, SOM은 국내 전체, RAM은 국내 야구·축구</b>로 나눠 진입 순서를 설계했습니다.</div>
+    <div class="keyline">3년차 목표 4.7억 원은 <b>RAM 417억의 1.13%</b>. 점유율이 아니라 <em>단위경제</em>를 증명하는 숫자입니다.</div>
+  </header>
+
+  <div class="order">
+    <div class="o-label">진입 순서</div>
+    <div class="o-row">
+      <div class="o-item now"><b>①</b>한국 <span>0~18개월 · 단위경제</span></div>
+      <div class="o-arrow">→</div>
+      <div class="o-item"><b>②</b>일본 <span>18~36개월 · 직접 진입</span></div>
+      <div class="o-arrow">→</div>
+      <div class="o-item"><b>③</b>중국 <span>36~48개월 · 라이선스</span></div>
+    </div>
+    <div class="o-note">크기 순서가 아니라 <b>진입 가능 순서</b>입니다.</div>
+  </div>
+
+  <div class="venn">
+    <svg viewBox="0 0 620 440" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gTam" cx="50%" cy="42%" r="62%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.055"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.012"/>
+        </radialGradient>
+        <radialGradient id="gSam" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#E10600" stop-opacity="0.30"/>
+          <stop offset="100%" stop-color="#E10600" stop-opacity="0.10"/>
+        </radialGradient>
+        <radialGradient id="gSom" cx="50%" cy="45%" r="60%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.03"/>
+        </radialGradient>
+      </defs>
+
+      <!-- TAM -->
+      <circle cx="310" cy="212" r="190" fill="url(#gTam)" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="1.6"/>
+      <!-- SAM -->
+      <circle cx="248" cy="220" r="102" fill="url(#gSam)" stroke="#E10600" stroke-width="2"/>
+      <!-- SOM -->
+      <circle cx="388" cy="220" r="102" fill="url(#gSom)" stroke="#FFFFFF" stroke-opacity="0.62" stroke-width="1.6" stroke-dasharray="5 4"/>
+      <!-- RAM -->
+      <circle cx="404" cy="266" r="48" fill="#E10600" stroke="#FF6B5E" stroke-width="1.2"/>
+      <circle cx="404" cy="266" r="48" fill="none" stroke="#FF3B30" stroke-opacity="0.45" stroke-width="7"/>
+
+      <!-- TAM -->
+      <text class="vlabel" x="310" y="50" text-anchor="middle" fill="#FF3B30" font-size="11.5" font-weight="800" letter-spacing="3">TAM</text>
+      <text class="vlabel" x="310" y="80" text-anchor="middle" fill="#FFFFFF" font-size="26" font-weight="800" letter-spacing="-1">76조 5,810억</text>
+      <text class="vlabel" x="310" y="99" text-anchor="middle" fill="#9C9CA3" font-size="10.5">글로벌 전체 시장</text>
+
+      <!-- SAM -->
+      <text class="vlabel" x="246" y="196" text-anchor="middle" fill="#FF6B5E" font-size="11" font-weight="800" letter-spacing="2.5">SAM</text>
+      <text class="vlabel" x="246" y="220" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="800">중국·일본</text>
+      <text class="vlabel" x="246" y="246" text-anchor="middle" fill="#FF3B30" font-size="17" font-weight="800" letter-spacing="-.6">4조 9,338억</text>
+      <text class="vlabel" x="246" y="264" text-anchor="middle" fill="#C9A9A6" font-size="9.5">중국 4.2조 + 일본 6,930억</text>
+
+      <!-- SOM -->
+      <text class="vlabel" x="398" y="134" text-anchor="middle" fill="#C9C9CF" font-size="11" font-weight="800" letter-spacing="2.5">SOM</text>
+      <text class="vlabel" x="398" y="158" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="800">한국 전체</text>
+      <text class="vlabel" x="398" y="184" text-anchor="middle" fill="#FFFFFF" font-size="17" font-weight="800" letter-spacing="-.6">2,083억</text>
+      <text class="vlabel" x="398" y="201" text-anchor="middle" fill="#8E8E95" font-size="9.5">도달 상한 221.6만 명</text>
+
+      <!-- RAM -->
+      <text class="vlabel" x="404" y="252" text-anchor="middle" fill="#FFD9D4" font-size="9" font-weight="800" letter-spacing="2">RAM</text>
+      <text class="vlabel" x="404" y="274" text-anchor="middle" fill="#FFFFFF" font-size="16" font-weight="800" letter-spacing="-.5">417억</text>
+      <text class="vlabel" x="404" y="293" text-anchor="middle" fill="#FFC9C2" font-size="7.8">야구·축구 44만</text>
+
+      <!-- annotation -->
+      <text class="vlabel" x="310" y="424" text-anchor="middle" fill="#6E6E75" font-size="9.5">TAM ⊃ SAM, SOM  ·  RAM ⊂ SOM  ·  원의 면적은 개념도  ·  SOM·RAM은 인구 × ARPU 도달 상한</text>
+    </svg>
+  </div>
+
+  <section class="cards">
+    <div class="card">
+      <div class="top">
+        <div>
+          <div class="tag">TAM</div>
+          <div class="name">글로벌 주니어</div>
+        </div>
+        <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#E10600" stroke-width="1.7">
+          <circle cx="24" cy="24" r="17"/>
+          <ellipse cx="24" cy="24" rx="7.5" ry="17"/>
+          <path d="M7 24h34M9.5 15h29M9.5 33h29"/>
+        </svg>
+      </div>
+      <div>
+        <div class="amount">76조 5,810억<small>원</small></div>
+        <div class="desc">전 세계 유소년 스포츠 지출 · CAGR 9.9%</div>
+      </div>
+      <div class="src">G1 · 2025</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div>
+          <div class="tag">SAM</div>
+          <div class="name">중국 · 일본</div>
+        </div>
+        <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#E10600" stroke-width="1.7">
+          <circle cx="24" cy="21" r="12"/>
+          <path d="M24 9c4.7 3.2 4.7 20.4 0 24M12 21h24"/>
+          <path d="M24 33v7M18 40h12"/>
+        </svg>
+      </div>
+      <div>
+        <div class="amount">4조 9,338억<small>원</small></div>
+        <div class="desc">중국 4조 2,408억 + 일본 6,930억</div>
+      </div>
+      <div class="src">C1 · J1·J2</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <div>
+          <div class="tag">SOM</div>
+          <div class="name">한국 전체</div>
+        </div>
+        <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#E10600" stroke-width="1.7">
+          <path d="M24 42s12-11.6 12-21a12 12 0 1 0-24 0c0 9.4 12 21 12 21z"/>
+          <circle cx="24" cy="20" r="4.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="amount">2,083억<small>원</small></div>
+        <div class="desc">운동하는 청소년 221만 6,160명</div>
+      </div>
+      <div class="src">K1 · K3</div>
+    </div>
+
+    <div class="card hot">
+      <div class="top">
+        <div>
+          <div class="tag">RAM</div>
+          <div class="name">한국 야구 · 축구</div>
+        </div>
+        <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="#FF3B30" stroke-width="1.7">
+          <circle cx="24" cy="24" r="16"/>
+          <path d="M17 10.5c4 4.4 4 22.6 0 27M31 10.5c-4 4.4-4 22.6 0 27"/>
+          <path d="M9.5 19.5c2.6 1.2 4.2 2.7 5 4.5M38.5 19.5c-2.6 1.2-4.2 2.7-5 4.5M9.5 28.5c2.6-1.2 4.2-2.7 5-4.5M38.5 28.5c-2.6-1.2-4.2-2.7-5-4.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="amount">417억<small>원</small></div>
+        <div class="desc">야구·축구 44만 3,232명 · 20% 가정</div>
+      </div>
+      <div class="src">K2 · [가정]</div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="src-line">
+      <b>출처</b>
+      Global Growth Insights, <i>Youth Sports Market Report</i> (2025)
+      <span>|</span> 中国体育用品业联合会, 《2025年青少年体育培训行业报告》(2026.01)
+      <span>|</span> 文部科学省, 学校基本調査 (2024)
+      <span>|</span> 笹川スポーツ財団 (2025)
+      <span>|</span> 교육부·국가데이터처, 2024년 초중고 사교육비조사 (2025.03)
+      <span>|</span> 대한체육회, 경기인 등록현황 (2026.10.29)
+      <span>|</span> 환율 ECB 2026.10.28 — USD 1,340 / CNY 201 / JPY 8.49
+    </div>
+    <div class="note">* TAM은 발표기관 기준 전체 시장, SAM·SOM·RAM은 인구 × ARPU로 계산한 도달 상한입니다. 정의가 달라 계층 간 합산은 하지 않습니다. RAM의 야구·축구 20%는 공식 종목별 통계 부재로 적용한 가정(15~25% 범위)입니다.</div>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>아카데미·연맹 대시보드 — Sports Grow</title>
+<meta name="description" content="선수와 팀을 통합 관리하고 종목·연령대·기간별 통계, 훈련 참여, 목표 달성 분석과 관리자용 통계 보고서를 제공하는 기관 대시보드입니다." />
+<meta name="theme-color" content="#0b1a1e" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sports Grow" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/pwa.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230b1a1e'/%3E%3Cpath d='M9 28l7-7 5 4 10-11' fill='none' stroke='%23d9f55f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='14' r='3' fill='%23d9f55f'/%3E%3C/svg%3E" />
+</head>
+<body class="app-body" data-role="academy">
+<script>document.documentElement.classList.add("js");</script>
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+<div class="app">
+  <aside class="app-sidebar" id="sidebar" aria-label="아카데미·연맹 메뉴">
+    <button class="icon-btn sidebar__close" id="sidebarClose" type="button" aria-label="메뉴 닫기">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <div class="sidebar__brand">
+      <a class="brand" href="index.html" aria-label="Sports Grow 홈">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M9 28.5 16.5 21l5 4L31.5 14.5" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="31.5" cy="14.5" r="3.1" fill="currentColor"/><path d="M9 33h22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".38"/></svg>
+        </span>
+        <span class="brand__text"><strong>SPORTS GROW</strong><small>Academy</small></span>
+      </a>
+    </div>
+
+    <div class="role-chip role-chip--academy">
+      <span class="role-chip__ico"><svg class="icon" aria-hidden="true"><use href="#i-building" /></svg></span>
+      <div><span>Academy &amp; Federation</span><strong data-user-name>한빛 스포츠아카데미</strong></div>
+    </div>
+
+    <nav class="sidebar__nav" data-scroll-nav aria-label="기관 대시보드 섹션">
+      <p class="sidebar__label">기관 운영</p>
+      <a class="sidebar__link is-active" href="#overview"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>기관 개요</a>
+      <a class="sidebar__link" href="#teams"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg>팀 관리 <em>5</em></a>
+      <a class="sidebar__link" href="#players"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>선수 통합 관리</a>
+      <p class="sidebar__label">분석 · 보고</p>
+      <a class="sidebar__link" href="#analytics"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>통계 분석</a>
+      <a class="sidebar__link" href="#reports"><svg class="icon" aria-hidden="true"><use href="#i-file" /></svg>통계 보고서</a>
+      <p class="sidebar__label">바로가기</p>
+      <a class="sidebar__link" href="coach.html"><svg class="icon" aria-hidden="true"><use href="#i-coach" /></svg>코치 화면</a>
+      <a class="sidebar__link" href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-globe" /></svg>서비스 소개</a>
+    </nav>
+
+    <div class="sidebar__spacer"></div>
+
+    <div class="sidebar-tip">
+      <div class="sidebar-tip__head"><svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>Admin only</div>
+      <strong>기관 통계 열람 권한</strong>
+      <p>보고서 내보내기는 기관 관리자 권한으로만 가능하며, 다운로드 이력이 기록됩니다.</p>
+      <a href="#reports">권한 정보 확인 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+    </div>
+
+    <div class="sidebar__user">
+      <span class="sidebar__avatar" data-user-initial>한</span>
+      <div><strong data-user-name>한빛 스포츠아카데미</strong><span data-user-org>기관 관리자 · 5개 팀</span></div>
+      <a class="sidebar__logout" href="#" data-logout aria-label="로그아웃">
+        <svg class="icon" aria-hidden="true"><use href="#i-logout" /></svg>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <button class="topbar__menu" id="sidebarToggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sidebar">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+      </button>
+      <div class="breadcrumb">
+        <span>아카데미·연맹</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+        <strong data-view-crumb>기관 개요</strong>
+      </div>
+      <div class="topbar__actions">
+        <span class="topbar__date"><svg class="icon" aria-hidden="true"><use href="#i-calendar" /></svg><span data-today>2026.10.28 (수)</span></span>
+        <button class="topbar__icon" type="button" id="notificationsBtn" aria-label="기관 알림 3건">
+          <svg class="icon" aria-hidden="true"><use href="#i-bell" /></svg>
+          <span class="topbar__dot" aria-hidden="true"></span>
+        </button>
+        <div class="topbar__user">
+          <div><strong data-user-name>한빛 스포츠아카데미</strong><span>기관 관리자</span></div>
+          <span class="topbar__avatar" data-user-initial>한</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-content" id="main">
+      <!-- ======================= OVERVIEW ======================= -->
+      <section class="dash-section" id="overview" aria-labelledby="overview-title">
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Academy overview <span class="tag tag--clay">5개 팀 · 82명</span></p>
+            <h1 id="overview-title"><span data-user-name>한빛 스포츠아카데미</span> 운영 현황입니다</h1>
+            <p class="page-head__desc">종목·연령대·기간별로 선수와 팀 지표를 한눈에 확인하세요. 훈련 참여율과 목표 달성률을 비교해 지원이 필요한 팀을 우선 살펴보세요.</p>
+          </div>
+          <div class="page-head__actions">
+            <div class="segmented" role="group" aria-label="분석 기간 선택" id="periodGroup">
+              <button class="segmented__btn is-active" type="button" data-period="month" aria-pressed="true">이번 달</button>
+              <button class="segmented__btn" type="button" data-period="quarter" aria-pressed="false">3개월</button>
+              <button class="segmented__btn" type="button" data-period="half" aria-pressed="false">6개월</button>
+              <button class="segmented__btn" type="button" data-period="year" aria-pressed="false">올해</button>
+            </div>
+            <a class="btn btn--dark btn--sm" href="#reports">
+              <svg class="icon" aria-hidden="true"><use href="#i-file" /></svg>
+              보고서
+            </a>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat stat--clay">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg></span>
+              <span class="stat__label">관리 선수</span>
+            </div>
+            <div class="stat__value" id="kpiPlayers">82<small>명</small></div>
+            <div class="stat__foot" id="kpiPlayersFoot">5개 팀 · 이번 달 신규 3명</div>
+          </div>
+          <div class="stat stat--blue">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg></span>
+              <span class="stat__label">운영 팀</span>
+            </div>
+            <div class="stat__value" id="kpiTeams">5<small>팀</small></div>
+            <div class="stat__foot" id="kpiTeamsFoot">야구 1 · 구기 3 · 육상 1</div>
+          </div>
+          <div class="stat stat--green">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg></span>
+              <span class="stat__label">평균 훈련 참여율</span>
+            </div>
+            <div class="stat__value" id="kpiParticipation">85<small>%</small></div>
+            <div class="stat__foot" id="kpiParticipationFoot"><span class="delta"><svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg>+2.4%</span> 지난 기간 대비</div>
+          </div>
+          <div class="stat stat--lime">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg></span>
+              <span class="stat__label">평균 목표 달성률</span>
+            </div>
+            <div class="stat__value" id="kpiGoal">69<small>%</small></div>
+            <div class="stat__foot" id="kpiGoalFoot">단기 73% · 장기 64%</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>기간별 훈련 참여 추이</h2>
+                <p class="panel__sub" id="trendSub">최근 6개월 · 전체 종목</p>
+              </div>
+              <span class="tag tag--green" id="trendDelta">+4.2%</span>
+            </div>
+            <div class="line-chart" id="trendChart" role="img" aria-label="최근 6개월 훈련 참여율 추이 선 그래프"></div>
+            <div class="panel__foot">
+              <span id="trendSummary">6개월 평균 참여율 84%</span>
+              <span class="legend-inline"><span><i></i>훈련 참여율</span><span><i class="is-clay"></i>목표 85%</span></span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg>종목별 선수 분포</h2>
+                <p class="panel__sub" id="donutSub">전체 82명 · 5개 종목</p>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut" id="sportDonut" style="--p1:27%;--p2:50%;--p3:74%">
+                <div class="donut__center"><strong id="donutTotal">82</strong><span>선수</span></div>
+              </div>
+              <div class="donut-legend" id="sportLegend"></div>
+            </div>
+            <div class="mini-kpi" style="margin-top:12px"><span>가장 큰 팀</span><strong id="largestTeam">한빛고 축구부 · 22명</strong></div>
+            <div class="mini-kpi"><span>평균 팀 규모</span><strong id="avgTeamSize">16.4명</strong></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>팀별 통합 현황</h2>
+              <p class="panel__sub">훈련 참여율 · 목표 달성률 · 관리 상태</p>
+            </div>
+            <a class="panel__link" href="#teams">팀 관리 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>팀</th><th>종목</th><th>연령대</th><th>선수</th><th>주간 훈련</th><th>참여율</th><th>목표 달성률</th><th>상태</th><th></th></tr>
+              </thead>
+              <tbody id="teamOverviewBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>기관 인사이트</h2>
+                <p class="panel__sub">이번 기간 데이터 기준</p>
+              </div>
+              <span class="tag tag--gold">자동 분석</span>
+            </div>
+            <div class="alert-list" id="insightList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>목표 달성 분포</h2>
+                <p class="panel__sub" id="goalDistSub">전체 선수 · 단기 목표 기준</p>
+              </div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-row__head"><span>달성 · 80% 이상</span><b id="distAchieved">18명</b></div>
+              <div class="progress progress--lime"><i id="distAchievedBar" style="--w:22%"></i></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-row__head"><span>순항 · 60~79%</span><b id="distOnTrack">34명</b></div>
+              <div class="progress"><i id="distOnTrackBar" style="--w:41%"></i></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-row__head"><span>진행 · 40~59%</span><b id="distProgress">19명</b></div>
+              <div class="progress progress--blue"><i id="distProgressBar" style="--w:23%"></i></div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-row__head"><span>지원 필요 · 40% 미만</span><b id="distRisk">11명</b></div>
+              <div class="progress progress--clay"><i id="distRiskBar" style="--w:14%"></i></div>
+            </div>
+            <p class="chart-note"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>목표 달성률은 팀별 단기 목표의 평균값이며, 선수 개별 목표는 코치 화면에서 조정할 수 있습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= TEAMS ======================= -->
+      <section class="dash-section" id="teams" aria-labelledby="teams-title" hidden>
+        <div class="section-label">
+          <h2 id="teams-title">팀 통합 관리</h2>
+          <span>종목 · 연령대별 팀 운영 현황</span>
+          <button class="btn btn--dark btn--sm" type="button" data-modal-open="teamModal" style="margin-left:auto">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>팀 추가
+          </button>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+              <input type="search" id="teamSearch" placeholder="팀 이름 또는 코치 검색" aria-label="팀 검색" />
+            </div>
+            <select class="filter-select" id="teamSport" aria-label="종목 필터">
+              <option value="all">전체 종목</option>
+            </select>
+            <select class="filter-select" id="teamAge" aria-label="연령대 필터">
+              <option value="all">전체 연령대</option>
+              <option value="U12">U12</option>
+              <option value="U15">U15</option>
+              <option value="U18">U18</option>
+            </select>
+            <span class="toolbar__spacer"></span>
+            <span class="tag tag--outline" id="teamCount">5개 팀</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>팀</th><th>종목 · 연령대</th><th>담당 코치</th><th>선수</th><th>주간 평균 훈련</th><th>참여율</th><th>목표 달성률</th><th>상태</th><th></th></tr>
+              </thead>
+              <tbody id="teamTableBody"></tbody>
+            </table>
+          </div>
+          <div class="panel__foot">
+            <span>팀을 선택하면 소속 선수와 훈련 지표를 확인할 수 있습니다.</span>
+            <span id="teamFoot">전체 5개 팀 · 82명</span>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="panel">
+            <div class="panel__head panel__head--tight">
+              <div><h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg>주간 훈련 시간</h2></div>
+            </div>
+            <div class="mini-kpi"><span>기관 주간 총 훈련</span><strong id="sumWeekly">1,130분</strong></div>
+            <div class="mini-kpi"><span>선수 1인 평균</span><strong id="sumAvgWeekly">230분</strong></div>
+            <div class="mini-kpi"><span>목표 달성 팀</span><strong id="sumGoalTeams">3개 팀</strong></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head panel__head--tight">
+              <div><h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg>기록 입력 현황</h2></div>
+            </div>
+            <div class="mini-kpi"><span>이번 주 입력 완료</span><strong id="sumRecorded">70 / 82명</strong></div>
+            <div class="mini-kpi"><span>입력률</span><strong id="sumRecordRate">85%</strong></div>
+            <div class="mini-kpi"><span>미입력 선수</span><strong id="sumMissing">12명</strong></div>
+          </div>
+          <div class="panel">
+            <div class="panel__head panel__head--tight">
+              <div><h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>연령대 구성</h2></div>
+            </div>
+            <div class="mini-kpi"><span>U12</span><strong id="sumU12">18명 · 22%</strong></div>
+            <div class="mini-kpi"><span>U15</span><strong id="sumU15">26명 · 32%</strong></div>
+            <div class="mini-kpi"><span>U18</span><strong id="sumU18">38명 · 46%</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= PLAYERS ======================= -->
+      <section class="dash-section" id="players" aria-labelledby="players-title" hidden>
+        <div class="section-label">
+          <h2 id="players-title">선수 통합 관리</h2>
+          <span>소속 팀 · 종목 · 목표를 한 번에 조회</span>
+          <span class="tag tag--clay" style="margin-left:auto" id="playerCount">82명</span>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+              <input type="search" id="playerSearch" placeholder="선수 이름 또는 포지션 검색" aria-label="선수 검색" />
+            </div>
+            <select class="filter-select" id="playerSport" aria-label="선수 종목 필터">
+              <option value="all">전체 종목</option>
+            </select>
+            <select class="filter-select" id="playerAge" aria-label="선수 연령대 필터">
+              <option value="all">전체 연령대</option>
+              <option value="U12">U12</option>
+              <option value="U15">U15</option>
+              <option value="U18">U18</option>
+            </select>
+            <select class="filter-select" id="playerTeam" aria-label="선수 소속 팀 필터">
+              <option value="all">전체 팀</option>
+            </select>
+            <select class="filter-select" id="playerSort" aria-label="선수 정렬">
+              <option value="goal">목표 달성률 순</option>
+              <option value="minutes">훈련량 순</option>
+              <option value="name">이름 순</option>
+              <option value="risk">지원 필요 우선</option>
+            </select>
+            <span class="toolbar__spacer"></span>
+            <button class="btn btn--outline btn--sm" type="button" id="playerCsv">
+              <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>CSV
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>선수</th><th>소속 팀</th><th>종목</th><th>연령대</th><th>포지션</th><th>주간 훈련</th><th>참여율</th><th>목표 달성률</th><th>상태</th></tr>
+              </thead>
+              <tbody id="playerTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="playerPager" aria-label="선수 목록 페이지"></div>
+          <div class="panel__foot">
+            <span id="playerFoot">전체 82명 중 1~10명 표시</span>
+            <span>선수 정보는 소속 팀 코치가 입력한 최신 기록을 기준으로 합니다.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= ANALYTICS ======================= -->
+      <section class="dash-section" id="analytics" aria-labelledby="analytics-title" hidden>
+        <div class="section-label">
+          <h2 id="analytics-title">통계 분석</h2>
+          <span>종목 · 연령대 · 기간별 훈련 참여와 목표 달성</span>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <span class="toolbar__label"><svg class="icon" aria-hidden="true"><use href="#i-filter" /></svg>분석 조건</span>
+            <select class="filter-select" id="anaSport" aria-label="분석 종목">
+              <option value="all">전체 종목</option>
+            </select>
+            <select class="filter-select" id="anaAge" aria-label="분석 연령대">
+              <option value="all">전체 연령대</option>
+              <option value="U12">U12</option>
+              <option value="U15">U15</option>
+              <option value="U18">U18</option>
+            </select>
+            <select class="filter-select" id="anaPeriod" aria-label="분석 기간">
+              <option value="month">이번 달</option>
+              <option value="quarter">최근 3개월</option>
+              <option value="half">최근 6개월</option>
+              <option value="year">올해</option>
+            </select>
+            <span class="toolbar__spacer"></span>
+            <span class="tag tag--green" id="anaSample">표본 82명</span>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <div class="panel__head panel__head--tight">
+                <div>
+                  <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-bars" /></svg>연령대별 평균 훈련 참여율</h2>
+                  <p class="panel__sub">선택 조건 기준 · %</p>
+                </div>
+              </div>
+              <div class="bar-chart bar-chart--labels" id="ageChart" role="img" aria-label="연령대별 평균 훈련 참여율 막대 그래프"></div>
+            </div>
+            <div>
+              <div class="panel__head panel__head--tight">
+                <div>
+                  <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>종목별 목표 달성률</h2>
+                  <p class="panel__sub">단기 목표 평균 · %</p>
+                </div>
+              </div>
+              <div class="bar-chart bar-chart--labels" id="goalChart" role="img" aria-label="종목별 목표 달성률 막대 그래프"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-calendar" /></svg>요일별 훈련 참여</h2>
+                <p class="panel__sub">최근 4주 · 선택 조건</p>
+              </div>
+              <span class="tag tag--blue">평균 <span id="heatAvg">84%</span></span>
+            </div>
+            <div class="heatmap" id="heatmap" role="img" aria-label="요일별 훈련 참여 히트맵"></div>
+            <div class="heatmap__legend">
+              <span>낮음</span><i style="--v:0.15"></i><i style="--v:0.4"></i><i style="--v:0.65"></i><i style="--v:0.9"></i><span>높음</span>
+            </div>
+            <p class="chart-note"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>주말 훈련 참여율이 평일보다 낮습니다. 팀별 주말 프로그램 운영 여부를 확인해 보세요.</p>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg>종목 · 연령대 교차 분석</h2>
+                <p class="panel__sub">선수 수 · 참여율 · 목표 달성률</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>구분</th><th>선수</th><th>참여율</th><th>목표 달성</th><th>추이</th></tr></thead>
+                <tbody id="sportTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>분석 요약</h2>
+              <p class="panel__sub">선택한 조건에서 자동으로 계산된 인사이트</p>
+            </div>
+            <span class="tag tag--outline" id="anaPeriodLabel">이번 달</span>
+          </div>
+          <div class="analysis-grid" id="analysisGrid"></div>
+        </div>
+      </section>
+
+      <!-- ======================= REPORTS ======================= -->
+      <section class="dash-section" id="reports" aria-labelledby="reports-title" hidden>
+        <div class="section-label">
+          <h2 id="reports-title">통계 보고서</h2>
+          <span>권한 있는 기관 관리자 전용</span>
+          <span class="tag tag--clay" style="margin-left:auto"><svg class="icon" aria-hidden="true" style="width:12px;height:12px"><use href="#i-lock" /></svg>관리자 전용</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-sliders" /></svg>보고서 생성</h2>
+                <p class="panel__sub">유형과 범위를 선택해 미리보기를 만듭니다.</p>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="reportType">보고서 유형</label>
+                <select class="select" id="reportType">
+                  <option value="monthly">월간 기관 운영 보고서</option>
+                  <option value="participation">팀별 훈련 참여 분석</option>
+                  <option value="age">연령대별 성장 리포트</option>
+                  <option value="goal">연간 목표 달성 요약</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="reportPeriod">기간</label>
+                <select class="select" id="reportPeriod">
+                  <option value="month">2026년 10월</option>
+                  <option value="quarter">2026년 3분기</option>
+                  <option value="half">2026년 상반기</option>
+                  <option value="year">2026년 연간</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="reportSport">대상 범위</label>
+              <select class="select" id="reportSport">
+                <option value="all">전체 종목 · 5개 팀</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px">
+              <button class="btn btn--dark btn--sm" type="button" id="reportGenerate">
+                <svg class="icon" aria-hidden="true"><use href="#i-refresh" /></svg>미리보기 생성
+              </button>
+              <button class="btn btn--outline btn--sm" type="button" id="reportCsv">
+                <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>CSV 다운로드
+              </button>
+            </div>
+            <div class="note-callout" style="margin-top:14px">
+              <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+              <span>기관 관리자·연맹 담당자만 통계 보고서를 열람하고 내보낼 수 있습니다. 개인 식별 정보는 최소화되며, 다운로드 이력은 감사 로그에 기록됩니다.</span>
+            </div>
+            <div class="report-list" style="margin-top:8px" id="reportList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="report-preview-head">
+              <div>
+                <h3 id="reportTitle">2026년 10월 기관 운영 보고서</h3>
+                <span id="reportMeta">한빛 스포츠아카데미 · 전체 종목 · 2026.10.01 ~ 2026.10.28</span>
+              </div>
+              <span class="tag tag--green">미리보기</span>
+            </div>
+            <div class="report-summary" id="reportSummary"></div>
+            <div class="table-wrap">
+              <table class="data-table data-table--compact">
+                <thead><tr><th>팀</th><th>선수</th><th>참여율</th><th>목표 달성</th></tr></thead>
+                <tbody id="reportTableBody"></tbody>
+              </table>
+            </div>
+            <p class="chart-note" id="reportNote"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>보고서는 선택한 기간의 마지막 기록을 기준으로 생성됩니다.</p>
+            <div class="report-access">
+              <div class="report-access__row">
+                <span><svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>열람 권한</span>
+                <strong>기관 관리자 · 연맹 담당자</strong>
+              </div>
+              <div class="report-access__row">
+                <span><svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>내보내기</span>
+                <strong>CSV · 관리자 확인 필요</strong>
+              </div>
+              <div class="report-access__row">
+                <span><svg class="icon" aria-hidden="true"><use href="#i-clock" /></svg>최근 생성</span>
+                <strong id="reportStamp">2026.10.28 09:40</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<nav class="mobile-tabbar" aria-label="아카데미 모바일 메뉴">
+  <a class="is-active" href="#overview"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>개요</a>
+  <a href="#teams"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg>팀</a>
+  <a href="#players"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>선수</a>
+  <a href="#analytics"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>통계</a>
+  <button type="button" onclick="document.getElementById('sidebarToggle').click()"><svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>메뉴</button>
+</nav>
+
+<!-- ======================= TEAM DRAWER ======================= -->
+<aside class="drawer" id="teamDrawer" hidden aria-label="팀 상세 정보">
+  <div class="drawer__backdrop" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="teamDrawerTitle">
+    <div class="drawer__head">
+      <div>
+        <h2 id="teamDrawerTitle">팀 상세</h2>
+        <p id="teamDrawerSub">종목 · 연령대</p>
+      </div>
+      <button class="icon-btn drawer__close" type="button" data-drawer-close aria-label="닫기">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+    </div>
+    <div class="drawer__body" id="teamDrawerBody"></div>
+  </div>
+</aside>
+
+<!-- ======================= ADD TEAM MODAL ======================= -->
+<div class="modal" id="teamModal" hidden>
+  <div class="modal__backdrop"></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="teamModalTitle">
+    <div class="modal__head">
+      <div>
+        <h2 id="teamModalTitle">팀 추가</h2>
+        <p>기관에 소속된 팀을 등록하고 선수·통계를 통합 관리합니다.</p>
+      </div>
+      <button class="icon-btn modal__close" type="button" data-modal-close aria-label="닫기">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+    </div>
+    <form id="teamForm">
+      <div class="field">
+        <label for="teamName">팀 이름</label>
+        <input class="input" type="text" id="teamName" placeholder="예: 한빛중 야구부" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="teamSportInput">종목</label>
+          <select class="select" id="teamSportInput">
+            <option value="야구">야구</option>
+            <option value="축구">축구</option>
+            <option value="농구">농구</option>
+            <option value="배구">배구</option>
+            <option value="육상">육상</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="teamAgeInput">연령대</label>
+          <select class="select" id="teamAgeInput">
+            <option value="U12">U12</option>
+            <option value="U15" selected>U15</option>
+            <option value="U18">U18</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="teamCoach">담당 코치</label>
+          <input class="input" type="text" id="teamCoach" placeholder="예: 박정우" required />
+        </div>
+        <div class="field">
+          <label for="teamPlayers">선수 수</label>
+          <input class="input" type="number" id="teamPlayers" min="1" max="60" value="12" />
+        </div>
+      </div>
+      <button class="btn btn--dark btn--block" type="submit" style="margin-top:16px">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>팀 등록
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="js/icons.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/app-shell.js" defer></script>
+<script src="js/academy.js" defer></script>
+<script src="js/pwa.js" defer></script>
+</body>
+</html>

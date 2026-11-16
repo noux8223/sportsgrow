@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>현재 개발 진행 정도</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font-family: "Malgun Gothic", "맑은 고딕", sans-serif; color: #222; }
+  .wrap { width: 1040px; padding: 30px 32px 24px; border: 1px solid #D9D9D9; }
+  .kicker { font-size: 13px; letter-spacing: 2px; color: #7F7F7F; font-weight: 700; }
+  h1 { font-size: 26px; margin: 7px 0 5px; color: #17365D; letter-spacing: -0.6px; }
+  .lead { font-size: 14px; color: #595959; line-height: 1.55; margin-bottom: 18px; }
+  .lead b { color: #1F4E79; }
+
+  /* ---------- 단계 타임라인 ---------- */
+  .track { position: relative; padding: 26px 0 0; margin-bottom: 22px; }
+  .track .rail { position: absolute; left: 52px; right: 52px; top: 44px; height: 4px; background: #E3E9F2; border-radius: 2px; }
+  .track .rail-done { position: absolute; left: 52px; top: 44px; height: 4px; width: 680px; background: #1F4E79; border-radius: 2px; }
+  .now { position: absolute; left: 680px; top: 4px; transform: translateX(-50%); text-align: center; z-index: 3; }
+  .now .tag { display: inline-block; background: #C00000; color: #fff; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: .5px; white-space: nowrap; }
+  .now .arrow { width: 0; height: 0; margin: 2px auto 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid #C00000; }
+  .steps { position: relative; display: flex; z-index: 2; }
+  .step { width: 170px; text-align: center; padding: 0 6px; }
+  .dot { width: 36px; height: 36px; line-height: 34px; border-radius: 50%; margin: 0 auto 9px; font-size: 15px; font-weight: 800; }
+  .s-done .dot { background: #1F4E79; color: #fff; border: 2px solid #1F4E79; }
+  .s-draft .dot { background: #fff; color: #1F4E79; border: 3px solid #1F4E79; }
+  .s-next .dot { background: #fff; color: #C00000; border: 3px dashed #C00000; }
+  .s-later .dot { background: #F2F2F2; color: #A6A6A6; border: 2px solid #D9D9D9; }
+  .step .n { font-size: 14.5px; font-weight: 700; color: #1F3864; }
+  .s-later .n { color: #8C8C8C; }
+  .step .st { font-size: 11.5px; margin-top: 3px; color: #7F7F7F; }
+  .s-next .st { color: #C00000; font-weight: 700; }
+
+  /* ---------- 자산 진행률 ---------- */
+  .assets { border: 1px solid #D6E0EC; border-radius: 10px; padding: 14px 16px 12px; background: #FBFCFE; }
+  .a-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 9px; }
+  .a-head .t { font-size: 14px; font-weight: 700; color: #1F4E79; }
+  .a-head .s { font-size: 11px; color: #8C8C8C; }
+  .row { display: flex; align-items: center; padding: 6px 0; border-top: 1px solid #EDF1F6; }
+  .row:first-of-type { border-top: none; }
+  .row .name { width: 120px; font-size: 13.5px; font-weight: 700; color: #1F3864; }
+  .row .bar { flex: 1; height: 16px; background: #E8EEF6; border-radius: 8px; overflow: hidden; margin: 0 12px; }
+  .row .fill { height: 100%; border-radius: 8px; }
+  .f-done { background: #1F4E79; }
+  .f-draft { background: #2E75B6; }
+  .f-plan { background: #BFBFBF; }
+  .row .pct { width: 44px; text-align: right; font-size: 12.5px; font-weight: 700; color: #1F3864; }
+  .row .chip { width: 62px; text-align: center; font-size: 10.5px; font-weight: 700; padding: 3px 0; border-radius: 20px; margin-left: 10px; }
+  .c-done { background: #DEEBF7; color: #1F4E79; }
+  .c-draft { background: #FFF2CC; color: #7F6000; }
+  .c-plan { background: #F2F2F2; color: #7F7F7F; }
+  .row .desc { width: 300px; font-size: 12px; color: #595959; line-height: 1.35; }
+
+  /* ---------- 다음 6개월 ---------- */
+  .next { display: flex; align-items: center; gap: 14px; margin-top: 18px; border-left: 5px solid #C00000; background: #FDF6F6; padding: 12px 16px; border-radius: 0 8px 8px 0; }
+  .next .k { font-size: 11px; font-weight: 700; color: #C00000; letter-spacing: 1px; white-space: nowrap; }
+  .next .v { font-size: 14px; color: #222; line-height: 1.5; }
+  .next .v b { color: #1F3864; }
+  .foot { font-size: 10.5px; color: #8C8C8C; margin-top: 9px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">2-6. 현재 개발 진행 정도</div>
+  <h1>지금은 “작동하는 프로토타입”까지 왔습니다</h1>
+  <div class="lead">제품 정의와 화면은 끝났습니다. 남은 것은 실제 기록이 흐르는 <b>MVP</b>와, 그것을 쓸 <b>코치</b>입니다.</div>
+
+  <div class="track">
+    <div class="rail"></div>
+    <div class="rail-done"></div>
+    <div class="now"><div class="tag">지금 여기</div><div class="arrow"></div></div>
+    <div class="steps">
+      <div class="step s-done"><div class="dot">✓</div><div class="n">문제 정의</div><div class="st">완료</div></div>
+      <div class="step s-done"><div class="dot">✓</div><div class="n">프로토타입</div><div class="st">완료 · 5개 화면</div></div>
+      <div class="step s-done"><div class="dot">✓</div><div class="n">제품 정의</div><div class="st">완료 · 5개 레이어</div></div>
+      <div class="step s-draft"><div class="dot">4</div><div class="n">지표 정의</div><div class="st">초안 · 24개 지표</div></div>
+      <div class="step s-next"><div class="dot">5</div><div class="n">MVP 개발</div><div class="st">다음 · M1~M3</div></div>
+      <div class="step s-later"><div class="dot">6</div><div class="n">파일럿 · 출시</div><div class="st">예정 · M7~M9</div></div>
+    </div>
+  </div>
+
+  <div class="assets">
+    <div class="a-head">
+      <div class="t">지금 손에 있는 것</div>
+      <div class="s">진행률은 완료 기준 자체 평가</div>
+    </div>
+
+    <div class="row">
+      <div class="name">프로토타입</div>
+      <div class="bar"><div class="fill f-done" style="width:100%"></div></div>
+      <div class="pct">100%</div>
+      <div class="chip c-done">완료</div>
+      <div class="desc">반응형 5개 화면, 데모 계정 운영</div>
+    </div>
+
+    <div class="row">
+      <div class="name">제품 정의</div>
+      <div class="bar"><div class="fill f-done" style="width:100%"></div></div>
+      <div class="pct">100%</div>
+      <div class="chip c-done">완료</div>
+      <div class="desc">5개 레이어, 역할 매트릭스, 권한 모델</div>
+    </div>
+
+    <div class="row">
+      <div class="name">지표 정의</div>
+      <div class="bar"><div class="fill f-draft" style="width:60%"></div></div>
+      <div class="pct">60%</div>
+      <div class="chip c-draft">초안</div>
+      <div class="desc">야구 24개 지표 계산식·필요 입력값</div>
+    </div>
+
+    <div class="row">
+      <div class="name">사업계획</div>
+      <div class="bar"><div class="fill f-done" style="width:100%"></div></div>
+      <div class="pct">100%</div>
+      <div class="chip c-done">완료</div>
+      <div class="desc">5년 로드맵, 8개 게이트, 5년 손익</div>
+    </div>
+
+    <div class="row">
+      <div class="name">파일럿</div>
+      <div class="bar"><div class="fill f-plan" style="width:10%"></div></div>
+      <div class="pct">10%</div>
+      <div class="chip c-plan">예정</div>
+      <div class="desc">코치·학부모 인터뷰, 후보 아카데미 접촉</div>
+    </div>
+  </div>
+
+  <div class="next">
+    <div class="k">다음 6개월</div>
+    <div class="v">개발 리드 <b>1명</b>을 채용해 <b>M1~M3 MVP·유료화</b>와 <b>M4~M6 코치·기관 기능</b>을 완성하고, <b>M7~M9</b>에 아카데미 10곳·선수 300명으로 검증·출시합니다.</div>
+  </div>
+
+  <div class="foot">* 지표 정의 60%는 24개 지표 중 계산식·입력값이 정리된 15개 기준입니다. 파일럿 10%는 후보 접촉 단계입니다.</div>
+</div>
+</body>
+</html>

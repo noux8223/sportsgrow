@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>성장전략 한 장 구조</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font-family: "Malgun Gothic", "맑은 고딕", sans-serif; color: #222; }
+  .wrap { width: 1040px; padding: 30px 32px 26px; border: 1px solid #D9D9D9; }
+  .kicker { font-size: 13px; letter-spacing: 2px; color: #7F7F7F; font-weight: 700; }
+  h1 { font-size: 25px; margin: 6px 0 4px; color: #17365D; letter-spacing: -0.5px; }
+  .lead { font-size: 13.5px; color: #595959; margin-bottom: 20px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .step { border: 1px solid #DCE6F1; border-radius: 10px; background: #FBFCFE; display: flex; flex-direction: column; }
+  .head { color: #fff; padding: 11px 14px 11px 16px; font-weight: 700; font-size: 16px; }
+  .head small { display: block; font-size: 11px; font-weight: 400; opacity: .9; margin-top: 3px; }
+  .s1 .head { background: #1F4E79; }
+  .s2 .head { background: #2E75B6; }
+  .s3 .head { background: #C55A11; }
+  .s4 .head { background: #548235; }
+  .body { padding: 12px 13px 14px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+  .row { border-bottom: 1px dashed #DCE6F1; padding-bottom: 8px; }
+  .row:last-child { border-bottom: none; padding-bottom: 0; }
+  .row .k { font-size: 11.5px; color: #7F7F7F; font-weight: 700; letter-spacing: .5px; }
+  .row .v { font-size: 14px; font-weight: 700; color: #1F3864; margin-top: 2px; }
+  .row .v em { font-style: normal; color: #C55A11; }
+  .row .n { font-size: 11.5px; color: #595959; margin-top: 2px; line-height: 1.4; }
+  .big { font-size: 20px; color: #1F4E79; font-weight: 800; letter-spacing: -.5px; }
+  .band { margin-top: 14px; background: #F2F6FA; border: 1px solid #C9D6E8; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; }
+  .band .label { font-size: 12px; font-weight: 700; color: #1F4E79; white-space: nowrap; }
+  .band .items { display: flex; gap: 10px; flex: 1; }
+  .pill { flex: 1; background: #fff; border: 1px solid #C9D6E8; border-radius: 20px; padding: 7px 12px; font-size: 12.5px; color: #1F3864; text-align: center; font-weight: 700; }
+  .pill span { color: #7F7F7F; font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">3. 성장전략 (Scale-up)</div>
+  <h1>시장 → 진입 → 수익 → 재무 — 한 장으로 보는 성장 경로</h1>
+  <div class="lead">작은 시장(RAM 417억)에서 단위경제를 증명하고, 같은 제품을 더 큰 시장(SAM 4.9조)으로 복제합니다.</div>
+
+  <div class="steps">
+    <div class="step s1">
+      <div class="head">① 시장<small>어디서 이기는가</small></div>
+      <div class="body">
+        <div class="row"><div class="k">TAM · 글로벌 주니어</div><div class="big">76.6조</div><div class="n">도달 상한 44.4조 원</div></div>
+        <div class="row"><div class="k">SAM · 중국 + 일본</div><div class="v">4조 9,338억</div><div class="n">중국 4조 2,408억 · 일본 6,930억</div></div>
+        <div class="row"><div class="k">SOM · 국내 주니어</div><div class="v">2,083억</div><div class="n">221.6만 명 × ARPU 9.4만 원</div></div>
+        <div class="row"><div class="k">RAM · 국내 야구·축구</div><div class="v"><em>417억</em></div><div class="n">44.3만 명 · LAM 42억</div></div>
+      </div>
+    </div>
+
+    <div class="step s2">
+      <div class="head">② 진입<small>어떤 순서로 들어가는가</small></div>
+      <div class="body">
+        <div class="row"><div class="k">1차 · 0~6개월</div><div class="v">서울 · 경기</div><div class="n">야구 아카데미 밀집 · 파트너 40곳</div></div>
+        <div class="row"><div class="k">2차 · 6~12개월</div><div class="v">부산 · 경남</div><div class="n">야구 저변 · 학교운동부 · 파트너 20곳</div></div>
+        <div class="row"><div class="k">3차 · 12~18개월</div><div class="v">대구 · 경북</div><div class="n">야구 특화 지역 · 파트너 15곳</div></div>
+        <div class="row"><div class="k">해외 · 18개월~</div><div class="v">일본 → 중국</div><div class="n">일본 PoC 5곳 → 유료 30곳 → 중국 파트너</div></div>
+      </div>
+    </div>
+
+    <div class="step s3">
+      <div class="head">③ 수익<small>누가 얼마를 내는가</small></div>
+      <div class="body">
+        <div class="row"><div class="k">PLAYER · 학부모 결제</div><div class="v">3,000원 / 월</div><div class="n">무제한 기록 · 주간 리포트 · 시즌 결산</div></div>
+        <div class="row"><div class="k">COACH · 선수 20명 기준</div><div class="v">30,000원 / 월</div><div class="n">대시보드 · 과제 · 검증 배지</div></div>
+        <div class="row"><div class="k">ACADEMY</div><div class="v">100,000원 / 월~</div><div class="n">기관 리포트 · 브랜딩 · 학부모 공지</div></div>
+        <div class="row"><div class="k">연 ARPU</div><div class="big">94,000원</div><div class="n">구독 66,000 + 애드온 28,000</div></div>
+      </div>
+    </div>
+
+    <div class="step s4">
+      <div class="head">④ 재무<small>언제 흑자가 되는가</small></div>
+      <div class="body">
+        <div class="row"><div class="k">매출 · Y1 → Y5</div><div class="v">0.3억 → <em>24억</em></div><div class="n">5년 누적 42.0억 원</div></div>
+        <div class="row"><div class="k">최대 적자</div><div class="v">9.67억</div><div class="n">M48 · Y5 영업현금흐름 +11.78억</div></div>
+        <div class="row"><div class="k">조달</div><div class="v">105.1억</div><div class="n">Seed 3 + 정부 2.1 + Pre-A 10 + A 30 + B 60</div></div>
+        <div class="row"><div class="k">창업자 지분</div><div class="v">57.5%</div><div class="n">옵션 풀 10% 별도</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="label">실행 원칙</div>
+    <div class="items">
+      <div class="pill">코치 = 유통 채널 <span>· 파트너 100곳</span></div>
+      <div class="pill">학부모 = 지불자 <span>· 전환율 15%</span></div>
+      <div class="pill">선수 데이터 = 자산 <span>· 성장 포트폴리오</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

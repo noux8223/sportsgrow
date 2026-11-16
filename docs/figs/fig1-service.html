@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>서비스 제공 관계 — 다섯 주체</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font-family: "Malgun Gothic", "맑은 고딕", sans-serif; color: #222; }
+  .wrap { width: 1040px; padding: 30px 32px 26px; border: 1px solid #D9D9D9; }
+  .kicker { font-size: 13px; letter-spacing: 2px; color: #7F7F7F; font-weight: 700; }
+  h1 { font-size: 25px; margin: 6px 0 4px; color: #17365D; letter-spacing: -0.5px; }
+  .lead { font-size: 13.5px; color: #595959; margin-bottom: 10px; line-height: 1.55; }
+  .lead b { color: #1F4E79; }
+
+  .stage { position: relative; width: 976px; height: 620px; }
+  .stage svg { position: absolute; left: 0; top: 0; z-index: 0; }
+
+  .node { position: absolute; width: 186px; transform: translate(-50%, -50%); border-radius: 9px; background: #fff; border: 1px solid #DCE6F1; box-shadow: 0 1px 2px rgba(23,54,93,.06); z-index: 2; overflow: hidden; }
+  .node .nh { color: #fff; font-size: 13px; font-weight: 700; padding: 5px 10px; display: flex; justify-content: space-between; align-items: baseline; }
+  .node .nh span { font-size: 9.5px; font-weight: 400; opacity: .9; }
+  .node .nb { padding: 7px 10px 9px; }
+  .node .nb div { font-size: 9.6px; color: #595959; line-height: 1.55; }
+  .node .nb em { font-style: normal; color: #A6A6A6; margin-right: 4px; }
+  .node .nb b { color: #1F3864; font-weight: 700; }
+
+  .center { position: absolute; left: 488px; top: 286px; width: 184px; height: 184px; transform: translate(-50%, -50%); border-radius: 50%; background: #17365D; color: #fff; text-align: center; display: flex; flex-direction: column; justify-content: center; z-index: 3; }
+  .center .c1 { font-size: 10px; letter-spacing: 2px; color: #9DC3E6; font-weight: 700; }
+  .center .c2 { font-size: 17px; font-weight: 800; margin-top: 3px; letter-spacing: -.5px; }
+  .center .c3 { font-size: 10px; color: #BDD7EE; margin-top: 5px; }
+  .center .c4 { font-size: 9px; color: #8EA9C1; margin-top: 2px; }
+
+  .legend { position: absolute; left: 0; top: 590px; width: 976px; display: flex; gap: 22px; justify-content: center; font-size: 11px; color: #595959; }
+  .legend i { display: inline-block; width: 26px; height: 0; border-top: 3px solid #2E75B6; margin-right: 6px; vertical-align: middle; }
+  .legend i.dash { border-top: 2px dashed #A6B8CC; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">2-1. 서비스 구조</div>
+  <h1>다섯 주체가 하나의 데이터를 나눠 씁니다</h1>
+  <div class="lead">회사는 <b>같은 원본</b>을 각자의 언어로 번역해 건넵니다. 선수에겐 성장 기록, 학부모에겐 주간 리포트, 코치에겐 관리 화면, 아카데미에겐 성과 자료, 연맹에겐 종목 통계입니다.</div>
+
+  <div class="stage" id="stage">
+    <svg id="wires" width="976" height="620"></svg>
+
+    <div class="center">
+      <div class="c1">COMPANY</div>
+      <div class="c2">스포츠 그로우</div>
+      <div class="c3">선수 1명의 단일 데이터 원본</div>
+      <div class="c4">5개 주체 · 1개 데이터</div>
+    </div>
+
+    <div class="legend">
+      <span><i></i>서비스 제공 (회사 → 주체)</span>
+      <span><i class="dash"></i>주체 간 실제 관계 (동의·소속·등록)</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var CX = 488, CY = 286, R = 262;
+  var CW = 186, CH = 84;
+  var actors = [
+    { name: '학생', sub: '선수', color: '#1F4E79', angle: 198,
+      give: '매일의 훈련·경기 기록', get: '성장 포트폴리오·달성률' },
+    { name: '학부모', sub: '지불자·보호자', color: '#2E75B6', angle: 126,
+      give: '보호자 동의·구독료', get: '주 1회 리포트·응원' },
+    { name: '코치', sub: '검증자', color: '#548235', angle: 54,
+      give: '코칭 피드백·검증', get: '선수 20명 대시보드' },
+    { name: '아카데미', sub: '기관 고객', color: '#C55A11', angle: -18,
+      give: '소속·선수 등록', get: '기관 리포트·브랜딩' },
+    { name: '연맹', sub: '표준·거버넌스', color: '#7030A0', angle: -90,
+      give: '공인 지표·대회 규정', get: '종목 통계·선수 풀' }
+  ];
+  var rel = ['보호자 동의', '주간 상담', '소속·지도', '등록·인증', '선수 등록'];
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('wires');
+  var stage = document.getElementById('stage');
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) { e.setAttribute(k, attrs[k]); }
+    return e;
+  }
+
+  // 각 주체의 카드 중심 좌표
+  actors.forEach(function (a) {
+    var rad = a.angle * Math.PI / 180;
+    a.ux = Math.cos(rad);
+    a.uy = -Math.sin(rad);
+    a.nx = CX + R * a.ux;
+    a.ny = CY + R * a.uy;
+  });
+
+  // 1) 주체 간 관계 (오각형, 점선)
+  var defs = el('defs', {});
+  var mk = el('marker', { id: 'dot', viewBox: '0 0 8 8', refX: '4', refY: '4', markerWidth: '4', markerHeight: '4' });
+  mk.appendChild(el('circle', { cx: '4', cy: '4', r: '2.4', fill: '#A6B8CC' }));
+  defs.appendChild(mk);
+  svg.appendChild(defs);
+
+  for (var i = 0; i < actors.length; i++) {
+    var a = actors[i], b = actors[(i + 1) % actors.length];
+    svg.appendChild(el('line', {
+      x1: a.nx, y1: a.ny, x2: b.nx, y2: b.ny,
+      stroke: '#C9D6E8', 'stroke-width': 2, 'stroke-dasharray': '6 5'
+    }));
+    var mx = (a.nx + b.nx) / 2, my = (a.ny + b.ny) / 2;
+    var dx = mx - CX, dy = my - CY, len = Math.sqrt(dx * dx + dy * dy);
+    var t = el('text', {
+      x: mx + dx / len * 14, y: my + dy / len * 14,
+      'text-anchor': 'middle', 'dominant-baseline': 'middle',
+      'font-size': 10.5, 'font-weight': 700, fill: '#8C8C8C',
+      'paint-order': 'stroke', stroke: '#FFFFFF', 'stroke-width': 4,
+      'font-family': 'Malgun Gothic'
+    });
+    t.textContent = rel[i];
+    svg.appendChild(t);
+  }
+
+  // 2) 서비스 제공 (회사 → 주체)
+  actors.forEach(function (a) {
+    var id = 'ar' + a.name;
+    var m = el('marker', { id: id, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6.5', markerHeight: '6.5', orient: 'auto' });
+    m.appendChild(el('path', { d: 'M0,0 L10,5 L0,10 z', fill: a.color }));
+    defs.appendChild(m);
+
+    var tx = (CW / 2) / Math.abs(a.ux);
+    var ty = (CH / 2) / Math.abs(a.uy);
+    var d = Math.min(tx, ty) + 9;
+    var ex = a.nx - a.ux * d;
+    var ey = a.ny - a.uy * d;
+    svg.appendChild(el('line', {
+      x1: CX, y1: CY, x2: ex, y2: ey,
+      stroke: a.color, 'stroke-width': 3, 'marker-end': 'url(#' + id + ')'
+    }));
+  });
+
+  // 3) 카드
+  actors.forEach(function (a) {
+    var n = document.createElement('div');
+    n.className = 'node';
+    n.style.left = a.nx + 'px';
+    n.style.top = a.ny + 'px';
+    n.style.borderTop = '3px solid ' + a.color;
+    n.innerHTML = '<div class="nh" style="background:' + a.color + '">' + a.name +
+      '<span>' + a.sub + '</span></div><div class="nb">' +
+      '<div><em>주는 것</em>' + a.give + '</div>' +
+      '<div><em>받는 것</em><b>' + a.get + '</b></div></div>';
+    stage.appendChild(n);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# OS metadata
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*~
+
+# Dependencies (not used by this static demo)
+node_modules/
+
+# Local-only test pages
+_view-preview.html

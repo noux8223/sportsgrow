@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sports Grow — 서비스 화면 목업 &amp; 흐름 모식도</title>
+<meta name="description" content="주니어 운동선수 성장 기록 플랫폼 Sports Grow의 학생·학부모, 코치, 아카데미·연맹 화면 목업과 서비스 흐름 모식도." />
+<meta name="theme-color" content="#0b1a1e" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/mockup.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230b1a1e'/%3E%3Cpath d='M9 28l7-7 5 4 10-11' fill='none' stroke='%23d9f55f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='14' r='3' fill='%23d9f55f'/%3E%3C/svg%3E" />
+</head>
+<body class="mk-page">
+
+<header class="mk-hero">
+  <div class="mk-wrap">
+    <p class="mk-eyebrow">Sports Grow · Service Mockup</p>
+    <h1>기록이 흩어진 주니어 스포츠를,<br /><em>하나의 성장 포트폴리오</em>로.</h1>
+    <p class="mk-hero__lead">
+      학생·학부모, 코치, 아카데미·연맹이 같은 데이터를 역할에 맞게 보는 서비스 화면입니다.
+      화면 10종과 기능·서비스 흐름 모식도를 한 페이지에 정리했습니다.
+    </p>
+    <div class="mk-hero__meta">
+      <span class="mk-pill"><b>10</b> 모바일 화면</span>
+      <span class="mk-pill"><b>3</b> 고객 역할</span>
+      <span class="mk-pill"><b>5</b> 서비스 여정</span>
+      <span class="mk-pill"><b>9</b> 핵심 기능</span>
+      <span class="mk-pill"><b>2026</b> 사업계획서용 가상 목업</span>
+    </div>
+  </div>
+</header>
+
+<nav class="mk-nav" aria-label="목업 섹션">
+  <div class="mk-wrap">
+    <span class="mk-nav__brand">
+      <span class="mk-nav__mark"><svg class="ic"><use href="#i-trend" /></svg></span>
+      <span>SPORTS GROW</span>
+    </span>
+    <div class="mk-nav__links">
+      <a href="#player">학생·학부모</a>
+      <a href="#coach">코치</a>
+      <a href="#org">아카데미·연맹</a>
+      <a href="#flow">서비스 흐름</a>
+      <a href="#matrix">기능 매트릭스</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- =====================================================================
+     01. 학생 · 학부모
+     ===================================================================== -->
+<section class="mk-section" id="player" aria-labelledby="player-title">
+  <div class="mk-wrap">
+    <div class="mk-sec-head">
+      <div>
+        <span class="mk-sec-head__num">01</span>
+        <h2 id="player-title">학생 · 학부모 페이지</h2>
+        <p>선수는 기록하고, 학부모는 과정을 확인하고 응원합니다. 개인 홈페이지는 공개 범위를 직접 통제하는 성장 포트폴리오입니다.</p>
+      </div>
+      <div class="mk-sec-head__tags">
+        <span class="mk-tag mk-tag--lime"><i></i>개인 프로필</span>
+        <span class="mk-tag"><i></i>훈련량</span>
+        <span class="mk-tag"><i></i>경기·성장</span>
+        <span class="mk-tag mk-tag--clay"><i></i>학부모 리포트</span>
+      </div>
+    </div>
+
+    <div class="mk-grid">
+
+      <!-- 01. 선수 홈 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">내 성장</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-eye" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-bell" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-card mk-card--ink">
+                <div class="mk-profile">
+                  <span class="mk-avatar">하</span>
+                  <div class="mk-profile__id">
+                    <div class="mk-profile__name">김하람 <span class="mk-verify">✓</span></div>
+                    <div class="mk-profile__sub">야구 · 내야수 · OO중 2</div>
+                    <div class="mk-profile__sub">OO 아카데미 · 등번호 7</div>
+                  </div>
+                  <span class="mk-badge mk-badge--lime"><svg class="ic"><use href="#i-lock" /></svg>비공개</span>
+                </div>
+                <div class="mk-profile__meta">
+                  <span>활동 <b>3년</b></span>
+                  <span>우투우타</span>
+                  <span>코치 검증 <b>12</b></span>
+                </div>
+              </div>
+
+              <div class="mk-card">
+                <div class="mk-between"><b class="mk-h">2026 시즌 목표</b><span class="mk-badge">달성 72%</span></div>
+                <div class="mk-goal"><span>타율 <b>.320</b></span><em>.312</em></div>
+                <div class="mk-progress"><i style="width:72%"></i></div>
+                <div class="mk-goal"><span>출루율 <b>.420</b></span><em>.401</em></div>
+                <div class="mk-progress"><i style="width:64%"></i></div>
+              </div>
+
+              <div class="mk-stats">
+                <div class="mk-stat"><span>타율</span><b>.312</b><em>▲ .024</em></div>
+                <div class="mk-stat"><span>출루율</span><b>.401</b><em>▲ .018</em></div>
+                <div class="mk-stat"><span>연속 훈련</span><b>14<small>일</small></b><em>최고 기록</em></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">성장 추이</b><span class="mk-sub">타율 · 최근 6개월</span></div>
+                <svg class="mk-chart" viewBox="0 0 260 58" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="mk-g1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#14805d" stop-opacity=".22" />
+                      <stop offset="1" stop-color="#14805d" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M0 49 L52 43 L104 45 L156 33 L208 25 L260 13 L260 58 L0 58 Z" fill="url(#mk-g1)" />
+                  <path d="M0 49 L52 43 L104 45 L156 33 L208 25 L260 13" fill="none" stroke="#14805d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+                  <circle cx="260" cy="13" r="2.7" fill="#d9f55f" stroke="#0b1a1e" stroke-width="1.2" />
+                </svg>
+                <div class="mk-axis"><span>4월</span><span>5월</span><span>6월</span><span>7월</span><span>8월</span><span>9월</span></div>
+              </div>
+
+              <div class="mk-list">
+                <div class="mk-item">
+                  <span class="mk-item__ico is-lime"><svg class="ic"><use href="#i-note" /></svg></span>
+                  <div class="mk-item__main"><b>코치 코멘트</b><span>“선구안이 좋아졌다. 유인구 커트 집중.”</span></div>
+                </div>
+              </div>
+
+              <div class="mk-card mk-card--lime mk-cheer">
+                <span class="mk-avatar mk-avatar--sm">엄</span>
+                <div>
+                  <b>엄마의 응원</b>
+                  <p>“오늘도 수고했어. 내일 경기 응원할게!”</p>
+                </div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-activity" /></svg><span>기록</span></a>
+              <a class="mk-tab mk-tab--add"><span class="mk-tab__fab"><svg class="ic"><use href="#i-plus" /></svg></span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>01</em><b>선수 홈</b></div>
+          <p>프로필, 공개 범위, 시즌 목표, 성장 요약, 코치 코멘트를 한 화면에 모았습니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 02. 훈련 기록 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">훈련 기록</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-calendar" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-sliders" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-week">
+                <span class="mk-iconbtn"><svg class="ic" style="transform:rotate(90deg)"><use href="#i-chevron" /></svg></span>
+                <b>10.20 — 10.26</b>
+                <span class="mk-iconbtn"><svg class="ic" style="transform:rotate(-90deg)"><use href="#i-chevron" /></svg></span>
+              </div>
+
+              <div class="mk-card mk-card--ink">
+                <div class="mk-between"><span class="mk-sub mk-sub--light">이번 주 훈련</span><span class="mk-badge mk-badge--lime">목표 83%</span></div>
+                <div class="mk-big">12.5<small>시간</small></div>
+                <div class="mk-progress"><i style="width:83%"></i></div>
+                <div class="mk-minirow"><span><b>5</b>세션</span><span><b>7.2</b>평균 강도</span><span><b>14</b>연속일</span></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">요일별 훈련량</b><span class="mk-sub">시간</span></div>
+                <div class="mk-bars">
+                  <div class="mk-bars__col"><i style="--h:38%"></i><span>월</span></div>
+                  <div class="mk-bars__col"><i style="--h:62%"></i><span>화</span></div>
+                  <div class="mk-bars__col"><i style="--h:44%"></i><span>수</span></div>
+                  <div class="mk-bars__col is-peak"><i style="--h:92%"></i><span>목</span></div>
+                  <div class="mk-bars__col"><i style="--h:56%"></i><span>금</span></div>
+                  <div class="mk-bars__col is-peak"><i style="--h:80%"></i><span>토</span></div>
+                  <div class="mk-bars__col"><i style="--h:20%"></i><span>일</span></div>
+                </div>
+              </div>
+
+              <div class="mk-list">
+                <div class="mk-item">
+                  <span class="mk-item__ico"><svg class="ic"><use href="#i-ball" /></svg></span>
+                  <div class="mk-item__main"><b>타격 · 2시간</b><span>10.26 · 강도 8 · 120구</span></div>
+                  <span class="mk-badge">검증</span>
+                </div>
+                <div class="mk-item">
+                  <span class="mk-item__ico is-lime"><svg class="ic"><use href="#i-activity" /></svg></span>
+                  <div class="mk-item__main"><b>웨이트 · 1시간 30분</b><span>10.25 · 강도 7 · 하체</span></div>
+                </div>
+                <div class="mk-item">
+                  <span class="mk-item__ico"><svg class="ic"><use href="#i-clock" /></svg></span>
+                  <div class="mk-item__main"><b>주루 · 1시간</b><span>10.24 · 강도 6 · 스프린트</span></div>
+                </div>
+                <div class="mk-item">
+                  <span class="mk-item__ico is-lime"><svg class="ic"><use href="#i-target" /></svg></span>
+                  <div class="mk-item__main"><b>수비 · 1시간 30분</b><span>10.23 · 강도 7 · 내야</span></div>
+                </div>
+              </div>
+
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-activity" /></svg><span>기록</span></a>
+              <a class="mk-tab mk-tab--add"><span class="mk-tab__fab"><svg class="ic"><use href="#i-plus" /></svg></span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>02</em><b>훈련 기록</b></div>
+          <p>날짜·종류·시간·강도를 기록하면 주간·월간 현황과 연속 기록이 자동으로 계산됩니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 03. 경기·성장 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">경기 · 성장</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-filter" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-download" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-card mk-card--ink">
+                <div class="mk-between"><span class="mk-sub mk-sub--light">10.19 · OO리그 8차전</span><span class="mk-badge mk-badge--lime">승</span></div>
+                <div class="mk-score"><b>OO중</b><strong>3 : 2</strong><b>△△중</b></div>
+                <div class="mk-game-line">4타수 2안타 · 1볼넷 · 2타점 · 1도루</div>
+              </div>
+
+              <div class="mk-stats mk-stats--4">
+                <div class="mk-stat"><span>타율</span><b>.312</b><em>▲ .024</em></div>
+                <div class="mk-stat"><span>출루</span><b>.401</b><em>▲ .018</em></div>
+                <div class="mk-stat"><span>장타</span><b>.455</b><em>▲ .012</em></div>
+                <div class="mk-stat"><span>OPS</span><b>.856</b><em>▲ .030</em></div>
+              </div>
+
+              <div class="mk-card">
+                <div class="mk-between"><b class="mk-h">시즌 목표 달성</b><span class="mk-badge">72%</span></div>
+                <div class="mk-goal"><span>타율 <b>.320</b></span><em>.312</em></div>
+                <div class="mk-progress"><i style="width:72%"></i></div>
+                <div class="mk-goal"><span>출루율 <b>.420</b></span><em>.401</em></div>
+                <div class="mk-progress"><i style="width:64%"></i></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">기간별 성장</b><span class="mk-sub">타율 · 6개월</span></div>
+                <svg class="mk-chart" viewBox="0 0 260 58" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="mk-g2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#14805d" stop-opacity=".2" />
+                      <stop offset="1" stop-color="#14805d" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M0 50 L52 46 L104 47 L156 36 L208 28 L260 15 L260 58 L0 58 Z" fill="url(#mk-g2)" />
+                  <path d="M0 50 L52 46 L104 47 L156 36 L208 28 L260 15" fill="none" stroke="#14805d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+                  <path d="M0 54 L52 52 L104 49 L156 44 L208 40 L260 34" fill="none" stroke="#b98514" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+                  <circle cx="260" cy="15" r="2.7" fill="#d9f55f" stroke="#0b1a1e" stroke-width="1.2" />
+                </svg>
+                <div class="mk-axis"><span>4월</span><span>5월</span><span>6월</span><span>7월</span><span>8월</span><span>9월</span></div>
+              </div>
+
+              <div class="mk-list">
+                <div class="mk-item">
+                  <span class="mk-item__ico"><svg class="ic"><use href="#i-trophy" /></svg></span>
+                  <div class="mk-item__main"><b>vs △△중 · 3:2 승</b><span>10.19 · 4타수 2안타 2타점</span></div>
+                  <span class="mk-badge">검증</span>
+                </div>
+                <div class="mk-item">
+                  <span class="mk-item__ico is-lime"><svg class="ic"><use href="#i-ball" /></svg></span>
+                  <div class="mk-item__main"><b>vs □□중 · 1:4 패</b><span>10.12 · 4타수 1안타 1볼넷</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-activity" /></svg><span>기록</span></a>
+              <a class="mk-tab mk-tab--add"><span class="mk-tab__fab"><svg class="ic"><use href="#i-plus" /></svg></span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>03</em><b>경기 · 성장 기록</b></div>
+          <p>대회 결과와 개인 성과를 입력하면 종목별 지표와 목표 달성률, 기간별 성장 곡선이 만들어집니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 04. 학부모 리포트 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">주간 리포트</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-bell" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-child">
+                <span class="mk-avatar">하</span>
+                <b>김하람 · 야구</b>
+                <svg class="ic"><use href="#i-chevron" /></svg>
+              </div>
+
+              <div class="mk-card mk-card--lime">
+                <span class="mk-eyebrow--ink">WEEKLY REPORT · 10.20–10.26</span>
+                <div class="mk-big">5회 훈련 · 12.5시간</div>
+                <div class="mk-minirow"><span><b>72%</b>목표 달성</span><span><b>+4%</b>지난주 대비</span><span><b>14일</b>연속</span></div>
+              </div>
+
+              <div class="mk-card">
+                <div class="mk-row">
+                  <span class="mk-avatar mk-avatar--sm">코</span>
+                  <div style="flex:1">
+                    <b class="mk-h">코치 코멘트</b>
+                    <p class="mk-sub" style="margin-top:3px;line-height:1.5">“선구안이 좋아졌습니다. 2스트라이크 이후 커트 앤에 집중해 주세요.”</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mk-stats">
+                <div class="mk-stat"><span>타율</span><b>.312</b><em>▲ .024</em></div>
+                <div class="mk-stat"><span>출루율</span><b>.401</b><em>▲ .018</em></div>
+                <div class="mk-stat"><span>훈련 시간</span><b>12.5<small>h</small></b><em>목표 83%</em></div>
+              </div>
+
+              <div class="mk-card">
+                <b class="mk-h">응원 보내기</b>
+                <div class="mk-input">
+                  <span>오늘도 수고했어!</span>
+                  <span class="mk-send"><svg class="ic"><use href="#i-send" /></svg></span>
+                </div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">다음 경기</b><span class="mk-badge mk-badge--warn">D-5</span></div>
+                <div class="mk-sub" style="margin-top:4px">10.31 (토) 14:00 · vs □□중 · OO구장</div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-file" /></svg><span>리포트</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>기록</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-bell" /></svg><span>알림</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>04</em><b>학부모 주간 리포트</b></div>
+          <p>훈련 시간·목표 달성·성장 변화·코치 코멘트를 주 1회 자동 요약하고, 응원 메시지로 연결합니다.</p>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     02. 코치
+     ===================================================================== -->
+<section class="mk-section" id="coach" aria-labelledby="coach-title">
+  <div class="mk-wrap">
+    <div class="mk-sec-head">
+      <div>
+        <span class="mk-sec-head__num">02</span>
+        <h2 id="coach-title">코치 페이지</h2>
+        <p>소속 선수의 목표·훈련·경기 기록을 한 화면에서 관리하고, 기록 검증과 피드백으로 데이터의 신뢰를 만듭니다.</p>
+      </div>
+      <div class="mk-sec-head__tags">
+        <span class="mk-tag"><i></i>선수 목록</span>
+        <span class="mk-tag"><i></i>목표·달성률</span>
+        <span class="mk-tag mk-tag--lime"><i></i>피드백</span>
+        <span class="mk-tag mk-tag--clay"><i></i>통합 현황</span>
+      </div>
+    </div>
+
+    <div class="mk-grid">
+
+      <!-- 05. 코치 대시보드 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">코치 대시보드</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-search" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-bell" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-card mk-card--ink">
+                <div class="mk-between"><span class="mk-sub mk-sub--light">OO중학교 야구부</span><span class="mk-badge mk-badge--ghost">2026 시즌</span></div>
+                <div class="mk-big">24<small>명</small></div>
+                <div class="mk-minirow"><span><b>18</b>이번 주 기록</span><span><b>68%</b>목표 달성</span><span><b>3</b>미입력</span></div>
+              </div>
+
+              <div class="mk-alert">
+                <svg class="ic"><use href="#i-bell" /></svg>
+                <div><b>기록 미입력 3명</b><span>이준서 · 박도윤 · 최민</span></div>
+                <span class="mk-link">확인</span>
+              </div>
+
+              <div class="mk-search">
+                <svg class="ic"><use href="#i-search" /></svg>
+                <span>선수 이름 · 포지션 검색</span>
+              </div>
+
+              <div class="mk-list">
+                <div class="mk-player">
+                  <span class="mk-avatar">하</span>
+                  <div class="mk-player__main">
+                    <div><b>김하람</b><span class="mk-badge">검증</span></div>
+                    <span>내야수 · 최근 10.26</span>
+                  </div>
+                  <div class="mk-player__stat"><b>.312</b><span>72%</span></div>
+                  <svg class="ic"><use href="#i-chevron" /></svg>
+                </div>
+                <div class="mk-player">
+                  <span class="mk-avatar">준</span>
+                  <div class="mk-player__main">
+                    <div><b>이준서</b></div>
+                    <span>투수 · 최근 10.24</span>
+                  </div>
+                  <div class="mk-player__stat"><b>.288</b><span style="color:var(--gold)">64%</span></div>
+                  <svg class="ic"><use href="#i-chevron" /></svg>
+                </div>
+                <div class="mk-player">
+                  <span class="mk-avatar">도</span>
+                  <div class="mk-player__main">
+                    <div><b>박도윤</b><span class="mk-badge mk-badge--warn">주의</span></div>
+                    <span>외야수 · 최근 10.20</span>
+                  </div>
+                  <div class="mk-player__stat"><b>.301</b><span>81%</span></div>
+                  <svg class="ic"><use href="#i-chevron" /></svg>
+                </div>
+                <div class="mk-player">
+                  <span class="mk-avatar">민</span>
+                  <div class="mk-player__main">
+                    <div><b>최민</b></div>
+                    <span>포수 · 최근 10.18</span>
+                  </div>
+                  <div class="mk-player__stat"><b>.265</b><span style="color:var(--clay)">48%</span></div>
+                  <svg class="ic"><use href="#i-chevron" /></svg>
+                </div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">이번 주 과제</b><span class="mk-badge">3개 진행</span></div>
+                <div class="mk-sub" style="margin-top:3px">타격 폼 교정 · 3명 제출 · 1명 미제출</div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-users" /></svg><span>선수</span></a>
+              <a class="mk-tab mk-tab--add"><span class="mk-tab__fab"><svg class="ic"><use href="#i-plus" /></svg></span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>05</em><b>코치 대시보드</b></div>
+          <p>소속 선수 전체의 기록 입력·목표 달성·주의 선수를 한 화면에서 파악합니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 06. 코치 선수 상세 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn is-back"><svg class="ic"><use href="#i-arrow" /></svg></span>
+              </span>
+              <span class="mk-appbar__title">김하람</span>
+              <span class="mk-appbar__acts"><span class="mk-iconbtn"><svg class="ic"><use href="#i-more" /></svg></span></span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-card mk-card--flat">
+                <div class="mk-profile" style="color:var(--ink)">
+                  <span class="mk-avatar">하</span>
+                  <div class="mk-profile__id">
+                    <div class="mk-profile__name">김하람 <span class="mk-verify">✓</span></div>
+                    <div class="mk-profile__sub" style="color:var(--muted)">야구 · 내야수 · OO중 2</div>
+                    <div class="mk-profile__sub" style="color:var(--muted)">등번호 7 · 우투우타</div>
+                  </div>
+                  <span class="mk-badge">검증 12</span>
+                </div>
+              </div>
+
+              <div class="mk-tabs"><span>훈련</span><span class="is-active">경기</span><span>목표</span><span>메모</span></div>
+
+              <div class="mk-stats">
+                <div class="mk-stat"><span>타율</span><b>.312</b><em>▲ .024</em></div>
+                <div class="mk-stat"><span>출루율</span><b>.401</b><em>▲ .018</em></div>
+                <div class="mk-stat"><span>OPS</span><b>.856</b><em>▲ .030</em></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">최근 6개월 성장</b><span class="mk-sub">타율</span></div>
+                <svg class="mk-chart" viewBox="0 0 260 58" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="mk-g3" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#14805d" stop-opacity=".2" />
+                      <stop offset="1" stop-color="#14805d" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M0 50 L52 45 L104 47 L156 35 L208 27 L260 14 L260 58 L0 58 Z" fill="url(#mk-g3)" />
+                  <path d="M0 50 L52 45 L104 47 L156 35 L208 27 L260 14" fill="none" stroke="#14805d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+                  <circle cx="260" cy="14" r="2.7" fill="#d9f55f" stroke="#0b1a1e" stroke-width="1.2" />
+                </svg>
+                <div class="mk-axis"><span>4월</span><span>5월</span><span>6월</span><span>7월</span><span>8월</span><span>9월</span></div>
+              </div>
+
+              <div class="mk-card">
+                <div class="mk-between"><b class="mk-h">목표 달성률</b><span class="mk-badge">72%</span></div>
+                <div class="mk-goal"><span>타율 <b>.320</b></span><em>.312</em></div>
+                <div class="mk-progress"><i style="width:72%"></i></div>
+                <div class="mk-goal"><span>출루율 <b>.420</b></span><em>.401</em></div>
+                <div class="mk-progress"><i style="width:64%"></i></div>
+              </div>
+
+              <div class="mk-card" style="border-color:#d9e9df;background:var(--green-soft)">
+                <div class="mk-between"><b class="mk-h" style="color:var(--green)">코칭 메모</b><span class="mk-sub">10.26</span></div>
+                <p class="mk-sub" style="margin-top:4px;line-height:1.55;color:#3f6b59">“2스트라이크 이후 커트 앤 성공률 상승. 다음 주는 주자 상황별 타격을 훈련.”</p>
+              </div>
+
+              <div class="mk-btnrow">
+                <span class="mk-btn mk-btn--lime"><svg class="ic"><use href="#i-edit" /></svg>피드백 남기기</span>
+                <span class="mk-btn mk-btn--ghost"><svg class="ic"><use href="#i-check" /></svg>기록 검증</span>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-users" /></svg><span>선수</span></a>
+              <a class="mk-tab mk-tab--add"><span class="mk-tab__fab"><svg class="ic"><use href="#i-plus" /></svg></span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>06</em><b>선수 상세 · 피드백</b></div>
+          <p>선수별 훈련·경기·목표를 확인하고, 코칭 메모와 기록 검증으로 데이터 신뢰를 더합니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 07. 통합 현황 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">통합 현황</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-filter" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-download" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-row" style="gap:5px">
+                <span class="mk-badge">10.20 — 10.26</span>
+                <span class="mk-badge mk-badge--ghost" style="background:var(--paper-2);color:var(--muted)">전체 포지션</span>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">선수별 훈련 참여</b><span class="mk-sub">6명 · 7일</span></div>
+                <div class="mk-heat">
+                  <span></span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span>
+                  <span class="mk-heat__name">김하람</span><i data-l="3"></i><i data-l="2"></i><i data-l="1"></i><i data-l="4"></i><i data-l="2"></i><i data-l="3"></i><i data-l="0"></i>
+                  <span class="mk-heat__name">이준서</span><i data-l="2"></i><i data-l="3"></i><i data-l="0"></i><i data-l="2"></i><i data-l="1"></i><i data-l="3"></i><i data-l="0"></i>
+                  <span class="mk-heat__name">박도윤</span><i data-l="1"></i><i data-l="0"></i><i data-l="2"></i><i data-l="1"></i><i data-l="0"></i><i data-l="0"></i><i data-l="0"></i>
+                  <span class="mk-heat__name">최민</span><i data-l="0"></i><i data-l="0"></i><i data-l="1"></i><i data-l="0"></i><i data-l="0"></i><i data-l="1"></i><i data-l="0"></i>
+                  <span class="mk-heat__name">정우진</span><i data-l="2"></i><i data-l="2"></i><i data-l="3"></i><i data-l="2"></i><i data-l="1"></i><i data-l="2"></i><i data-l="0"></i>
+                  <span class="mk-heat__name">한지호</span><i data-l="3"></i><i data-l="1"></i><i data-l="2"></i><i data-l="3"></i><i data-l="2"></i><i data-l="1"></i><i data-l="0"></i>
+                </div>
+                <div class="mk-legend">낮음 <i style="background:#ece9df"></i><i style="background:#dff0e5"></i><i style="background:#9ed3b4"></i><i style="background:#14805d"></i><i style="background:#0b1a1e"></i> 높음</div>
+              </div>
+
+              <div class="mk-risk">
+                <div><b>기록 미입력 3명</b><span>이준서 · 박도윤 · 최민</span></div>
+                <span class="mk-badge mk-badge--warn">알림 발송</span>
+              </div>
+              <div class="mk-risk">
+                <div><b>목표 달성률 50% 미만 2명</b><span>최민 48% · 박도윤 45%</span></div>
+                <span class="mk-badge mk-badge--clay">상담 필요</span>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">목표 달성 분포</b><span class="mk-sub">24명</span></div>
+                <div class="mk-bars" style="height:56px">
+                  <div class="mk-bars__col"><i style="--h:26%"></i><span>~40%</span></div>
+                  <div class="mk-bars__col"><i style="--h:44%"></i><span>~60%</span></div>
+                  <div class="mk-bars__col is-peak"><i style="--h:86%"></i><span>~80%</span></div>
+                  <div class="mk-bars__col"><i style="--h:52%"></i><span>~100%</span></div>
+            </div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-users" /></svg><span>선수</span></a>
+              <a class="mk-tab mk-tab--add"><span class="mk-tab__fab"><svg class="ic"><use href="#i-plus" /></svg></span></a>
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-user" /></svg><span>MY</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>07</em><b>다수 선수 통합 현황</b></div>
+          <p>선수별 훈련 참여를 히트맵으로 보고, 미입력·목표 미달 선수를 즉시 찾아냅니다.</p>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     03. 아카데미 · 연맹
+     ===================================================================== -->
+<section class="mk-section" id="org" aria-labelledby="org-title">
+  <div class="mk-wrap">
+    <div class="mk-sec-head">
+      <div>
+        <span class="mk-sec-head__num">03</span>
+        <h2 id="org-title">아카데미 · 연맹 페이지</h2>
+        <p>소속 선수와 팀을 통합 관리하고, 종목·연령대·기간별 통계와 관리자용 보고서를 자동 생성합니다.</p>
+      </div>
+      <div class="mk-sec-head__tags">
+        <span class="mk-tag"><i></i>통합 관리</span>
+        <span class="mk-tag mk-tag--lime"><i></i>통계</span>
+        <span class="mk-tag"><i></i>참여·달성 분석</span>
+        <span class="mk-tag mk-tag--violet"><i></i>보고서</span>
+      </div>
+    </div>
+
+    <div class="mk-grid">
+
+      <!-- 08. 기관 대시보드 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">기관 대시보드</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-bell" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-settings" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-card mk-org">
+                <span class="mk-logo">OO</span>
+                <div class="mk-org__main">
+                  <b>OO 스포츠 아카데미</b>
+                  <span>야구 · 축구 · 수영 · 6개 팀</span>
+                </div>
+                <span class="mk-badge">관리자</span>
+              </div>
+
+              <div class="mk-kpis">
+                <div class="mk-kpi"><span>소속 선수</span><b>128<small>명</small></b><em>▲ 12명 이번 달</em></div>
+                <div class="mk-kpi"><span>훈련 참여율</span><b>86%</b><em>▲ 4% 지난달</em></div>
+                <div class="mk-kpi"><span>목표 달성률</span><b>71%</b><em>▲ 3% 지난달</em></div>
+                <div class="mk-kpi"><span>소속 코치</span><b>6<small>명</small></b><em>전원 활성</em></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">팀별 현황</b><span class="mk-sub">참여율</span></div>
+                <div class="mk-list" style="margin-top:7px">
+                  <div class="mk-team">
+                    <div class="mk-team__name"><b>U12 야구</b><span>32명 · 2코치</span></div>
+                    <div class="mk-progress"><i style="width:88%"></i></div>
+                    <span class="mk-team__pct">88%</span>
+                  </div>
+                  <div class="mk-team">
+                    <div class="mk-team__name"><b>U15 야구</b><span>48명 · 2코치</span></div>
+                    <div class="mk-progress"><i style="width:84%"></i></div>
+                    <span class="mk-team__pct">84%</span>
+                  </div>
+                  <div class="mk-team">
+                    <div class="mk-team__name"><b>U18 야구</b><span>48명 · 2코치</span></div>
+                    <div class="mk-progress"><i style="width:79%"></i></div>
+                    <span class="mk-team__pct">79%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">주간 참여 추이</b><span class="mk-sub">4주</span></div>
+                <div class="mk-bars" style="height:58px">
+                  <div class="mk-bars__col"><i style="--h:62%"></i><span>1주</span></div>
+                  <div class="mk-bars__col"><i style="--h:74%"></i><span>2주</span></div>
+                  <div class="mk-bars__col"><i style="--h:68%"></i><span>3주</span></div>
+                  <div class="mk-bars__col is-peak"><i style="--h:86%"></i><span>4주</span></div>
+                </div>
+              </div>
+
+              <div class="mk-alert" style="background:var(--blue-soft);border-color:#ccd8f7">
+                <svg class="ic" style="color:var(--blue)"><use href="#i-mail" /></svg>
+                <div><b style="color:#2b4fae">10월 학부모 리포트</b><span style="color:#5b74b5">10.31 발송 예정 · 96명</span></div>
+                <span class="mk-link" style="color:#2b4fae">미리보기</span>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-users" /></svg><span>선수</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-file" /></svg><span>보고서</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-settings" /></svg><span>설정</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>08</em><b>기관 대시보드</b></div>
+          <p>소속 선수·팀·코치 현황과 참여율·목표 달성률을 기관 단위로 통합 관리합니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 09. 기관 통계 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">통계</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-filter" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-download" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-row" style="gap:5px;flex-wrap:wrap">
+                <span class="mk-badge">야구</span>
+                <span class="mk-badge" style="background:var(--paper-2);color:var(--muted)">U15</span>
+                <span class="mk-badge" style="background:var(--paper-2);color:var(--muted)">최근 3개월</span>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">월별 평균 훈련 시간</b><span class="mk-sub">시간</span></div>
+                <div class="mk-bars" style="height:80px">
+                  <div class="mk-bars__col"><i style="--h:58%"></i><span>7월</span></div>
+                  <div class="mk-bars__col"><i style="--h:72%"></i><span>8월</span></div>
+                  <div class="mk-bars__col"><i style="--h:66%"></i><span>9월</span></div>
+                  <div class="mk-bars__col is-peak"><i style="--h:86%"></i><span>10월</span></div>
+                </div>
+              </div>
+
+              <div class="mk-donuts">
+                <div class="mk-donut" style="--v:86"><b>86%</b><span>훈련 참여율</span></div>
+                <div class="mk-donut" style="--v:71"><b>71%</b><span>목표 달성률</span></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">팀별 상세</b><span class="mk-sub">선수 / 참여 / 달성</span></div>
+                <div class="mk-list" style="margin-top:6px">
+                  <div class="mk-team">
+                    <div class="mk-team__name"><b>U12</b><span>32명</span></div>
+                    <span class="mk-team__pct">88%</span>
+                    <div class="mk-progress"><i style="width:76%"></i></div>
+                    <span class="mk-team__pct">76%</span>
+                  </div>
+                  <div class="mk-team">
+                    <div class="mk-team__name"><b>U15</b><span>48명</span></div>
+                    <span class="mk-team__pct">84%</span>
+                    <div class="mk-progress"><i style="width:71%"></i></div>
+                    <span class="mk-team__pct">71%</span>
+                  </div>
+                  <div class="mk-team">
+                    <div class="mk-team__name"><b>U18</b><span>48명</span></div>
+                    <span class="mk-team__pct">79%</span>
+                    <div class="mk-progress"><i style="width:66%"></i></div>
+                    <span class="mk-team__pct">66%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mk-card" style="background:var(--paper-2);border-color:transparent">
+                <div class="mk-row">
+                  <svg class="ic" style="color:var(--green)"><use href="#i-info" /></svg>
+                  <span class="mk-sub" style="font-size:7.5px;line-height:1.5">연령대·포지션·경기 수를 보정한 또래 비교 지표는 베타로 제공됩니다.</span>
+                </div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-users" /></svg><span>선수</span></a>
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-file" /></svg><span>보고서</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-settings" /></svg><span>설정</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>09</em><b>기관 통계</b></div>
+          <p>종목·연령대·기간별로 선수 현황과 훈련 참여·목표 달성률을 비교 분석합니다.</p>
+        </figcaption>
+      </figure>
+
+      <!-- 10. 기관 보고서 -->
+      <figure class="mk-phone">
+        <div class="mk-device">
+          <div class="mk-notch"></div>
+          <div class="mk-screen">
+            <div class="mk-status"><span>9:41</span><span class="mk-status__r"><span class="mk-status__net">5G</span><span class="mk-batt"></span></span></div>
+            <div class="mk-appbar">
+              <span class="mk-appbar__title">보고서</span>
+              <span class="mk-appbar__acts">
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-arrow-up-right" /></svg></span>
+                <span class="mk-iconbtn"><svg class="ic"><use href="#i-more" /></svg></span>
+              </span>
+            </div>
+            <div class="mk-body">
+              <div class="mk-report">
+                <span class="mk-eyebrow">2026 SEASON · Q3</span>
+                <b>3분기 성장 리포트</b>
+                <span>OO 스포츠 아카데미 · 소속 선수 128명</span>
+                <div class="mk-report__lines"><i></i><i></i><i></i><i></i></div>
+                <div class="mk-report__foot"><span>생성 2026.10.27</span><span>v1.2</span></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">보고서 구성</b><span class="mk-badge">4개 섹션</span></div>
+                <div class="mk-check-list" style="margin-top:7px">
+                  <div class="mk-check"><svg class="ic"><use href="#i-check-circle" /></svg>기관 요약 · 참여율 86%</div>
+                  <div class="mk-check"><svg class="ic"><use href="#i-check-circle" /></svg>팀별 통계 · 6개 팀</div>
+                  <div class="mk-check"><svg class="ic"><use href="#i-check-circle" /></svg>우수 선수 · 성장률 상위 10명</div>
+                  <div class="mk-check"><svg class="ic"><use href="#i-check-circle" /></svg>개선 필요 · 목표 미달 12명</div>
+                </div>
+              </div>
+
+              <div class="mk-btnrow">
+                <span class="mk-btn"><svg class="ic"><use href="#i-download" /></svg>PDF</span>
+                <span class="mk-btn mk-btn--ghost"><svg class="ic"><use href="#i-download" /></svg>Excel</span>
+                <span class="mk-btn mk-btn--lime"><svg class="ic"><use href="#i-send" /></svg>학부모 발송</span>
+              </div>
+
+              <div class="mk-sent">
+                <svg class="ic"><use href="#i-check-circle" /></svg>
+                <div><b>학부모 96명 발송 완료</b><span>10.27 14:32 · 읽음 71명</span></div>
+              </div>
+
+              <div class="mk-card mk-card--tight">
+                <div class="mk-between"><b class="mk-h">권한</b><span class="mk-sub">관리자 전용</span></div>
+                <div class="mk-row" style="margin-top:6px;flex-wrap:wrap;gap:4px">
+                  <span class="mk-badge">원장</span>
+                  <span class="mk-badge">코치 6명</span>
+                  <span class="mk-badge mk-badge--ghost" style="background:var(--paper-2);color:var(--muted)">학부모 열람</span>
+                </div>
+              </div>
+            </div>
+            <div class="mk-tabbar">
+              <a class="mk-tab"><svg class="ic"><use href="#i-home" /></svg><span>홈</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-users" /></svg><span>선수</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-chart" /></svg><span>통계</span></a>
+              <a class="mk-tab is-active"><svg class="ic"><use href="#i-file" /></svg><span>보고서</span></a>
+              <a class="mk-tab"><svg class="ic"><use href="#i-settings" /></svg><span>설정</span></a>
+            </div>
+          </div>
+        </div>
+        <figcaption class="mk-cap">
+          <div class="mk-cap__top"><em>10</em><b>관리자 통계 보고서</b></div>
+          <p>기관 요약·팀별 통계·우수 선수·개선 필요를 자동 구성하고 PDF·Excel·학부모 발송까지 연결합니다.</p>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     04. 서비스 흐름 모식도
+     ===================================================================== -->
+<section class="mk-section mk-section--flow" id="flow" aria-labelledby="flow-title">
+  <div class="mk-wrap">
+    <div class="mk-sec-head">
+      <div>
+        <span class="mk-sec-head__num">04</span>
+        <h2 id="flow-title">기능 · 서비스 흐름 모식도</h2>
+        <p>가입·초대부터 기록, 자동 분석, 공유·피드백, 시즌 결산까지. 하나의 데이터가 어떻게 순환하는지 한눈에 정리했습니다.</p>
+      </div>
+      <div class="mk-sec-head__tags">
+        <span class="mk-tag"><i></i>입력</span>
+        <span class="mk-tag mk-tag--lime"><i></i>플랫폼</span>
+        <span class="mk-tag mk-tag--violet"><i></i>출력</span>
+        <span class="mk-tag mk-tag--clay"><i></i>공통 기반</span>
+      </div>
+    </div>
+
+    <div class="mk-flow-intro">
+      <p>
+        핵심 구조는 <b>“한 명의 선수, 하나의 데이터 원본, 네 개의 시선”</b>입니다.
+        선수·학부모·코치·기관이 각자 입력하고, 플랫폼이 자동으로 집계·검증한 뒤, 권한에 따라 다른 화면으로 제공합니다.
+      </p>
+      <div class="mk-legend-box">
+        <span><i></i>입력·기록</span>
+        <span><i class="lime"></i>자동 분석</span>
+        <span><i class="ink"></i>권한별 제공</span>
+        <span><i class="clay"></i>공통 기반</span>
+      </div>
+    </div>
+
+    <ol class="mk-journey" aria-label="서비스 여정 5단계">
+      <li>
+        <span class="mk-journey__num">01</span>
+        <b>가입 · 초대</b>
+        <p>역할 선택, 보호자 동의, 코치·학부모 초대 링크 발송</p>
+        <div class="mk-journey__tags"><span>학생</span><span>학부모</span><span>코치</span><span>기관</span></div>
+      </li>
+      <li>
+        <span class="mk-journey__num">02</span>
+        <b>기록</b>
+        <p>프로필, 훈련량, 경기 결과, 시즌 목표를 30초 단위로 입력</p>
+        <div class="mk-journey__tags"><span>30초 입력</span><span>템플릿</span></div>
+      </li>
+      <li>
+        <span class="mk-journey__num">03</span>
+        <b>자동 분석</b>
+        <p>종목별 지표 계산, 기간별 성장률, 목표 달성률 산출</p>
+        <div class="mk-journey__tags"><span>지표 엔진</span><span>검증 배지</span></div>
+      </li>
+      <li>
+        <span class="mk-journey__num">04</span>
+        <b>공유 · 피드백</b>
+        <p>학부모 주간 리포트, 코치 코멘트, 응원 메시지</p>
+        <div class="mk-journey__tags"><span>권한</span><span>알림</span></div>
+      </li>
+      <li>
+        <span class="mk-journey__num">05</span>
+        <b>결산 · 확장</b>
+        <p>시즌 리포트, 진로 프로필, 기관 통계 보고서</p>
+        <div class="mk-journey__tags"><span>PDF</span><span>포토북</span><span>벤치마크</span></div>
+      </li>
+    </ol>
+
+    <div class="mk-flow" aria-label="역할별 기능과 데이터 흐름">
+      <div class="mk-flow__col">
+        <h3>입력 · 기록</h3>
+        <p>역할별로 필요한 데이터를 입력합니다.</p>
+        <div class="mk-flow__nodes">
+          <div class="mk-node">
+            <b>선수 · 학부모</b>
+            <span>개인 프로필 · 공개 범위 · 훈련량 · 경기 기록</span>
+          </div>
+          <div class="mk-node">
+            <b>코치</b>
+            <span>선수 관리 · 목표 설정 · 기록 검증 · 피드백</span>
+          </div>
+          <div class="mk-node">
+            <b>아카데미 · 연맹</b>
+            <span>팀·선수 통합 관리 · 권한 · 통계 조건</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mk-flow__arrow"><span>입력</span></div>
+
+      <div class="mk-flow__core">
+        <span class="mk-eyebrow">CORE</span>
+        <h3>선수 성장 데이터 허브</h3>
+        <p>한 명의 선수 데이터를 한 번만 저장하고, 역할에 맞게 다시 보여줍니다.</p>
+        <div class="mk-core-grid">
+          <span>프로필 · 권한</span>
+          <span>기록 원장</span>
+          <span>지표 룰 엔진</span>
+          <span>목표 · 달성률</span>
+          <span>통계 · 리포트</span>
+          <span>검증 · 이력</span>
+        </div>
+      </div>
+
+      <div class="mk-flow__arrow"><span>가공</span></div>
+
+      <div class="mk-flow__col">
+        <h3>출력 · 활용</h3>
+        <p>같은 데이터를 역할별 화면으로 제공합니다.</p>
+        <div class="mk-flow__nodes">
+          <div class="mk-node mk-node--lime">
+            <b>개인 성장 홈</b>
+            <span>선수·학부모 · 프로필 · 성장 그래프 · 응원</span>
+          </div>
+          <div class="mk-node">
+            <b>학부모 주간 리포트</b>
+            <span>훈련 시간 · 목표 달성 · 코치 코멘트</span>
+          </div>
+          <div class="mk-node">
+            <b>코치 대시보드</b>
+            <span>선수 목록 · 통합 현황 · 피드백</span>
+          </div>
+          <div class="mk-node mk-node--dark">
+            <b>기관 통계 보고서</b>
+            <span>종목·연령·기간 통계 · PDF · 발송</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mk-flow__base">
+      <b>공통 기반</b> RBAC 권한 · 보호자 동의 · 감사 로그 · 알림(카카오·SMS) · 구독 결제 · 국내 리전 클라우드
+    </div>
+
+    <div class="mk-loop" aria-label="데이터 선순환">
+      <span class="mk-loop__label">Growth Loop</span>
+      <span>기록</span><i>→</i>
+      <span>자동 분석</span><i>→</i>
+      <span>공유 · 응원</span><i>→</i>
+      <span>동기 상승</span><i>→</i>
+      <span>기록 증가</span><i>↻</i>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     05. 기능 매트릭스
+     ===================================================================== -->
+<section class="mk-section" id="matrix" aria-labelledby="matrix-title">
+  <div class="mk-wrap">
+    <div class="mk-sec-head">
+      <div>
+        <span class="mk-sec-head__num">05</span>
+        <h2 id="matrix-title">역할별 기능 매트릭스</h2>
+        <p>누가 무엇을 입력하고, 무엇을 조회하며, 어디까지 권한을 갖는지 정리했습니다. ● 전체 / ○ 제한 / – 없음.</p>
+      </div>
+      <div class="mk-sec-head__tags">
+        <span class="mk-tag"><i></i>단일 데이터 원본</span>
+        <span class="mk-tag mk-tag--lime"><i></i>권한 기반 공유</span>
+      </div>
+    </div>
+
+    <div class="mk-matrix-wrap">
+      <table class="mk-matrix">
+        <thead>
+          <tr>
+            <th scope="col">기능</th>
+            <th scope="col">선수</th>
+            <th scope="col">학부모</th>
+            <th scope="col">코치</th>
+            <th scope="col">아카데미</th>
+            <th scope="col">연맹</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>개인 프로필 · 공개 범위</td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-off">–</span></td>
+          </tr>
+          <tr>
+            <td>훈련량 기록 · 주간 현황</td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-off">–</span></td>
+          </tr>
+          <tr>
+            <td>경기 결과 · 성장 기록</td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-off">–</span></td>
+          </tr>
+          <tr>
+            <td>목표 설정 · 달성률</td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-off">–</span></td>
+          </tr>
+          <tr>
+            <td>피드백 · 코칭 메모</td>
+            <td><span class="is-off">–</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-off">–</span></td>
+          </tr>
+          <tr>
+            <td>다수 선수 통합 현황</td>
+            <td><span class="is-off">–</span></td>
+            <td><span class="is-off">–</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+          </tr>
+          <tr>
+            <td>종목·연령·기간 통계</td>
+            <td><span class="is-off">–</span></td>
+            <td><span class="is-off">–</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-on">●</span></td>
+          </tr>
+          <tr>
+            <td>관리자 통계 보고서</td>
+            <td><span class="is-off">–</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-on">●</span></td>
+          </tr>
+          <tr>
+            <td>권한 · 보호자 동의 관리</td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-half">○</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-on">●</span></td>
+            <td><span class="is-on">●</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mk-matrix__note">※ ● 전체 권한 / ○ 열람 또는 제한된 권한 / – 해당 없음. 실제 권한은 기관 정책과 보호자 동의 범위에 따라 조정됩니다.</p>
+
+    <div class="mk-map">
+      <div class="mk-map__card">
+        <span>SCREEN 01–04</span>
+        <b>학생 · 학부모</b>
+        <p>개인 홈 → 훈련 기록 → 경기·성장 → 주간 리포트로 이어지는 개인 성장 여정.</p>
+      </div>
+      <div class="mk-map__card">
+        <span>SCREEN 05–07</span>
+        <b>코치</b>
+        <p>선수 목록 → 선수 상세·피드백 → 다수 선수 통합 현황으로 이어지는 관리 여정.</p>
+      </div>
+      <div class="mk-map__card">
+        <span>SCREEN 08–10</span>
+        <b>아카데미 · 연맹</b>
+        <p>기관 대시보드 → 통계 분석 → 보고서 생성·발송으로 이어지는 운영 여정.</p>
+      </div>
+      <div class="mk-map__card">
+        <span>FLOW</span>
+        <b>데이터 선순환</b>
+        <p>기록이 분석되고 공유될수록 선수의 동기와 데이터 가치가 함께 커지는 구조.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="mk-footer">
+  <div class="mk-wrap">
+    <span><b>SPORTS GROW</b> — 주니어 운동선수 성장 기록 플랫폼</span>
+    <span>본 화면은 사업계획서용 가상 목업이며, 실제 서비스 화면과 데이터는 다를 수 있습니다.</span>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+</body>
+</html>

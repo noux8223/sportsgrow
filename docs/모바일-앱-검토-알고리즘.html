@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>모바일 앱 제작 검토 알고리즘 — 주니어 선수 성장 기록 플랫폼</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 1600px;
+    background: #E9EDF3;
+    font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", sans-serif;
+    color: #17243A;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { width: 1600px; padding: 44px 52px 40px; background: #F7F9FC; }
+
+  /* header */
+  .hero {
+    position: relative; overflow: hidden;
+    background: #0B1A2E; color: #fff;
+    border-radius: 22px; padding: 34px 40px 30px;
+  }
+  .hero::after {
+    content: ""; position: absolute; right: -90px; top: -120px;
+    width: 420px; height: 420px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(72,149,239,.28), transparent 68%);
+  }
+  .kicker { font-size: 13px; letter-spacing: 2.4px; font-weight: 800; color: #8FC2FF; }
+  h1 { position: relative; margin: 9px 0 8px; font-size: 40px; line-height: 1.18; letter-spacing: -1.1px; }
+  h1 em { font-style: normal; color: #FFC24B; }
+  .sub { position: relative; margin: 0; font-size: 15px; color: rgba(255,255,255,.68); line-height: 1.6; }
+  .legend { position: relative; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  .legend span {
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,.82);
+    border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06);
+    padding: 6px 12px; border-radius: 999px;
+  }
+
+  .layout { display: grid; grid-template-columns: 1fr 486px; gap: 26px; margin-top: 24px; }
+
+  /* flow */
+  .flow-head { display: flex; align-items: baseline; gap: 12px; margin: 2px 0 14px; }
+  .flow-head .n {
+    font-size: 11px; font-weight: 800; letter-spacing: 1.6px;
+    color: #fff; background: #1F4E79; padding: 5px 10px; border-radius: 5px;
+  }
+  .flow-head h2 { margin: 0; font-size: 21px; letter-spacing: -.4px; }
+  .flow-head .note { margin-left: auto; font-size: 12px; color: #7C8799; }
+
+  .step {
+    position: relative; background: #fff; border: 1px solid #D8E0EC;
+    border-radius: 15px; padding: 18px 20px 16px 76px;
+    box-shadow: 0 3px 10px rgba(15,35,70,.04);
+  }
+  .step .num {
+    position: absolute; left: 18px; top: 18px;
+    width: 42px; height: 42px; border-radius: 11px;
+    background: #EAF2FC; color: #1F4E79;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800;
+  }
+  .step.q .num { background: #FFF1DD; color: #B45309; }
+  .step .label { font-size: 10.5px; font-weight: 800; letter-spacing: 1.4px; color: #8A94A6; }
+  .step h3 { margin: 4px 0 0; font-size: 19px; line-height: 1.4; letter-spacing: -.4px; }
+
+  .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 13px; }
+  .branch { border-radius: 9px; padding: 10px 13px; font-size: 12.5px; line-height: 1.55; }
+  .branch b { display: block; font-size: 11px; letter-spacing: 1px; margin-bottom: 3px; }
+  .branch.y { background: #EAF6EC; color: #245C2E; border: 1px solid #CBE6CF; }
+  .branch.n { background: #F2F4F8; color: #49566B; border: 1px solid #DCE2EC; }
+
+  .answer {
+    margin-top: 11px; padding: 10px 13px; border-radius: 9px;
+    background: #0F2D4E; color: #fff; font-size: 12.5px; line-height: 1.55;
+    display: flex; gap: 9px; align-items: flex-start;
+  }
+  .answer .tag {
+    flex: 0 0 auto; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    background: #FFC24B; color: #3A2600; padding: 3px 7px; border-radius: 4px; margin-top: 1px;
+  }
+  .answer b { color: #FFD37A; }
+
+  .connector { height: 26px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .connector::before { content: ""; width: 2px; height: 100%; background: #C3CEDD; }
+  .connector::after {
+    content: ""; position: absolute; bottom: -1px;
+    border-left: 5px solid transparent; border-right: 5px solid transparent;
+    border-top: 7px solid #C3CEDD;
+  }
+
+  .start {
+    display: flex; align-items: center; gap: 12px;
+    background: #1F4E79; color: #fff; border-radius: 11px;
+    padding: 12px 16px; font-size: 14px; font-weight: 700;
+  }
+  .start .dot { width: 10px; height: 10px; border-radius: 50%; background: #FFC24B; }
+
+  /* side */
+  .side-head { display: flex; align-items: baseline; gap: 12px; margin: 2px 0 14px; }
+  .side-head .n {
+    font-size: 11px; font-weight: 800; letter-spacing: 1.6px;
+    color: #fff; background: #C55A11; padding: 5px 10px; border-radius: 5px;
+  }
+  .side-head h2 { margin: 0; font-size: 21px; letter-spacing: -.4px; }
+
+  .check { background: #fff; border: 1px solid #D8E0EC; border-radius: 13px; padding: 13px 15px 13px; margin-bottom: 9px; }
+  .check .ch { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .check .ch i {
+    font-style: normal; width: 22px; height: 22px; border-radius: 6px;
+    background: #FDEBDC; color: #B45309; font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .check .ch b { font-size: 13.5px; letter-spacing: -.2px; }
+  .check ul { margin: 0; padding-left: 15px; }
+  .check li { font-size: 11.8px; line-height: 1.55; color: #536176; margin: 2px 0; }
+  .check li b { color: #17243A; }
+
+  /* gates */
+  .gates { margin-top: 24px; background: #0B1A2E; border-radius: 16px; padding: 20px 24px 22px; color: #fff; }
+  .gates .gh { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .gates .gh b { font-size: 16px; letter-spacing: -.2px; }
+  .gates .gh span { font-size: 12px; color: rgba(255,255,255,.55); }
+  .gate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+  .gate { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 12px 14px; }
+  .gate .gk { font-size: 10px; font-weight: 800; letter-spacing: 1.3px; color: #FFC24B; }
+  .gate .gt { font-size: 13px; font-weight: 700; margin-top: 4px; line-height: 1.45; }
+  .gate .gd { font-size: 11px; color: rgba(255,255,255,.58); margin-top: 4px; line-height: 1.45; }
+
+  /* conclusion */
+  .conclusion {
+    background: #0B1A2E; border-radius: 14px; padding: 20px 22px 20px; color: #fff;
+  }
+  .conclusion .ck { font-size: 10px; font-weight: 800; letter-spacing: 1.6px; color: #8FC2FF; }
+  .conclusion h3 { margin: 7px 0 4px; font-size: 20px; line-height: 1.35; letter-spacing: -.4px; }
+  .conclusion h3 em { font-style: normal; color: #FFC24B; }
+  .conclusion p { margin: 0 0 14px; font-size: 12px; line-height: 1.6; color: rgba(255,255,255,.66); }
+  .conclusion .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .conclusion .block { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 9px; padding: 11px 12px; }
+  .conclusion .block b { display: block; font-size: 10.5px; letter-spacing: 1.2px; margin-bottom: 6px; }
+  .conclusion .block.in b { color: #9BE0A9; }
+  .conclusion .block.out b { color: #FFC24B; }
+  .conclusion .block li { font-size: 11.5px; line-height: 1.55; color: rgba(255,255,255,.78); margin: 2px 0; }
+  .conclusion .block ul { margin: 0; padding-left: 13px; }
+
+  .foot { display: flex; justify-content: space-between; margin-top: 16px; font-size: 11px; color: #7C8799; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <div class="kicker">SPORTS GROW · MOBILE APP REVIEW 2026</div>
+    <h1>모바일 앱 제작 <em>검토 알고리즘</em></h1>
+    <p class="sub">주니어 선수 성장 기록 플랫폼 — “무엇을 만들까”보다 <b>“어떤 순서로 결정할까”</b>가 먼저입니다.<br>각 질문의 답이 다음 단계의 기술 선택과 출시 조건을 바꿉니다.</p>
+    <div class="legend">
+      <span>Q 결정 질문</span>
+      <span>A 이 프로젝트의 답</span>
+      <span>! 놓치면 재작업</span>
+      <span>PWA 우선 → 검증 후 확장</span>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- LEFT : algorithm -->
+    <section>
+      <div class="flow-head">
+        <span class="n">FLOW</span>
+        <h2>결정 알고리즘 — 7개 질문</h2>
+        <span class="note">위에서 아래로 순서대로 판정</span>
+      </div>
+
+      <div class="start"><span class="dot"></span>START — 앱 형태와 출시 범위를 정한다</div>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q1</div>
+        <div class="label">기술 형태</div>
+        <h3>12개월 안에 카메라 OCR·음성 자동 입력이 필수인가?</h3>
+        <div class="branches">
+          <div class="branch n"><b>NO</b>PWA·웹앱 우선. 설치 없이 시작하고 개발비를 줄인다.</div>
+          <div class="branch y"><b>YES</b>크로스플랫폼(React Native·Flutter) 또는 네이티브 검토.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div><b>아니오.</b> OCR·음성은 M10~으로 이연 → <b>PWA 우선</b>, 카메라·푸시는 필요 시 네이티브 브리지로 보완.</div></div>
+      </article>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q2</div>
+        <div class="label">입력 환경</div>
+        <h3>훈련장·체육관에서 오프라인 기록이 필요한가?</h3>
+        <div class="branches">
+          <div class="branch y"><b>YES</b>로컬 DB + 동기화 큐 + 충돌 해결 규칙을 먼저 설계.</div>
+          <div class="branch n"><b>NO</b>서버 API 우선. 단순한 구조로 시작.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div><b>예.</b> 입력이 끊기면 3일 안에 이탈한다 → <b>오프라인 우선</b>, 재접속 시 자동 동기화·중복 방지.</div></div>
+      </article>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q3</div>
+        <div class="label">수익·결제</div>
+        <h3>학부모 구독 결제가 앱 안에서 발생하는가?</h3>
+        <div class="branches">
+          <div class="branch y"><b>YES</b>스토어 IAP, 수수료 15~30%, 구독 복원·환불 정책 필수.</div>
+          <div class="branch n"><b>NO</b>웹 결제 + 앱은 열람 전용. B2B는 세금계산서.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div>B2C는 앱 내 결제 가능성 → <b>IAP vs 외부 결제</b> 비교. B2B(코치·아카데미)는 <b>웹 계약·세금계산서</b>로 분리.</div></div>
+      </article>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q4</div>
+        <div class="label">데이터·동의</div>
+        <h3>미성년자 개인정보를 저장하는가?</h3>
+        <div class="branches">
+          <div class="branch y"><b>YES</b>법정대리인 동의, 권한 매트릭스, 국내 리전, 암호화, 파기.</div>
+          <div class="branch n"><b>NO</b>일반 개인정보 보호 수준 적용.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div><b>예(필수).</b> 설계 단계부터 <b>PIA·동의·공개 범위</b>를 넣는다. 사후 추가는 재작업 비용이 가장 크다.</div></div>
+      </article>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q5</div>
+        <div class="label">성능·접근성</div>
+        <h3>저사양 기기·저속 네트워크 사용자가 있는가?</h3>
+        <div class="branches">
+          <div class="branch y"><b>YES</b>경량 번들, 이미지 지연 로딩, 오프라인 캐시, 배터리 고려.</div>
+          <div class="branch n"><b>NO</b>기본 성능 목표만 설정.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div><b>예.</b> 전국 아카데미·학부모 → <b>저가 Android·3G</b> 기준으로 앱 크기와 첫 화면 속도를 맞춘다.</div></div>
+      </article>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q6</div>
+        <div class="label">스토어 정책</div>
+        <h3>아동·청소년 대상 앱으로 심사되는가?</h3>
+        <div class="branches">
+          <div class="branch y"><b>YES</b>아동 대상 정책, 광고·추적 제한, 개인정보 라벨, 보호자 동의.</div>
+          <div class="branch n"><b>NO</b>일반 심사 기준 적용.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div><b>가능성 높음.</b> 만 14세 미만 보호자 동의, <b>광고 없음</b>, 데이터 판매 없음. 스토어 개인정보 라벨을 실제 수집과 일치.</div></div>
+      </article>
+      <div class="connector"></div>
+
+      <article class="step q">
+        <div class="num">Q7</div>
+        <div class="label">출시·운영</div>
+        <h3>출시 후 운영·롤백 체계가 있는가?</h3>
+        <div class="branches">
+          <div class="branch y"><b>YES</b>단계적 배포, 크래시·ANR, 푸시, 버전 정책, CS, 롤백.</div>
+          <div class="branch n"><b>NO</b>출시 보류. 파일럿으로 되돌린다.</div>
+        </div>
+        <div class="answer"><span class="tag">A</span><div>파일럿 <b>3곳 → 1곳 유료</b> 후 단계 배포 — 유료 전환은 <b>M3</b>, 전체 공개는 지표 확인 후(M9).</div></div>
+      </article>
+
+      <div class="gates">
+        <div class="gh"><b>출시 전 통과 게이트</b><span>하나라도 미달이면 출시가 아니라 보완</span></div>
+        <div class="gate-grid">
+          <div class="gate"><div class="gk">GATE 01</div><div class="gt">입력 30초</div><div class="gd">주 3회 입력 코치 60%</div></div>
+          <div class="gate"><div class="gk">GATE 02</div><div class="gt">리포트 열람 60%</div><div class="gd">학부모 주간 리포트 4주</div></div>
+          <div class="gate"><div class="gk">GATE 03</div><div class="gt">유료 1곳</div><div class="gd">파일럿 3곳 중 1곳 전환</div></div>
+          <div class="gate"><div class="gk">GATE 04</div><div class="gt">보안 0건</div><div class="gd">권한·개인정보 점검</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT : checklist -->
+    <aside>
+      <div class="side-head">
+        <span class="n">CHECK</span>
+        <h2>검토 체크리스트</h2>
+      </div>
+
+      <div class="check">
+        <div class="ch"><i>01</i><b>기술 선택</b></div>
+        <ul>
+          <li><b>PWA vs RN vs Flutter</b> — 6개월 개발·유지보수 인력 기준</li>
+          <li>앱 번들 크기, 첫 실행 속도, 저가 기기 호환</li>
+          <li>오프라인 저장·동기화·충돌 해결</li>
+          <li>카메라·마이크·푸시 권한 거부 시 대체 동선</li>
+        </ul>
+      </div>
+
+      <div class="check">
+        <div class="ch"><i>02</i><b>역할·계정</b></div>
+        <ul>
+          <li>선수·학부모·코치·아카데미 <b>4개 역할</b></li>
+          <li>한 기기에서 학부모/코치 <b>계정 전환</b></li>
+          <li>초대 링크·딥링크·가입 없는 열람</li>
+          <li>보호자 동의와 선수 본인 동의 분리</li>
+        </ul>
+      </div>
+
+      <div class="check">
+        <div class="ch"><i>03</i><b>데이터·보안</b></div>
+        <ul>
+          <li>국내 리전 보관, 전송·저장 암호화</li>
+          <li>권한 매트릭스·감사 로그·접근 이력</li>
+          <li>공개 범위(비공개·코치·학부모·전체)</li>
+          <li>탈퇴·삭제 요청, 보관 기간, 파기 절차</li>
+        </ul>
+      </div>
+
+      <div class="check">
+        <div class="ch"><i>04</i><b>결제·정책</b></div>
+        <ul>
+          <li>IAP 수수료 vs 외부 결제, 구독 복원</li>
+          <li>환불·해지·미성년자 결제 동의</li>
+          <li>아동 대상 앱 정책, 광고·추적 제한</li>
+          <li>개인정보 처리방침·스토어 라벨 일치</li>
+        </ul>
+      </div>
+
+      <div class="check">
+        <div class="ch"><i>05</i><b>알림·참여</b></div>
+        <ul>
+          <li>주간 리포트 푸시, 방해 금지 시간</li>
+          <li>알림 권한 거부 시 이메일·카톡 대체</li>
+          <li>코치 과제·학부모 응원의 딥링크</li>
+          <li>재방문 주기 측정(DAU·WAU·리텐션)</li>
+        </ul>
+      </div>
+
+      <div class="check">
+        <div class="ch"><i>06</i><b>출시·운영</b></div>
+        <ul>
+          <li>스토어 심사용 데모 계정·스크린샷</li>
+          <li>단계 배포, 크래시·ANR·롤백</li>
+          <li>버전 정책·강제 업데이트 기준</li>
+          <li>CS 채널·응답 시간·장애 공지</li>
+        </ul>
+      </div>
+
+      <div class="check" style="background:#FFF7E8;border-color:#F0D9AC;">
+        <div class="ch"><i style="background:#FFC24B;color:#3A2600;">!</i><b>놓치면 재작업</b></div>
+        <ul>
+          <li>OCR·음성을 나중에 넣을 때 <b>입력 UX</b>가 바뀌는지</li>
+          <li>일본·중국 확장 시 <b>다국어·현지 결제</b></li>
+          <li>앱 없이도 열리는 <b>웹 폴백</b></li>
+          <li>스토어 정책 변경(수수료·아동 정책)</li>
+        </ul>
+      </div>
+
+      <div class="conclusion">
+        <div class="ck">CONCLUSION</div>
+        <h3>PWA로 먼저 출시하고,<br><em>검증된 뒤</em> 확장한다</h3>
+        <p><b>3개월 MVP(M1~M3)로 유료 베타</b>를 열고, 6개월(M1~M6)에 개발을 완료합니다.<br>OCR·음성은 M10 이후로 미루고, 파일럿 3곳으로 먼저 증명합니다.</p>
+        <div class="split">
+          <div class="block in">
+            <b>M1–M6 포함</b>
+            <ul>
+              <li>기록 입력·오프라인 동기화</li>
+              <li>성장 리포트·그래프</li>
+              <li>코치·학부모 공유 권한</li>
+              <li>구독 결제·계정 전환</li>
+            </ul>
+          </div>
+          <div class="block out">
+            <b>출시 후(M10~)</b>
+            <ul>
+              <li>카메라 OCR 자동 입력</li>
+              <li>음성 기록·요약</li>
+              <li>네이티브·해외 결제</li>
+              <li>소셜·랭킹 기능</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <span>SPORTS GROW · 모바일 앱 제작 검토 알고리즘 v1.0</span>
+    <span>근거: 사업계획서 2-5 개발 일정 · 2-6 개발 진행 정도 · 2-6-1 기술 완성도 · 3-5 마케팅</span>
+  </div>
+</div>
+</body>
+</html>

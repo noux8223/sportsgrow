@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>코치 대시보드 — Sports Grow</title>
+<meta name="description" content="소속 선수 목록과 프로필, 훈련·경기 기록, 단기·장기 목표, 피드백을 통합 관리하는 코치 대시보드입니다." />
+<meta name="theme-color" content="#0b1a1e" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sports Grow" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/pwa.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230b1a1e'/%3E%3Cpath d='M9 28l7-7 5 4 10-11' fill='none' stroke='%23d9f55f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='14' r='3' fill='%23d9f55f'/%3E%3C/svg%3E" />
+</head>
+<body class="app-body" data-role="coach">
+<script>document.documentElement.classList.add("js");</script>
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+<div class="app">
+  <aside class="app-sidebar" id="sidebar" aria-label="코치 메뉴">
+    <button class="icon-btn sidebar__close" id="sidebarClose" type="button" aria-label="메뉴 닫기">
+      <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+    </button>
+    <div class="sidebar__brand">
+      <a class="brand" href="index.html" aria-label="Sports Grow 홈">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M9 28.5 16.5 21l5 4L31.5 14.5" fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="31.5" cy="14.5" r="3.1" fill="currentColor"/><path d="M9 33h22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".38"/></svg>
+        </span>
+        <span class="brand__text"><strong>SPORTS GROW</strong><small>Coach</small></span>
+      </a>
+    </div>
+
+    <div class="role-chip role-chip--coach">
+      <span class="role-chip__ico"><svg class="icon" aria-hidden="true"><use href="#i-coach" /></svg></span>
+      <div><span>Coach &amp; Director</span><strong data-user-name>박정우</strong></div>
+    </div>
+
+    <nav class="sidebar__nav" data-scroll-nav aria-label="코치 대시보드 섹션">
+      <p class="sidebar__label">선수 관리</p>
+      <a class="sidebar__link is-active" href="#overview"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>통합 현황</a>
+      <a class="sidebar__link" href="#roster"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>선수 목록 <em data-total-players>12</em></a>
+      <a class="sidebar__link" href="#goals"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>목표 관리</a>
+      <a class="sidebar__link" href="#feedback"><svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>피드백 · 메모 <em>4</em></a>
+      <a class="sidebar__link" href="#requests"><svg class="icon" aria-hidden="true"><use href="#i-mail" /></svg>보호자 요청 <em id="requestPendingNav">0</em></a>
+      <p class="sidebar__label">바로가기</p>
+      <a class="sidebar__link" href="student.html#media"><svg class="icon" aria-hidden="true"><use href="#i-camera" /></svg>사진 · 동영상</a>
+      <a class="sidebar__link" href="student.html"><svg class="icon" aria-hidden="true"><use href="#i-user" /></svg>학생 화면</a>
+      <a class="sidebar__link" href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-globe" /></svg>서비스 소개</a>
+    </nav>
+
+    <div class="sidebar__spacer"></div>
+
+    <div class="sidebar-tip">
+      <div class="sidebar-tip__head"><svg class="icon" aria-hidden="true"><use href="#i-bell" /></svg>Needs attention</div>
+      <strong>기록 미입력 3명</strong>
+      <p>박도윤 · 오세훈 · 문준서 선수의 이번 주 기록이 없습니다.</p>
+      <a href="#roster">선수 확인하기 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+    </div>
+
+    <div class="sidebar__user">
+      <span class="sidebar__avatar" data-user-initial>박</span>
+      <div><strong data-user-name>박정우</strong><span data-user-org>한빛중학교 야구부</span></div>
+      <a class="sidebar__logout" href="#" data-logout aria-label="로그아웃">
+        <svg class="icon" aria-hidden="true"><use href="#i-logout" /></svg>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <button class="topbar__menu" id="sidebarToggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sidebar">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+      </button>
+      <div class="breadcrumb">
+        <span>코치</span>
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron" /></svg>
+        <strong data-view-crumb>통합 현황</strong>
+      </div>
+      <div class="topbar__actions">
+        <span class="topbar__date"><svg class="icon" aria-hidden="true"><use href="#i-calendar" /></svg><span data-today>2026.10.28 (수)</span></span>
+        <button class="topbar__icon" type="button" id="notificationsBtn" aria-label="알림 3건">
+          <svg class="icon" aria-hidden="true"><use href="#i-bell" /></svg>
+          <span class="topbar__dot" aria-hidden="true"></span>
+        </button>
+        <div class="topbar__user">
+          <div><strong data-user-name>박정우</strong><span>코치</span></div>
+          <span class="topbar__avatar" data-user-initial>박</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-content" id="main">
+      <section class="dash-section" id="overview" aria-labelledby="overview-title">
+        <div class="page-head">
+          <div>
+            <p class="page-head__eyebrow">Coach dashboard <span class="tag tag--blue">한빛중 야구부</span></p>
+            <h1 id="overview-title"><span data-user-name>박정우</span> 코치님, 선수 현황입니다</h1>
+            <p class="page-head__desc">담당 선수 12명 · 1군 8명 / 2군 4명. 이번 주 기록 입력률과 목표 달성률을 확인하고 필요한 선수에게 피드백을 남기세요.</p>
+          </div>
+          <div class="page-head__actions">
+            <button class="btn btn--outline btn--sm" type="button" id="jumpFeedback">
+              <svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>
+              피드백 작성
+            </button>
+            <button class="btn btn--dark btn--sm" type="button" data-modal-open="playerModal">
+              <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+              선수 추가
+            </button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat stat--blue">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg></span>
+              <span class="stat__label">관리 선수</span>
+            </div>
+            <div class="stat__value"><span data-total-players>12</span><small>명</small></div>
+            <div class="stat__foot">1군 8명 · 2군 4명</div>
+          </div>
+          <div class="stat stat--green">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg></span>
+              <span class="stat__label">이번 주 기록 입력</span>
+            </div>
+            <div class="stat__value">9<small>/ 12명</small></div>
+            <div class="stat__foot"><span class="delta delta--neutral">75%</span> 3명 기록 미입력</div>
+          </div>
+          <div class="stat stat--lime">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg></span>
+              <span class="stat__label">팀 목표 달성률</span>
+            </div>
+            <div class="stat__value">68<small>%</small></div>
+            <div class="stat__foot"><span class="delta"><svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg>+4%</span> 지난주 대비</div>
+          </div>
+          <div class="stat stat--clay">
+            <div class="stat__top">
+              <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-activity" /></svg></span>
+              <span class="stat__label">이번 주 신규 기록</span>
+            </div>
+            <div class="stat__value">27<small>건</small></div>
+            <div class="stat__foot">훈련 21 · 경기 6</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-bars" /></svg>선수별 주간 훈련량</h2>
+                <p class="panel__sub">이번 주 · 상위 5명</p>
+              </div>
+              <a class="panel__link" href="#roster">전체 선수 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+            </div>
+            <div id="weeklyTop"></div>
+            <div class="panel__foot">
+              <span>팀 평균 230분 · 목표 240분</span>
+              <span class="legend-inline"><span><i></i>훈련량</span><span><i class="is-clay"></i>목표 미달</span></span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-bell" /></svg>확인이 필요한 선수</h2>
+                <p class="panel__sub">기록 누락 · 목표 지연</p>
+              </div>
+              <span class="tag tag--clay">3명</span>
+            </div>
+            <div class="alert-list" id="alertList"></div>
+            <button class="btn btn--outline btn--block btn--sm" type="button" id="alertReview" style="margin-top:10px">
+              통합 현황에서 검토하기
+            </button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:10px">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-layers" /></svg>다수 선수 통합 현황</h2>
+              <p class="panel__sub">훈련량 · 최근 경기 · 목표 달성률을 한 화면에서</p>
+            </div>
+            <span class="tag tag--blue">전체 <span data-total-players>12</span>명</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>선수</th><th>소속</th><th>이번 주 훈련</th><th>최근 기록</th><th>목표 달성률</th><th>상태</th><th></th></tr>
+              </thead>
+              <tbody id="overviewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg>팀 목표 분포</h2>
+                <p class="panel__sub">선수 12명 · 단기 목표 기준</p>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut" style="--p1:58%;--p2:83%;--p3:100%">
+                <div class="donut__center"><strong>68%</strong><span>평균</span></div>
+              </div>
+              <div class="donut-legend">
+                <div><i></i>순항 <b>7명</b></div>
+                <div><i></i>진행 <b>3명</b></div>
+                <div><i></i>지연 <b>2명</b></div>
+                <div><i></i>달성 <b>2명</b></div>
+              </div>
+            </div>
+            <div class="mini-kpi" style="margin-top:12px"><span>단기 목표 평균</span><strong>72%</strong></div>
+            <div class="mini-kpi"><span>장기 목표 평균</span><strong>64%</strong></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>최근 코칭 메모</h2>
+                <p class="panel__sub">최근 3건</p>
+              </div>
+              <a class="panel__link" href="#feedback">전체 보기 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
+            </div>
+            <div class="note-list" id="recentNotes"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= ROSTER ======================= -->
+      <section class="dash-section" id="roster" aria-labelledby="roster-title" hidden>
+        <div class="section-label">
+          <h2 id="roster-title">소속 선수 목록</h2>
+          <span>개별 프로필 · 기록 확인</span>
+          <span class="tag tag--blue" style="margin-left:auto" id="rosterCount">12명</span>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+              <input type="search" id="rosterSearch" placeholder="선수 이름 또는 포지션 검색" aria-label="선수 검색" />
+            </div>
+            <select class="filter-select" id="rosterTeam" aria-label="소속 팀 필터">
+              <option value="all">전체 소속</option>
+              <option value="1군">1군</option>
+              <option value="2군">2군</option>
+            </select>
+            <select class="filter-select" id="rosterSort" aria-label="정렬 기준">
+              <option value="goal">목표 달성률 순</option>
+              <option value="minutes">훈련량 순</option>
+              <option value="name">이름 순</option>
+              <option value="risk">관리 필요 우선</option>
+            </select>
+            <span class="toolbar__spacer"></span>
+            <button class="btn btn--dark btn--sm" type="button" data-modal-open="playerModal">
+              <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>선수 추가
+            </button>
+          </div>
+          <div class="roster-grid" id="rosterGrid"></div>
+          <div class="panel__foot">
+            <span>선수 카드를 선택하면 개별 프로필과 훈련·경기 기록을 확인할 수 있습니다.</span>
+            <span id="rosterFoot">전체 12명</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= GOALS ======================= -->
+      <section class="dash-section" id="goals" aria-labelledby="goals-title" hidden>
+        <div class="section-label">
+          <h2 id="goals-title">목표 관리</h2>
+          <span>단기 · 장기 목표 설정과 달성률</span>
+          <button class="btn btn--dark btn--sm" type="button" data-modal-open="goalModal" style="margin-left:auto">
+            <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>목표 추가
+          </button>
+        </div>
+
+        <div class="grid-2" style="align-items:start">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>선수별 목표</h2>
+                <p class="panel__sub">선수를 선택하면 단기·장기 목표를 확인할 수 있습니다.</p>
+              </div>
+              <select class="filter-select" id="goalPlayer" aria-label="목표 확인 선수 선택"></select>
+            </div>
+            <div class="goal-grid" id="goalCards"></div>
+            <p class="chart-note" style="margin-top:12px"><svg class="icon" aria-hidden="true"><use href="#i-info" /></svg>목표 달성률은 코치가 설정한 측정 기준과 입력된 기록을 바탕으로 계산됩니다.</p>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-bars" /></svg>팀 전체 달성률</h2>
+                <p class="panel__sub">단기 목표 기준 · 높은 순</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>선수</th><th>단기 목표</th><th>장기 목표</th><th>달성률</th></tr></thead>
+                <tbody id="teamGoalBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= FEEDBACK ======================= -->
+      <section class="dash-section" id="feedback" aria-labelledby="feedback-title" hidden>
+        <div class="section-label">
+          <h2 id="feedback-title">피드백 · 코칭 메모</h2>
+          <span>선수별 메모 기록과 통합 확인</span>
+          <span class="tag tag--green" style="margin-left:auto" id="noteCount">4건</span>
+        </div>
+
+        <div class="grid-2" style="align-items:start">
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-edit" /></svg>새 코칭 메모</h2>
+                <p class="panel__sub">선수에게 남길 피드백을 기록합니다.</p>
+              </div>
+            </div>
+            <form class="note-composer" id="noteForm">
+              <div class="note-composer__row">
+                <select class="select select--sm" id="notePlayer" aria-label="선수 선택" required></select>
+                <select class="select select--sm" id="noteType" aria-label="메모 유형">
+                  <option value="훈련">훈련</option>
+                  <option value="경기">경기</option>
+                  <option value="태도">태도</option>
+                </select>
+              </div>
+              <textarea class="textarea" id="noteText" placeholder="예: 하체 회전이 좋아졌습니다. 이번 주는 공을 끝까지 보는 연습에 집중해 주세요." required></textarea>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn btn--dark btn--sm" type="submit"><svg class="icon" aria-hidden="true"><use href="#i-send" /></svg>메모 저장</button>
+                <button class="btn btn--outline btn--sm" type="button" id="noteTemplate">문장 예시 넣기</button>
+              </div>
+            </form>
+            <div class="note-callout" style="margin-top:14px">
+              <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+              <span>코칭 메모는 선수와 학부모에게 공개될 수 있습니다. 민감한 평가나 비교 표현은 피하고, 관찰 가능한 사실과 다음 행동에 집중해 주세요.</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__head">
+              <div>
+                <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>최근 메모</h2>
+                <p class="panel__sub">선수별 피드백 타임라인</p>
+              </div>
+              <select class="filter-select" id="noteFilter" aria-label="메모 선수 필터">
+                <option value="all">전체 선수</option>
+              </select>
+            </div>
+            <div class="note-list" id="noteList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================= PARENT REQUESTS ======================= -->
+      <section class="dash-section" id="requests" aria-labelledby="requests-title" hidden>
+        <div class="section-label">
+          <h2 id="requests-title">보호자 요청</h2>
+          <span>학부모가 보낸 요청 확인 · 처리</span>
+          <span class="tag tag--clay" style="margin-left:auto" id="requestPendingTag">대기 0건</span>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <div>
+              <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-mail" /></svg>학부모 요청함</h2>
+              <p class="panel__sub">요청을 확인하고 완료 처리하면 학부모 화면의 상태가 '확인 완료'로 바뀝니다.</p>
+            </div>
+            <button class="btn btn--outline btn--sm" type="button" id="requestRefresh">
+              <svg class="icon" aria-hidden="true"><use href="#i-refresh" /></svg>새로고침
+            </button>
+          </div>
+          <div class="request-list" id="parentRequestList"></div>
+          <div class="panel__foot">
+            <span>요청은 학부모 계정에서 전송됩니다.</span>
+            <span>개인정보가 포함된 요청은 별도 채널로 안내하세요.</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<nav class="mobile-tabbar" aria-label="코치 모바일 메뉴">
+  <a class="is-active" href="#overview"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>현황</a>
+  <a href="#roster"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>선수</a>
+  <a href="#goals"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>목표</a>
+  <a href="#feedback"><svg class="icon" aria-hidden="true"><use href="#i-note" /></svg>메모</a>
+  <button type="button" onclick="document.getElementById('sidebarToggle').click()"><svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>메뉴</button>
+</nav>
+
+<!-- ======================= PLAYER DRAWER ======================= -->
+<aside class="drawer" id="playerDrawer" hidden aria-label="선수 상세 정보">
+  <div class="drawer__backdrop" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <div class="drawer__head">
+      <div>
+        <h2 id="drawerTitle">선수 프로필</h2>
+        <p id="drawerSub">소속 · 포지션</p>
+      </div>
+      <button class="icon-btn drawer__close" type="button" data-drawer-close aria-label="닫기">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+    </div>
+    <div class="drawer__body" id="drawerContent"></div>
+  </div>
+</aside>
+
+<!-- ======================= ADD PLAYER MODAL ======================= -->
+<div class="modal" id="playerModal" hidden>
+  <div class="modal__backdrop"></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle">
+    <div class="modal__head">
+      <div>
+        <h2 id="playerModalTitle">선수 추가</h2>
+        <p>소속 선수를 등록하면 개별 프로필과 기록을 관리할 수 있습니다.</p>
+      </div>
+      <button class="icon-btn modal__close" type="button" data-modal-close aria-label="닫기">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+    </div>
+    <form id="playerForm">
+      <div class="field">
+        <label for="playerName">선수 이름</label>
+        <input class="input" type="text" id="playerName" placeholder="예: 홍길동" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="playerPosition">포지션</label>
+          <input class="input" type="text" id="playerPosition" placeholder="예: 투수" required />
+        </div>
+        <div class="field">
+          <label for="playerGrade">학년</label>
+          <input class="input" type="text" id="playerGrade" placeholder="예: 중1" required />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="playerTeam">소속</label>
+          <select class="select" id="playerTeam">
+            <option value="1군">1군</option>
+            <option value="2군">2군</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="playerGoal">초기 목표 달성률</label>
+          <input class="input" type="number" id="playerGoal" min="0" max="100" value="50" />
+        </div>
+      </div>
+      <button class="btn btn--dark btn--block" type="submit" style="margin-top:16px">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>선수 등록
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= ADD GOAL MODAL ======================= -->
+<div class="modal" id="goalModal" hidden>
+  <div class="modal__backdrop"></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+    <div class="modal__head">
+      <div>
+        <h2 id="goalModalTitle">목표 추가</h2>
+        <p>선수별 단기·장기 목표를 설정하고 달성률을 추적합니다.</p>
+      </div>
+      <button class="icon-btn modal__close" type="button" data-modal-close aria-label="닫기">
+        <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+      </button>
+    </div>
+    <form id="goalForm">
+      <div class="field">
+        <label for="goalPlayerInput">선수</label>
+        <select class="select" id="goalPlayerInput" required></select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="goalType">목표 유형</label>
+          <select class="select" id="goalType">
+            <option value="단기">단기 목표</option>
+            <option value="장기">장기 목표</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="goalDue">목표 기한</label>
+          <input class="input" type="date" id="goalDue" data-default-today />
+        </div>
+      </div>
+      <div class="field">
+        <label for="goalTitle">목표 내용</label>
+        <input class="input" type="text" id="goalTitle" placeholder="예: 10월 타율 .320 달성" required />
+      </div>
+      <div class="field">
+        <label for="goalPct">현재 달성률 (%)</label>
+        <input class="input" type="number" id="goalPct" min="0" max="100" value="0" />
+      </div>
+      <button class="btn btn--dark btn--block" type="submit" style="margin-top:16px">
+        <svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>목표 저장
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="js/icons.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/app-shell.js" defer></script>
+<script src="js/coach.js" defer></script>
+<script src="js/pwa.js" defer></script>
+</body>
+</html>

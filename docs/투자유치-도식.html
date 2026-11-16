@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>투자유치·자금조달 도식 — 얼마가 필요하고 어디서 오는가</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --ink: #0b1a1e; --ink-2: #112a2f; --ink-3: #18383e;
+    --paper: #f7f6f0; --paper-2: #efece2; --white: #fff;
+    --lime: #d9f55f; --lime-soft: #f2facd;
+    --green: #0e6b4e; --green-soft: #e3f1e9;
+    --blue: #2f5fe0; --blue-soft: #e9eefc;
+    --clay: #c25a34; --clay-soft: #f9e9e1;
+    --violet: #6a55c8; --violet-soft: #efeafb;
+    --gold: #b98514; --gold-soft: #f8efd7;
+    --text: #15272b; --muted: #5d6d71; --muted-2: #859396;
+    --line: #e1ded3;
+    --font: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: #e9e6dc;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+  .page { width: min(1240px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 64px; }
+
+  /* header */
+  .hero {
+    position: relative; overflow: hidden;
+    background: var(--ink); color: #fff;
+    border-radius: 28px; padding: 44px 48px 40px;
+  }
+  .hero::before {
+    content: ""; position: absolute; right: -140px; top: -180px;
+    width: 520px; height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,245,95,.16), transparent 68%);
+  }
+  .eyebrow {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--lime); border: 1px solid rgba(217,245,95,.35);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 18px;
+  }
+  .hero h1 {
+    position: relative; margin: 0 0 10px; font-size: 38px; line-height: 1.18;
+    font-weight: 800; letter-spacing: -0.035em;
+  }
+  .hero h1 em { font-style: normal; color: var(--lime); }
+  .hero p { position: relative; margin: 0; color: rgba(255,255,255,.62); font-size: 14px; max-width: 760px; }
+  .hero .fx { position: relative; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+  .hero .fx span {
+    font-size: 12px; font-variant-numeric: tabular-nums;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    padding: 7px 12px; border-radius: 8px; color: rgba(255,255,255,.8);
+  }
+
+  /* cards */
+  .card {
+    background: var(--white); border: 1px solid var(--line);
+    border-radius: 24px; padding: 30px 32px 34px; margin-top: 18px;
+  }
+  .card-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .num {
+    font-size: 12px; font-weight: 800; color: var(--ink);
+    background: var(--lime); border-radius: 6px; padding: 3px 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card h2 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+  .card .sub { margin: 6px 0 22px; color: var(--muted); font-size: 13px; }
+
+  .note {
+    margin-top: 18px; padding: 13px 17px; border-radius: 12px;
+    background: var(--blue-soft); color: #14307a; font-size: 12.5px; line-height: 1.6;
+    border-left: 3px solid var(--blue);
+  }
+  .note.warn { background: var(--clay-soft); color: #7a3819; border-left-color: var(--clay); }
+
+  /* three boxes */
+  .trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .box { border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+  .box .k { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+  .box .v { font-size: 25px; font-weight: 800; letter-spacing: -0.03em; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .box .d { font-size: 12px; color: var(--muted); }
+  .box.a { background: var(--green-soft); border-color: transparent; }
+  .box.a .v { color: var(--green); }
+  .box.b { background: var(--blue-soft); border-color: transparent; }
+  .box.b .v { color: var(--blue); }
+  .box.c { background: var(--violet-soft); border-color: transparent; }
+  .box.c .v { color: var(--violet); }
+
+  /* chart */
+  .chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  /* bars */
+  .brow { display: grid; grid-template-columns: 132px 1fr 118px; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .brow .lb { font-size: 12.5px; font-weight: 700; }
+  .brow .lb small { display: block; font-weight: 500; font-size: 10.5px; color: var(--muted-2); }
+  .track { height: 22px; background: var(--paper-2); border-radius: 6px; overflow: hidden; display: flex; }
+  .track i { display: block; height: 100%; }
+  .brow .val { text-align: right; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  /* rounds */
+  .rounds { display: flex; flex-direction: column; gap: 8px; }
+  .rnd {
+    display: grid; grid-template-columns: 118px 1fr 92px 92px;
+    align-items: center; gap: 14px;
+    padding: 13px 16px; border-radius: 12px; border: 1px solid var(--line);
+  }
+  .rnd .name { font-size: 13px; font-weight: 800; }
+  .rnd .name small { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted-2); }
+  .rnd .barw { height: 16px; background: var(--paper-2); border-radius: 5px; overflow: hidden; }
+  .rnd .barw i { display: block; height: 100%; border-radius: 5px; }
+  .rnd .amt { text-align: right; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .rnd .cum { text-align: right; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rnd.seed { background: var(--green-soft); border-color: transparent; }
+  .rnd.gov { background: var(--lime-soft); border-color: transparent; }
+  .rnd.prea { background: var(--blue-soft); border-color: transparent; }
+  .rnd.sera { background: var(--violet-soft); border-color: transparent; }
+  .rnd.serb { background: var(--paper-2); border-color: transparent; }
+
+  /* dilution */
+  .dil { display: flex; height: 40px; border-radius: 10px; overflow: hidden; margin: 6px 0 10px; }
+  .dil i { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff; }
+  .dil-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted-2); }
+
+  /* table */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+  tr.total td { border-top: 2px solid var(--ink); border-bottom: 0; font-weight: 800; }
+
+  footer { margin-top: 22px; text-align: center; font-size: 11px; color: var(--muted-2); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+
+  @media (max-width: 900px) {
+    .hero { padding: 30px 26px; }
+    .hero h1 { font-size: 26px; }
+    .trio, .grid2 { grid-template-columns: 1fr; }
+    .card { padding: 22px 20px 26px; }
+    .brow { grid-template-columns: 96px 1fr; }
+    .brow .val { grid-column: 2; text-align: left; }
+    .rnd { grid-template-columns: 96px 1fr; }
+    .rnd .amt, .rnd .cum { grid-column: 2; text-align: left; }
+  }
+
+  @page { size: A4 landscape; margin: 10mm; }
+  @media print {
+    body { background: #fff; }
+    .page { width: 100%; padding: 0; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Funding Map · 2026</span>
+    <h1>얼마가 필요한가 · <em>어디서 오는가</em></h1>
+    <p>주니어 운동선수 성장 기록 플랫폼 — 84개월 비용 98억 1,800만 원, 최대 적자 9억 6,700만 원, 조달 105억 1,000만 원.</p>
+    <div class="fx">
+      <span>최대 적자 9.67억 (M48)</span>
+      <span>5년차 현금흐름 +11.78억</span>
+      <span>창업자 지분 57.5%</span>
+      <span>환율 1 USD = 1,340원</span>
+    </div>
+  </header>
+
+  <!-- 01 -->
+  <section class="card">
+    <div class="card-head"><span class="num">01</span><h2>세 가지 돈 — 생존 / 실행 / 가속</h2></div>
+    <p class="sub">같은 사업을 세 가지 속도로 굴릴 때 필요한 금액. "최소 얼마면 사는가"와 "최대 얼마를 쓸 수 있는가"를 분리했다.</p>
+
+    <div class="trio">
+      <div class="box a">
+        <div class="k">생존 · 필수</div>
+        <div class="v">15.1억</div>
+        <div class="d">Seed 3 + 정부출연 2.1 + Pre-A 10<br>한국·일본만. 5년차 흑자, 7년차 20억</div>
+      </div>
+      <div class="box b">
+        <div class="k">실행 · 계획</div>
+        <div class="v">45.1억</div>
+        <div class="d">위 + Series A 30<br>중국·대만·호주. 7년차 80억</div>
+      </div>
+      <div class="box c">
+        <div class="k">가속 · 선택</div>
+        <div class="v">105.1억</div>
+        <div class="d">위 + Series B 60<br>미국·독일 진입을 12개월 앞당김</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>핵심</strong> — 이 사업은 <strong>자본이 없어도 망하지 않는다.</strong> 7년 총비용 98억 중 인건비가 45.6억(46%)이고, 공장·재고·대규모 광고가 없다.
+      자본은 <strong>성장 속도</strong>를 결정할 뿐 <strong>생존</strong>을 결정하지 않는다.
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="card">
+    <div class="card-head"><span class="num">02</span><h2>누적 현금흐름 — 적자는 48개월에 끝난다</h2></div>
+    <p class="sub">영업현금흐름을 매년 누적한 값(억 원). M48에 −9.67억으로 저점을 찍고, 5년차에 플러스로 전환한다.</p>
+
+    <svg class="chart" viewBox="0 0 900 320" role="img" aria-label="연차별 누적 현금흐름 선 그래프">
+      <!-- grid -->
+      <g stroke="#ece9df" stroke-width="1">
+        <line x1="50" y1="254" x2="890" y2="254" />
+        <line x1="50" y1="182" x2="890" y2="182" />
+        <line x1="50" y1="110" x2="890" y2="110" />
+        <line x1="50" y1="38"  x2="890" y2="38" />
+      </g>
+      <g fill="#859396" font-size="10.5" font-family="Pretendard, sans-serif" text-anchor="end">
+        <text x="42" y="258">0</text>
+        <text x="42" y="186">+20</text>
+        <text x="42" y="114">+40</text>
+        <text x="42" y="42">+60</text>
+      </g>
+
+      <!-- area -->
+      <path d="M50,254 L168.6,263.5 L287.1,275.7 L405.7,282.6 L524.3,287 L642.9,244.6 L761.4,212.7 L880,29.6 L880,254 Z"
+            fill="rgba(47,95,224,.10)" />
+      <!-- line -->
+      <polyline points="50,254 168.6,263.5 287.1,275.7 405.7,282.6 524.3,287 642.9,244.6 761.4,212.7 880,29.6"
+                fill="none" stroke="#2f5fe0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+      <!-- zero emphasis -->
+      <line x1="50" y1="254" x2="890" y2="254" stroke="#0b1a1e" stroke-width="1.5" stroke-dasharray="4 4" opacity=".35" />
+
+      <!-- points -->
+      <g fill="#2f5fe0">
+        <circle cx="50" cy="254" r="4.5" />
+        <circle cx="168.6" cy="263.5" r="4.5" />
+        <circle cx="287.1" cy="275.7" r="4.5" />
+        <circle cx="405.7" cy="282.6" r="4.5" />
+        <circle cx="524.3" cy="287" r="4.5" fill="#c25a34" />
+        <circle cx="642.9" cy="244.6" r="4.5" fill="#0e6b4e" />
+        <circle cx="761.4" cy="212.7" r="4.5" fill="#0e6b4e" />
+        <circle cx="880" cy="29.6" r="5.5" fill="#0e6b4e" />
+      </g>
+
+      <!-- peak annotation -->
+      <g font-family="Pretendard, sans-serif">
+        <line x1="524.3" y1="287" x2="524.3" y2="292" stroke="#c25a34" stroke-width="1.5" />
+        <text x="524.3" y="303" font-size="11" font-weight="700" fill="#c25a34" text-anchor="middle">최대 적자 −9.67억 (Y4·M48)</text>
+
+        <text x="50" y="244" font-size="11" font-weight="700" fill="#2f5fe0" text-anchor="middle">0</text>
+        <text x="168.6" y="256" font-size="11" fill="#5d6d71" text-anchor="middle">−2.65</text>
+        <text x="287.1" y="268" font-size="11" fill="#5d6d71" text-anchor="middle">−6.03</text>
+        <text x="405.7" y="275" font-size="11" fill="#5d6d71" text-anchor="middle">−7.95</text>
+        <text x="642.9" y="234" font-size="11" font-weight="700" fill="#0e6b4e" text-anchor="middle">+2.11</text>
+        <text x="761.4" y="202" font-size="11" font-weight="700" fill="#0e6b4e" text-anchor="middle">+11.47</text>
+        <text x="870" y="20" font-size="13" font-weight="800" fill="#0e6b4e" text-anchor="middle">+62.33</text>
+
+        <!-- year labels -->
+        <g fill="#859396" font-size="11" text-anchor="middle">
+          <text x="50" y="300">Y0</text>
+          <text x="168.6" y="300">Y1</text>
+          <text x="287.1" y="300">Y2</text>
+          <text x="405.7" y="300">Y3</text>
+          <text x="642.9" y="300">Y5</text>
+          <text x="761.4" y="300">Y6</text>
+          <text x="880" y="300">Y7</text>
+        </g>
+      </g>
+    </svg>
+
+    <div class="legend">
+      <span><i style="background:#2f5fe0"></i>누적 현금흐름</span>
+      <span><i style="background:#c25a34"></i>최대 적자 구간</span>
+      <span><i style="background:#0e6b4e"></i>흑자 전환 이후</span>
+    </div>
+
+    <div class="note">
+      <strong>왜 48개월인가</strong> — M0~18은 제품 검증(매출 0.3억), M18~36은 유료화(4.7억), M36~48은 Wave 2 진입 비용이 매출보다 먼저 나간다.
+      이 4년을 넘기면 <strong>매출이 비용을 추월</strong>한다.
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="card">
+    <div class="card-head"><span class="num">03</span><h2>단계별 소요자금 — 어디에 얼마가 드는가</h2></div>
+    <p class="sub">계획 비용 98억 1,800만 원 + 예비비 10% 9억 8,200만 원 = 조달 상한 108억. 막대 폭은 총액 대비 비율.</p>
+
+    <div class="brow">
+      <div class="lb">Phase 0 파일럿<small>0~6개월 · 3명</small></div>
+      <div class="track"><i style="width:1.3%;background:#0e6b4e"></i><i style="width:0.7%;background:#8fc7ae"></i></div>
+      <div class="val">1.13억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">Phase 1 유료화<small>6~18개월 · 5명</small></div>
+      <div class="track"><i style="width:4.0%;background:#0e6b4e"></i><i style="width:2.3%;background:#8fc7ae"></i></div>
+      <div class="val">3.65억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">Phase 2 확장<small>18~36개월 · 8명</small></div>
+      <div class="track"><i style="width:10.2%;background:#0e6b4e"></i><i style="width:8.1%;background:#8fc7ae"></i></div>
+      <div class="val">10.68억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">Phase 3 Wave 2<small>36~60개월 · 14명</small></div>
+      <div class="track"><i style="width:22.9%;background:#0e6b4e"></i><i style="width:19.0%;background:#8fc7ae"></i></div>
+      <div class="val">24.44억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">Phase 4 미·독<small>60~84개월 · 25명</small></div>
+      <div class="track"><i style="width:39.9%;background:#0e6b4e"></i><i style="width:60.1%;background:#8fc7ae"></i></div>
+      <div class="val">58.28억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">예비비 10%<small>채용 지연·환율·규제</small></div>
+      <div class="track"><i style="width:16.8%;background:#b98514"></i></div>
+      <div class="val">9.82억</div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:#0e6b4e"></i>인건비 45.62억 (46%)</span>
+      <span><i style="background:#8fc7ae"></i>운영비 52.56억 (54%)</span>
+      <span><i style="background:#b98514"></i>예비비 9.82억</span>
+    </div>
+
+    <div class="note">
+      <strong>18개월이 승부처</strong> — 초기 18개월에 4억 7,800만 원이 든다. 그중 <strong>64%가 사람</strong>이다.
+      우리는 장비도 재고도 사지 않는다. 사람에게 쓰는 돈이 곧 제품인 사업이다.
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="card">
+    <div class="card-head"><span class="num">04</span><h2>조달 사다리 — 비희석부터, 위험한 돈은 나중에</h2></div>
+    <p class="sub">조달 순서는 금액 순서가 아니다. <strong>지분을 주지 않는 돈 → 가장 비싼 돈</strong> 순으로 쓴다.</p>
+
+    <div class="rounds">
+      <div class="rnd seed">
+        <div class="name">Seed<small>M0 · 엔젤 3~5명</small></div>
+        <div class="barw"><i style="width:5%;background:#0e6b4e"></i></div>
+        <div class="amt">3억</div>
+        <div class="cum">누적 3억</div>
+      </div>
+      <div class="rnd gov">
+        <div class="name">정부출연<small>M0~24 · 비희석</small></div>
+        <div class="barw"><i style="width:3.5%;background:#b98514"></i></div>
+        <div class="amt">2.1억</div>
+        <div class="cum">누적 5.1억</div>
+      </div>
+      <div class="rnd prea">
+        <div class="name">Pre-A<small>M12 · 초기 VC</small></div>
+        <div class="barw"><i style="width:16.7%;background:#2f5fe0"></i></div>
+        <div class="amt">10억</div>
+        <div class="cum">누적 15.1억</div>
+      </div>
+      <div class="rnd sera">
+        <div class="name">Series A<small>M30 · VC + CVC</small></div>
+        <div class="barw"><i style="width:50%;background:#6a55c8"></i></div>
+        <div class="amt">30억</div>
+        <div class="cum">누적 45.1억</div>
+      </div>
+      <div class="rnd serb">
+        <div class="name">Series B<small>M60 · 선택</small></div>
+        <div class="barw"><i style="width:100%;background:#5d6d71"></i></div>
+        <div class="amt">60억</div>
+        <div class="cum">누적 105.1억</div>
+      </div>
+    </div>
+
+    <div class="note warn">
+      <strong>정부지원 표기 주의</strong> — 공고상 규모는 <strong>총사업비 3억</strong>이지만 그중 <strong>0.9억은 우리 자부담</strong>이다.
+      실제로 조달하는 돈은 <strong>정부출연 2.1억</strong>이고, 모든 누적·합계는 이 값 기준이다.
+      <br><strong>Series B는 없어도 된다.</strong> 5년차에 현금흐름이 플러스이므로 B 없이 매출로 미국에 진입할 수 있다. B는 12개월을 앞당기는 자금이다.
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="card">
+    <div class="card-head"><span class="num">05</span><h2>지분 희석과 투자수익</h2></div>
+    <p class="sub">4개 라운드를 모두 거쳐도 창업자 지분은 57.5%로 과반을 유지한다. 옵션 풀 10%를 두면 실질 52%.</p>
+
+    <div class="dil">
+      <i style="width:57.5%;background:#0b1a1e">창업자 57.5%</i>
+      <i style="width:13%;background:#5d6d71">B 13.0%</i>
+      <i style="width:12.4%;background:#6a55c8">A 12.4%</i>
+      <i style="width:10.6%;background:#2f5fe0">Pre-A 10.6%</i>
+      <i style="width:6.4%;background:#0e6b4e">Seed 6.4%</i>
+    </div>
+    <div class="dil-scale"><span>창업 100%</span><span>Seed 후 90.0%</span><span>Pre-A 후 77.1%</span><span>A 후 66.1%</span><span>B 후 57.5%</span></div>
+
+    <table style="margin-top:22px">
+      <thead>
+        <tr>
+          <th>시나리오</th><th style="text-align:right">기업가치</th>
+          <th style="text-align:right">Seed (6.4%)</th><th style="text-align:right">Pre-A (10.6%)</th>
+          <th style="text-align:right">A (12.4%)</th><th style="text-align:right">B (13.0%)</th>
+          <th style="text-align:right">창업자 (57.5%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>보수</td><td class="n">300억</td><td class="n">19.2억 (6.4x)</td><td class="n">31.9억 (3.2x)</td><td class="n">37.3억 (1.2x)</td><td class="n">60억 (1.0x)</td><td class="n">172.5억</td></tr>
+        <tr><td><b>기본</b></td><td class="n">600억</td><td class="n">38.3억 (12.8x)</td><td class="n">63.9억 (6.4x)</td><td class="n">74.5억 (2.5x)</td><td class="n">78.3억 (1.3x)</td><td class="n">345억</td></tr>
+        <tr><td>공격</td><td class="n">1,000억</td><td class="n">63.9억 (21.3x)</td><td class="n">106.5억 (10.6x)</td><td class="n">124.2억 (4.1x)</td><td class="n">130.4억 (2.2x)</td><td class="n">575억</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>희석 후 지분으로 계산했다</strong> — 뒤 라운드가 들어오면 앞 투자자도 함께 희석된다. 진입 지분 × Exit 기업가치로 계산하면
+      Seed 수익이 <strong>20배로 2배 가까이 과대평가</strong>된다. 실제는 <strong>12.8배</strong>다. 실사에서 반드시 지적되는 부분이다.
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="card">
+    <div class="card-head"><span class="num">06</span><h2>Use of Funds — 105.1억의 행선지</h2></div>
+    <p class="sub">조달액 기준. 계획 비용 98.18억에 예비비 사용분 6.92억을 더한 값이다.</p>
+
+    <div class="brow">
+      <div class="lb">인건비<small>49.8억 · 47%</small></div>
+      <div class="track"><i style="width:47.4%;background:#0e6b4e"></i></div>
+      <div class="val">49.8억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">제품·개발<small>21.4억 · 20%</small></div>
+      <div class="track"><i style="width:20.4%;background:#2f5fe0"></i></div>
+      <div class="val">21.4억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">마케팅·파트너<small>20.2억 · 19%</small></div>
+      <div class="track"><i style="width:19.2%;background:#6a55c8"></i></div>
+      <div class="val">20.2억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">해외·법무<small>9.4억 · 9%</small></div>
+      <div class="track"><i style="width:8.9%;background:#c25a34"></i></div>
+      <div class="val">9.4억</div>
+    </div>
+    <div class="brow">
+      <div class="lb">기타·예비<small>4.3억 · 4%</small></div>
+      <div class="track"><i style="width:4.1%;background:#b98514"></i></div>
+      <div class="val">4.3억</div>
+    </div>
+
+    <div class="grid2" style="margin-top:24px">
+      <div>
+        <h3 style="margin:0 0 8px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)">3년차까지 누적 15.46억</h3>
+        <table>
+          <tbody>
+            <tr><td>인건비</td><td class="n">9.00억</td><td class="n" style="color:var(--muted);font-weight:500">58.2%</td></tr>
+            <tr><td>해외 진입·법무</td><td class="n">2.50억</td><td class="n" style="color:var(--muted);font-weight:500">16.1%</td></tr>
+            <tr><td>마케팅·파트너</td><td class="n">1.90억</td><td class="n" style="color:var(--muted);font-weight:500">12.3%</td></tr>
+            <tr><td>법무·회계·보안</td><td class="n">0.83억</td><td class="n" style="color:var(--muted);font-weight:500">5.4%</td></tr>
+            <tr><td>기타·여비</td><td class="n">0.49억</td><td class="n" style="color:var(--muted);font-weight:500">3.2%</td></tr>
+            <tr><td>클라우드·툴</td><td class="n">0.39억</td><td class="n" style="color:var(--muted);font-weight:500">2.5%</td></tr>
+            <tr><td>외주 (디자인·QA)</td><td class="n">0.35억</td><td class="n" style="color:var(--muted);font-weight:500">2.3%</td></tr>
+            <tr class="total"><td>합계</td><td class="n">15.46억</td><td class="n">100%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3 style="margin:0 0 8px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)">라운드 실패 시 생존</h3>
+        <table>
+          <thead><tr><th>실패 지점</th><th>즉시 조치</th><th style="text-align:right">흑자</th></tr></thead>
+          <tbody>
+            <tr><td><b>Seed</b></td><td>정부출연 0.7억 + 창업자 자본</td><td class="n">60개월</td></tr>
+            <tr><td><b>Pre-A</b></td><td>Seed + 매출, 채용 동결(5명)</td><td class="n">48개월</td></tr>
+            <tr><td><b>A</b></td><td>Pre-A + 정책금융, 일본 연기</td><td class="n">42개월</td></tr>
+            <tr><td><b>B</b></td><td>문제 없음 — 5년차 흑자</td><td class="n">48개월</td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin-top:14px">
+          <strong>플랜 B</strong> — 45억 조달 시 7년차 80억. 13억 조달(Seed+Pre-A)이어도 7년차 20억으로 <strong>사업은 존속</strong>한다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>SPORTS GROW — 투자유치·자금조달 도식 · 상세는 docs/사업계획서-투자유치-자금조달.md</footer>
+</div>
+</body>
+</html>

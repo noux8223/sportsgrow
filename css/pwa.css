@@ -1,0 +1,98 @@
+/* =====================================================================
+   SPORTS GROW — PWA UI (설치 안내·업데이트 알림)
+   ===================================================================== */
+.pwa-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  max-width: min(92vw, 440px);
+  padding: 12px 12px 12px 16px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 50px -24px rgba(11, 26, 30, 0.78);
+  font-size: 12.5px;
+  line-height: 1.5;
+  transform: translateX(-50%);
+  animation: pwa-toast-in 0.22s var(--ease) both;
+}
+
+.pwa-toast__msg {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-toast__action,
+.pwa-toast__close {
+  flex: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pwa-toast__action {
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: var(--lime);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.pwa-toast__action:hover {
+  background: var(--lime-2);
+}
+
+.pwa-toast__close {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.pwa-toast__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.pwa-toast__action:focus-visible,
+.pwa-toast__close:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+/* 모바일 대시보드의 하단 탭바 위로 띄우기 */
+@media (max-width: 760px) {
+  body.app-body .pwa-toast {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes pwa-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-toast {
+    animation: none;
+  }
+}

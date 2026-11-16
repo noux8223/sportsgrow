@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>SPORTS GROW — IR Deck</title>
+<style>
+  @page { size: 960pt 540pt; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #FFFFFF; }
+  body { font-family: "Malgun Gothic", "맑은 고딕", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .slide {
+    position: relative; width: 1280px; height: 720px; overflow: hidden;
+    background: #FFFFFF; color: #111111; padding: 42px 62px 32px;
+    page-break-after: always; break-after: page;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  .slide::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(68% 58% at 92% 2%, rgba(29,78,216,.055) 0%, rgba(29,78,216,0) 58%),
+      radial-gradient(50% 42% at 2% 100%, rgba(29,78,216,.028) 0%, rgba(29,78,216,0) 62%);
+  }
+  .slide::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .35;
+    background-image: linear-gradient(rgba(15,23,42,.035) 1px, transparent 1px);
+    background-size: 100% 40px;
+  }
+  .inner { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; letter-spacing: 3px; color: #6B7280; font-weight: 700; }
+  .topbar .brand { color: #1F2937; letter-spacing: 2.6px; }
+  .topbar .brand i { color: #1D4ED8; font-style: normal; }
+  .num { color: #9CA3AF; }
+
+  .kicker { margin-top: 16px; font-size: 9.5px; letter-spacing: 3.4px; color: #1D4ED8; font-weight: 800; }
+  .kicker span { color: #9CA3AF; margin-left: 8px; letter-spacing: 2.4px; }
+  h2 { font-size: 33px; line-height: 1.24; font-weight: 800; letter-spacing: -1.1px; margin-top: 7px; }
+  h2 .red { color: #1D4ED8; }
+  h2 .dim { color: #6B7280; font-weight: 700; }
+  .sub { margin-top: 9px; font-size: 12px; line-height: 1.6; color: #374151; max-width: 1080px; }
+  .sub b { color: #111827; }
+
+  .body { flex: 1; min-height: 0; }
+  .foot { margin-top: auto; padding-top: 7px; border-top: 1px solid #EEF2F7; display: flex; justify-content: space-between; font-size: 8.6px; color: #6B7280; }
+  .foot .r { color: #9CA3AF; }
+
+  .band { border: 1px solid #E5E7EB; border-left: 3px solid #1D4ED8; background: rgba(15,23,42,.03); border-radius: 3px; padding: 14px 20px; display: flex; align-items: center; gap: 22px; }
+  .band .k { font-size: 8.6px; letter-spacing: 2.2px; color: #4B5563; font-weight: 800; white-space: nowrap; }
+  .band .txt { font-size: 12px; color: #1F2937; line-height: 1.5; word-break: keep-all; }
+  .band .txt b { color: #111111; }
+  .band .txt em { font-style: normal; color: #2563EB; font-weight: 800; }
+
+  /* ═══ 01 표지 — 성장 단계 일러스트 ═══ */
+  .cover { padding: 0 0 0 66px; background: #FFFFFF; display: flex; align-items: center; }
+  .cover .title { width: 580px; flex: 0 0 580px; z-index: 3; }
+  .cover .brandline { font-size: 9.5px; letter-spacing: 3px; font-weight: 700; color: #1F2937; margin-bottom: 24px; }
+  .cover .brandline i { color: #1D4ED8; font-style: normal; }
+  .cover h1 { font-size: 52px; line-height: 1.26; font-weight: 800; letter-spacing: -2.1px; color: #111111; }
+  .cover h1 .blue { color: #1D4ED8; }
+  .cover .hero {
+    margin-left: auto; margin-right: 30px; width: 600px; flex: 0 0 600px; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cover .hero img { width: 100%; height: auto; display: block; }
+  .cover .growth { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 4; border-radius: 2px;
+    background: linear-gradient(90deg, rgba(29,78,216,.12) 0%, rgba(29,78,216,.4) 40%, rgba(29,78,216,.7) 70%, #1D4ED8 100%); }
+
+  /* ═══ 02 Problem ═══ */
+  .pg2 { display: grid; grid-template-columns: 1fr 430px; gap: 38px; margin-top: 30px; }
+  .srcs { display: flex; flex-direction: column; gap: 10px; }
+  .src { display: flex; align-items: center; gap: 10px; border: 1px solid #E5E7EB; background: rgba(15,23,42,.03); border-radius: 3px; padding: 18px 14px; }
+  .src svg { width: 17px; height: 17px; flex: 0 0 17px; stroke: #4B5563; fill: none; stroke-width: 1.6; }
+  .src .t { font-size: 11.6px; font-weight: 700; color: #111827; }
+  .src .d { margin-left: auto; font-size: 9px; color: #6B7280; }
+  .src.void { border-color: #BFDBFE; background: rgba(29,78,216,.035); }
+  .src.void svg { stroke: #2563EB; }
+  .src.void .t { color: #111111; }
+  .src.void .d { color: #60A5FA; }
+  .broken { margin-top: 6px; font-size: 8.6px; letter-spacing: 1.6px; color: #4B5563; text-align: right; }
+  .pg2fig { position: absolute; left: 0; top: 106px; bottom: 28px; width: 560px; display: flex; flex-direction: column; align-items: center; }
+  .pg2fig img { flex: 1; min-height: 0; width: 100%; object-fit: contain; object-position: center center; display: block; }
+  .stat2 { margin-top: 12px; text-align: center; }
+  .stat2 b { display: block; font-size: 34px; font-weight: 800; letter-spacing: -1.2px; }
+  .stat2 span { display: block; font-size: 11.5px; color: #6B7280; margin-top: 6px; line-height: 1.55; }
+
+  /* ═══ 03 Opportunity ═══ */
+  .opp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+  .ocard { border: 1px solid #E5E7EB; border-top: 3px solid #1D4ED8; border-radius: 3px; padding: 20px 20px 18px; background: linear-gradient(180deg, rgba(29,78,216,.02), rgba(15,23,42,.022)); display: flex; flex-direction: column; min-height: 336px; }
+  .ocard .n { font-size: 9.5px; letter-spacing: 2px; font-weight: 800; color: #1D4ED8; }
+  .ocard h3 { font-size: 19px; font-weight: 800; letter-spacing: -.5px; margin-top: 8px; }
+  .ocard p { margin-top: 10px; font-size: 11px; line-height: 1.65; color: #374151; }
+  .ocard .mini { margin-top: 16px; }
+  .ocard .mini svg { display: block; width: 100%; height: 76px; }
+  .ocard .mini .cap2 { font-size: 7.6px; letter-spacing: 1.2px; color: #6B7280; margin-top: 7px; }
+  .ocard .big { margin-top: auto; padding-top: 14px; border-top: 1px solid #E5E7EB; }
+  .ocard .big b { display: block; font-size: 25px; font-weight: 800; letter-spacing: -1px; color: #111111; }
+  .ocard .big span { display: block; font-size: 9px; color: #4B5563; margin-top: 2px; }
+  .spend { margin-top: 16px; border: 1px solid #E5E7EB; border-radius: 3px; padding: 17px 20px; background: rgba(15,23,42,.025); }
+  .spend .row { display: flex; align-items: center; justify-content: space-between; font-size: 10.4px; color: #374151; margin-bottom: 9px; }
+  .spend .row b { color: #111827; }
+  .spend .bar { height: 28px; background: rgba(15,23,42,.06); border-radius: 2px; position: relative; overflow: hidden; }
+  .spend .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #1E3A8A, #1D4ED8); border-radius: 2px; }
+  .spend .cap { display: flex; justify-content: space-between; font-size: 8.6px; color: #6B7280; margin-top: 6px; }
+
+  /* ═══ 04 Solution ═══ */
+  .flow { display: grid; grid-template-columns: 220px 54px 260px 54px 1fr; align-items: stretch; margin-top: 40px; height: 400px; }
+  .fbox { border: 1px solid #E5E7EB; background: rgba(15,23,42,.03); border-radius: 4px; padding: 26px 20px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+  .fbox.core { border-color: #1D4ED8; background: rgba(29,78,216,.04); box-shadow: inset 0 0 50px rgba(29,78,216,.06); }
+  .fbox .k { font-size: 9px; letter-spacing: 2.2px; color: #6B7280; font-weight: 800; }
+  .fbox .v { font-size: 22px; font-weight: 800; margin-top: 8px; line-height: 1.35; }
+  .fbox small { display: block; font-size: 10.4px; color: #4B5563; }
+  .fbox.core .k { color: #2563EB; }
+  .farrow { display: flex; align-items: center; justify-content: center; color: #9CA3AF; font-size: 20px; }
+  .outs { display: flex; flex-direction: column; gap: 9px; }
+  .out { flex: 1; display: flex; align-items: center; gap: 9px; border: 1px solid #E5E7EB; border-left: 3px solid #1D4ED8; border-radius: 3px; padding: 12px 16px; background: rgba(15,23,42,.025); }
+  .out b { font-size: 13px; font-weight: 800; }
+  .out span { font-size: 10.2px; color: #4B5563; margin-left: auto; }
+
+  /* ═══ 05 Product ═══ */
+  .prod { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .pcard { border: 1px solid #E5E7EB; border-radius: 3px; background: rgba(255,255,255,.016); padding: 15px 17px 14px; }
+  .pcard .ph { display: flex; align-items: baseline; justify-content: space-between; }
+  .pcard .role { font-size: 14px; font-weight: 800; }
+  .pcard .role small { font-size: 8.6px; letter-spacing: 1.4px; color: #6B7280; font-weight: 800; margin-left: 8px; }
+  .pcard .tag { font-size: 8.2px; letter-spacing: 1.4px; font-weight: 800; color: #2563EB; }
+  .pcard .ui { margin-top: 9px; height: 130px; border: 1px solid #E5E7EB; border-radius: 3px; background: #F5F7FB; padding: 9px 11px; overflow: hidden; }
+  .pcard .feats { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .pcard .feats div { font-size: 9.8px; color: #374151; display: flex; gap: 7px; }
+  .pcard .feats div::before { content: "·"; color: #1D4ED8; font-weight: 900; }
+  .ui .uhead { display: flex; justify-content: space-between; font-size: 8px; color: #6B7280; letter-spacing: 1px; }
+  .ui .uname { font-size: 11px; font-weight: 800; margin-top: 2px; }
+  .ui .uname span { font-size: 8.4px; color: #4B5563; font-weight: 400; margin-left: 6px; }
+  .ui .kpis { display: flex; gap: 6px; margin-top: 6px; }
+  .ui .kpi { flex: 1; border: 1px solid #E5E7EB; border-radius: 2px; padding: 4px 6px; }
+  .ui .kpi b { display: block; font-size: 11px; }
+  .ui .kpi span { font-size: 7px; color: #6B7280; }
+  .ui .rep { display: flex; justify-content: space-between; align-items: center; font-size: 8.4px; padding: 4px 0; border-bottom: 1px solid #EEF2F7; color: #374151; }
+  .ui .rep b { color: #111827; font-size: 8.8px; }
+  .ui .rep .ok { color: #2563EB; font-weight: 800; }
+  .ui .tbl { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .ui .tbl th { font-size: 6.8px; color: #6B7280; text-align: left; padding: 2px 3px; font-weight: 700; letter-spacing: .5px; }
+  .ui .tbl td { font-size: 8px; color: #1F2937; padding: 3px; border-top: 1px solid #EEF2F7; }
+  .ui .tbl td .dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: #1D4ED8; margin-right: 4px; }
+  .ui .bars { display: flex; align-items: flex-end; gap: 7px; height: 44px; margin-top: 5px; }
+  .ui .bars i { flex: 1; background: linear-gradient(180deg, #1D4ED8, #1E3A8A); border-radius: 1px 1px 0 0; }
+  .ui .u4 { display: flex; gap: 6px; }
+  .ui .u4 .kpi { flex: 1; }
+
+  /* ═══ 06 Business Model ═══ */
+  .biz { display: grid; grid-template-columns: 1fr 470px; gap: 44px; margin-top: 26px; flex: 1; min-height: 0; align-items: center; }
+  .tiers { display: flex; flex-direction: column; justify-content: center; gap: 18px; position: relative; }
+  .tiers::before { content: ""; position: absolute; left: 46px; top: 54px; bottom: 54px; width: 2px; z-index: 0;
+    background: linear-gradient(180deg, #BFDBFE, #1D4ED8); }
+  .tier { position: relative; z-index: 1; display: grid; grid-template-columns: 46px 1fr auto; align-items: center; gap: 20px;
+    border: 1px solid #E5E7EB; border-radius: 4px; background: #FFFFFF; padding: 21px 24px; }
+  .tier.key { border-color: #1D4ED8; box-shadow: 0 0 0 1px rgba(29,78,216,.12), 0 10px 26px rgba(29,78,216,.07); }
+  .tno { width: 46px; height: 46px; border-radius: 50%; background: #F3F6FC; border: 1px solid #E5E7EB;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #1D4ED8; }
+  .tier.key .tno { background: #1D4ED8; border-color: #1D4ED8; color: #FFFFFF; }
+  .tname { font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+  .tname small { display: block; font-size: 8.8px; color: #9CA3AF; font-weight: 800; letter-spacing: 1.8px; margin-top: 4px; }
+  .tdesc { font-size: 10.6px; color: #4B5563; margin-top: 6px; line-height: 1.5; }
+  .tprice { text-align: right; font-size: 25px; font-weight: 800; letter-spacing: -1px; white-space: nowrap; }
+  .tprice small { font-size: 9.6px; color: #4B5563; font-weight: 400; letter-spacing: 0; margin-left: 2px; }
+  .tier.key .tprice { color: #1D4ED8; }
+  .piebox { border: 1px solid #E5E7EB; border-radius: 4px; padding: 22px 26px; background: linear-gradient(180deg, #FFFFFF, #F8FAFF); }
+  .piebox .ph2 { font-size: 8.8px; letter-spacing: 2.2px; font-weight: 800; color: #1D4ED8; }
+  .piebox .ph2 span { color: #9CA3AF; margin-left: 8px; letter-spacing: 1.4px; }
+  .donut { position: relative; width: 262px; height: 262px; margin: 6px auto 0; }
+  .donut svg { display: block; width: 100%; height: 100%; }
+  .donut .ctr { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .donut .ctr b { font-size: 31px; font-weight: 800; letter-spacing: -1.4px; color: #111111; }
+  .donut .ctr b small { font-size: 14px; letter-spacing: 0; margin-left: 2px; }
+  .donut .ctr span { font-size: 9.2px; color: #6B7280; margin-top: 5px; }
+  .legend { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .lg { display: flex; align-items: center; gap: 10px; font-size: 10.4px; }
+  .lg i { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 9px; }
+  .lg .nm { color: #374151; }
+  .lg .amt { margin-left: auto; font-weight: 800; color: #111111; font-variant-numeric: tabular-nums; }
+  .lg .pc { width: 48px; text-align: right; color: #6B7280; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .piebox .note { margin-top: 12px; padding-top: 10px; border-top: 1px solid #EEF2F7; font-size: 8.6px; color: #6B7280; line-height: 1.55; }
+
+  /* ═══ 07 Market ═══ */
+  .mkt3 { display: grid; grid-template-columns: 1fr 400px; gap: 44px; margin-top: 16px; align-items: center; position: relative; z-index: 2; }
+  .mapbg { position: absolute; top: -42px; left: -62px; width: 1280px; height: 720px; opacity: .065; filter: invert(1) grayscale(1) brightness(1.9); object-fit: cover; pointer-events: none; z-index: -1; -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.45) 0%, #000 40%); mask-image: linear-gradient(180deg, rgba(0,0,0,.45) 0%, #000 40%); }
+  .tiers4 { display: flex; flex-direction: column; }
+  .t4 { display: grid; grid-template-columns: 54px auto minmax(24px, 1fr) 88px; align-items: center; gap: 16px; padding: 21px 2px; border-bottom: 1px solid #EEF2F7; }
+  .t4:first-child { border-top: 1px solid #EEF2F7; }
+  .t4 .ld { align-self: start; margin-top: 13px; border-bottom: 1px dotted #D5DBE6; }
+  .t4 .lv { font-size: 10.4px; font-weight: 800; letter-spacing: 2px; color: #6B7280; }
+  .t4 .tx b { display: block; font-size: 13.8px; font-weight: 800; color: #111827; letter-spacing: -.2px; }
+  .t4 .tx span { display: block; font-size: 9.6px; color: #4B5563; margin-top: 4px; }
+  .t4 .wh { text-align: right; font-size: 9.6px; color: #6B7280; }
+  .t4.hot .lv { color: #2563EB; }
+  .t4.hot .tx b { color: #1D4ED8; }
+  .venn { position: relative; width: 400px; height: 400px; }
+  .venn svg { display: block; width: 100%; height: 100%; }
+  .vl { position: absolute; left: 0; right: 0; text-align: center; line-height: 1; }
+  .vl b { display: block; font-size: 8.2px; letter-spacing: 2.2px; font-weight: 800; color: #64748B; }
+  .vl span { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.6px; color: #111111; margin-top: 6px; }
+  .vl.tam { top: 11px; }
+  .vl.sam { top: 60px; }
+  .vl.som { top: 109px; }
+  .vl.ram { top: 172px; }
+  .vl.ram b { color: rgba(255,255,255,.72); }
+  .vl.ram span { color: #FFFFFF; font-size: 21px; letter-spacing: -.8px; }
+  .entry { margin-top: 16px; border: 1px solid #E5E7EB; border-radius: 3px; padding: 16px 20px; background: rgba(248,250,252,.85); position: relative; z-index: 2; display: flex; align-items: center; gap: 18px; }
+  .entry .eh { font-size: 8.4px; letter-spacing: 1.8px; font-weight: 800; color: #4B5563; width: 104px; line-height: 1.55; flex: 0 0 104px; }
+  .entry .eh b { display: block; color: #1D4ED8; }
+  .entry .seq { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .entry .ec { border-left: 2px solid #D1D5DB; padding-left: 12px; }
+  .entry .ec.on { border-left-color: #1D4ED8; }
+  .entry .ec-h { display: flex; align-items: center; gap: 8px; }
+  .flag { width: 28px; height: 18px; display: block; overflow: hidden; border-radius: 2px; box-shadow: 0 0 0 1px rgba(17,24,39,.14); flex: 0 0 28px; }
+  .flag svg { display: block; width: 100%; height: 100%; }
+  .entry .ec-h b { font-size: 13.8px; font-weight: 800; }
+  .entry .ec-h i { font-style: normal; font-size: 8px; color: #1D4ED8; letter-spacing: 1px; margin-left: 2px; }
+  .entry .ec > span { display: block; font-size: 9.2px; color: #4B5563; margin-top: 6px; padding-left: 36px; }
+
+  /* ═══ 08 GTM ═══ */
+  .gtm { display: grid; grid-template-columns: 400px 1fr; gap: 34px; margin-top: 16px; }
+  .funnel2 .fh { font-size: 8.6px; letter-spacing: 2px; color: #4B5563; font-weight: 800; margin-bottom: 8px; }
+  .fs { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .fs .bar2 { height: 50px; border: 1px solid #E5E7EB; border-left: 3px solid #1D4ED8; border-radius: 2px; background: rgba(15,23,42,.03); display: flex; align-items: center; padding: 0 14px; gap: 10px; }
+  .fs .bar2 b { font-size: 15px; font-weight: 800; }
+  .fs .bar2 span { font-size: 9px; color: #4B5563; }
+  .fs .side { font-size: 9px; color: #6B7280; white-space: nowrap; }
+  .fs.w1 .bar2 { width: 96%; } .fs.w2 .bar2 { width: 78%; } .fs.w3 .bar2 { width: 58%; } .fs.w4 .bar2 { width: 40%; border-color: #BFDBFE; background: rgba(29,78,216,.045); }
+  .fs.w4 .bar2 b { color: #1D4ED8; }
+  .chan { display: flex; flex-direction: column; border: 1px solid #E5E7EB; border-radius: 3px; background: rgba(15,23,42,.022); height: 100%; overflow: hidden; }
+  .chan .chh { display: flex; justify-content: space-between; padding: 10px 14px; font-size: 8.2px; letter-spacing: 1.8px; font-weight: 800; color: #4B5563; background: rgba(15,23,42,.04); }
+  .chan .chh span { letter-spacing: .4px; font-weight: 600; color: #6B7280; }
+  .chan .c { display: grid; grid-template-columns: 116px 1fr; gap: 12px; border-bottom: 1px solid #EEF2F7; padding: 0 14px; align-items: center; flex: 1; }
+  .chan .c:last-child { border-bottom: 0; }
+  .chan .c b { font-size: 10.6px; color: #111827; }
+  .chan .c span { font-size: 9.6px; color: #4B5563; line-height: 1.45; }
+  .waves { display: flex; align-items: stretch; gap: 6px; margin-top: 18px; }
+  .wave { flex: 1; border: 1px solid #E5E7EB; border-top: 2px solid #D1D5DB; border-radius: 2px; padding: 13px 12px; }
+  .wave.on { border-top-color: #1D4ED8; background: rgba(29,78,216,.028); }
+  .wave b { display: block; font-size: 10.4px; font-weight: 800; }
+  .wave span { display: block; font-size: 8.6px; color: #4B5563; margin-top: 3px; }
+  .wave em { display: block; font-size: 7.8px; color: #6B7280; font-style: normal; margin-top: 4px; }
+
+  /* ═══ 09 Roadmap ═══ */
+  .gantt { margin-top: 16px; border: 1px solid #E5E7EB; border-radius: 3px; overflow: hidden; }
+  .grow { display: grid; grid-template-columns: 178px repeat(12, 1fr); align-items: center; border-bottom: 1px solid #EEF2F7; min-height: 38px; }
+  .grow:last-child { border-bottom: 0; }
+  .grow.head { background: rgba(15,23,42,.04); min-height: 26px; }
+  .grow.head .gl { font-size: 8px; letter-spacing: 1.4px; color: #6B7280; font-weight: 800; padding-left: 12px; }
+  .grow.head .gm { font-size: 8px; color: #6B7280; text-align: center; font-weight: 700; }
+  .gl { font-size: 9.8px; color: #1F2937; font-weight: 700; padding-left: 12px; }
+  .gl small { display: block; font-size: 7.8px; color: #6B7280; font-weight: 400; margin-top: 1px; }
+  .gbar { grid-row: 1; height: 16px; border-radius: 2px; background: linear-gradient(90deg, #1E3A8A, #1D4ED8); margin-right: 3px; display: flex; align-items: center; padding: 0 7px; font-size: 7.6px; font-weight: 800; color: #111111; }
+  .gbar.soft { background: linear-gradient(90deg, #D1D5DB, #6B7280); color: #111827; }
+  .gbar.dark { background: linear-gradient(90deg, #1E3A8A, #1E40AF); }
+  .miles { display: grid; grid-template-columns: 178px repeat(12, 1fr); align-items: center; margin-top: 14px; }
+  .mile { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .mile .d { width: 7px; height: 7px; background: #1D4ED8; transform: rotate(45deg); flex: 0 0 7px; }
+  .mile b { font-size: 9.4px; letter-spacing: 1px; color: #2563EB; font-weight: 800; }
+  .mile span { font-size: 9.2px; color: #374151; }
+
+  /* ═══ 10 Revenue ═══ */
+  .rev { display: grid; grid-template-columns: 1fr 360px; gap: 34px; margin-top: 16px; }
+  .rchart { display: flex; align-items: flex-end; gap: 9px; height: 236px; border-bottom: 1px solid #E5E7EB; }
+  .rbar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .rbar i { width: 100%; max-width: 44px; background: linear-gradient(180deg, #1D4ED8, #1E3A8A); border-radius: 2px 2px 0 0; }
+  .rbar i.zero { background: #EEF2F7; }
+  .rbar .v { font-size: 9px; font-weight: 800; margin-bottom: 4px; color: #1F2937; }
+  .rbar .m { font-size: 8px; color: #6B7280; margin-top: 6px; }
+  .rchart .sep { flex: 0 0 1px; align-self: stretch; margin: 0 4px; border-left: 1px dashed #D1D5DB; }
+  .scen { display: flex; flex-direction: column; gap: 7px; }
+  .sc { border: 1px solid #E5E7EB; border-radius: 3px; padding: 10px 14px; display: grid; grid-template-columns: 1fr auto; align-items: center; background: rgba(15,23,42,.024); }
+  .sc.key { border-color: #BFDBFE; background: linear-gradient(90deg, rgba(29,78,216,.048), rgba(15,23,42,.022)); }
+  .sc b { font-size: 10px; letter-spacing: 1.4px; color: #4B5563; }
+  .sc.key b { color: #2563EB; }
+  .sc span { display: block; font-size: 8.6px; color: #6B7280; margin-top: 2px; }
+  .sc .amt2 { font-size: 17px; font-weight: 800; letter-spacing: -.6px; }
+  .mix2 { margin-top: 12px; border-top: 1px solid #E5E7EB; padding-top: 10px; }
+  .mix2 .mx { display: flex; justify-content: space-between; font-size: 9.2px; color: #374151; padding: 3px 0; }
+  .mix2 .mx b { color: #111827; }
+  .y5 { margin-top: 14px; border: 1px solid #E5E7EB; border-radius: 3px; padding: 12px 18px 14px; background: rgba(15,23,42,.024); }
+  .y5h { display: flex; justify-content: space-between; font-size: 8.4px; letter-spacing: 1.8px; font-weight: 800; color: #4B5563; }
+  .y5h span { color: #6B7280; font-weight: 600; letter-spacing: .4px; }
+  .y5r { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 10px; }
+  .y5c { border-top: 1px solid #EEF2F7; padding-top: 8px; }
+  .y5c b { font-size: 16px; font-weight: 800; letter-spacing: -.6px; }
+  .y5c em { font-style: normal; font-size: 8.6px; color: #6B7280; margin-left: 6px; letter-spacing: 1px; }
+  .y5c span { display: block; font-size: 8.6px; color: #4B5563; margin-top: 3px; }
+  .y5c i { display: block; height: 3px; min-width: 6px; background: linear-gradient(90deg, #1E3A8A, #1D4ED8); margin-top: 8px; border-radius: 2px; }
+
+  /* ═══ 11 Execution ═══ */
+  .exec { display: grid; grid-template-columns: 350px 1fr; gap: 36px; margin-top: 16px; }
+  .tl2 { border-left: 1px solid #E5E7EB; padding-left: 16px; }
+  .tl2 .t { position: relative; padding-bottom: 22px; }
+  .tl2 .t::before { content: ""; position: absolute; left: -20px; top: 3px; width: 7px; height: 7px; border-radius: 50%; background: #1D4ED8; }
+  .tl2 .t b { font-size: 10px; letter-spacing: 1.2px; color: #2563EB; font-weight: 800; }
+  .tl2 .t span { display: block; font-size: 9.6px; color: #374151; line-height: 1.5; margin-top: 3px; }
+  .cap { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .cap .c { border: 1px solid #E5E7EB; border-radius: 3px; padding: 11px 13px; background: rgba(15,23,42,.024); }
+  .cap .c .h { display: flex; justify-content: space-between; align-items: baseline; }
+  .cap .c b { font-size: 10.5px; font-weight: 800; }
+  .cap .c em { font-style: normal; font-size: 8px; letter-spacing: 1px; color: #2563EB; font-weight: 800; }
+  .cap .c p { font-size: 9px; color: #4B5563; line-height: 1.5; margin-top: 4px; }
+  .cap .c .b2 { height: 3px; background: rgba(15,23,42,.09); margin-top: 7px; border-radius: 2px; }
+  .cap .c .b2 i { display: block; height: 100%; background: #1D4ED8; border-radius: 2px; }
+  .done { display: flex; gap: 7px; margin-top: 12px; flex-wrap: wrap; }
+  .done span { font-size: 8.4px; color: #1F2937; border: 1px solid #E5E7EB; border-radius: 2px; padding: 4px 9px; }
+  .done span b { color: #2563EB; }
+  .team { margin-top: 16px; border: 1px solid #E5E7EB; border-radius: 3px; overflow: hidden; }
+  .team .th { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; background: rgba(15,23,42,.04); font-size: 8.2px; letter-spacing: 1.6px; font-weight: 800; color: #4B5563; }
+  .team .th span { letter-spacing: .4px; font-weight: 600; color: #6B7280; }
+  .team .tr { display: grid; grid-template-columns: repeat(5, 1fr); }
+  .team .tm { padding: 12px 14px; border-right: 1px solid #EEF2F7; }
+  .team .tm:last-child { border-right: 0; }
+  .team .tm b { display: block; font-size: 10.6px; font-weight: 800; }
+  .team .tm span { display: block; font-size: 8.4px; color: #4B5563; margin-top: 3px; line-height: 1.45; }
+  .team .tm em { display: inline-block; font-style: normal; font-size: 7.6px; letter-spacing: .8px; font-weight: 800; color: #2563EB; margin-top: 6px; }
+  .team .tm em.dim { color: #4B5563; }
+
+  /* ═══ 12 Ask ═══ */
+  .ask2 { display: grid; grid-template-columns: 330px 1fr; gap: 34px; margin-top: 14px; }
+  .askbox2 { border: 1px solid #BFDBFE; background: linear-gradient(180deg, rgba(29,78,216,.05), rgba(29,78,216,.015)); border-radius: 4px; padding: 22px 24px; }
+  .askbox2 .k { font-size: 8.8px; letter-spacing: 2.4px; color: #2563EB; font-weight: 800; }
+  .askbox2 .amt { font-size: 46px; font-weight: 800; letter-spacing: -2px; margin-top: 2px; }
+  .askbox2 .amt small { font-size: 13px; color: #60A5FA; letter-spacing: 0; }
+  .askbox2 .use { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
+  .donutwrap { position: relative; width: 124px; height: 124px; flex: 0 0 124px; }
+  .donutwrap svg { display: block; width: 100%; height: 100%; }
+  .donutwrap .cl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9.4px; color: #475569; }
+  .legend { display: flex; flex-direction: column; gap: 5px; }
+  .legend div { display: flex; align-items: center; gap: 7px; font-size: 9px; color: #1F2937; }
+  .legend i { width: 7px; height: 7px; border-radius: 1px; display: block; }
+  .legend b { margin-left: auto; color: #111827; }
+  .askbox2 .fn { margin-top: 10px; font-size: 8.6px; color: #64748B; line-height: 1.5; }
+  .askbox2 .plan { margin-top: 12px; border-top: 1px solid #BFDBFE; padding-top: 11px; display: flex; flex-direction: column; gap: 8px; }
+  .askbox2 .plan div { display: grid; grid-template-columns: 66px 1fr; gap: 10px; align-items: baseline; }
+  .askbox2 .plan b { font-size: 8.4px; letter-spacing: .8px; color: #60A5FA; font-weight: 800; }
+  .askbox2 .plan span { font-size: 9.4px; color: #64748B; }
+  .goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .goal { border: 1px solid #E5E7EB; border-radius: 3px; padding: 15px 16px; background: rgba(15,23,42,.025); }
+  .goal b { display: block; font-size: 21px; font-weight: 800; letter-spacing: -.8px; }
+  .goal span { display: block; font-size: 8.8px; color: #4B5563; margin-top: 2px; }
+  .vision { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .vi { border-top: 2px solid #E5E7EB; padding-top: 8px; }
+  .vi b { display: block; font-size: 15px; font-weight: 800; }
+  .vi span { display: block; font-size: 8.4px; color: #4B5563; margin-top: 2px; line-height: 1.4; }
+  .close2 { margin-top: 18px; border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB; padding: 20px 2px; display: flex; align-items: center; justify-content: space-between; }
+  .closing .close2 { margin-top: auto; }
+  .closing .foot { margin-top: 12px; }
+  .close2 .q { font-size: 19px; font-weight: 800; letter-spacing: -.5px; line-height: 1.45; }
+  .close2 .q .red { color: #1D4ED8; }
+  .close2 .c { text-align: right; font-size: 8.8px; color: #6B7280; line-height: 1.7; }
+  .close2 .c b { color: #1F2937; font-size: 10px; }
+  h2.h2two { font-size: 30px; line-height: 1.22; letter-spacing: -1px; }
+
+  /* ═══ 13 Appendix ═══ */
+  .app { display: grid; grid-template-columns: 1fr 386px; gap: 30px; margin-top: 14px; }
+  table.sup { width: 100%; border-collapse: collapse; }
+  table.sup th { font-size: 8px; letter-spacing: 1.2px; color: #6B7280; font-weight: 800; text-align: left; padding: 0 8px 6px; border-bottom: 1px solid #E5E7EB; }
+  table.sup td { font-size: 9.8px; color: #1F2937; padding: 12px 8px; border-bottom: 1px solid #EEF2F7; }
+  table.sup td:first-child { color: #1D4ED8; font-weight: 800; font-size: 8.6px; }
+  table.sup td.nm { color: #111827; }
+  .note2 { border: 1px solid #E5E7EB; border-left: 3px solid #1D4ED8; border-radius: 3px; padding: 12px 14px; background: rgba(15,23,42,.03); }
+  .note2 .h { font-size: 8.4px; letter-spacing: 1.8px; color: #4B5563; font-weight: 800; }
+  .note2 p { font-size: 9px; color: #374151; line-height: 1.55; margin-top: 6px; }
+  .note2 p b { color: #111827; }
+  .fx { display: flex; gap: 8px; margin-top: 10px; }
+  .fx div { flex: 1; border: 1px solid #E5E7EB; border-radius: 2px; padding: 7px 9px; font-size: 8.6px; color: #374151; }
+  .fx b { color: #111827; font-size: 9.6px; display: block; }
+  .sens { margin-top: 16px; display: flex; align-items: center; gap: 18px; border: 1px solid #E5E7EB; border-radius: 3px; padding: 14px 18px; background: rgba(15,23,42,.025); }
+  .sens .sh { font-size: 8.4px; letter-spacing: 1.6px; font-weight: 800; color: #4B5563; width: 104px; flex: 0 0 104px; line-height: 1.55; }
+  .sens .sh b { display: block; color: #1D4ED8; }
+  .sens .sr { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .sens .sc2 { border-left: 2px solid #D1D5DB; padding-left: 13px; }
+  .sens .sc2.on { border-left-color: #1D4ED8; }
+  .sens .sc2 b { font-size: 16px; font-weight: 800; }
+  .sens .sc2 span { font-size: 9px; color: #4B5563; margin-left: 7px; }
+  .sens .sc2 em { display: block; font-style: normal; font-size: 8.8px; color: #6B7280; margin-top: 3px; }
+  /* ?먥븧??LIGHT THEME ??white bg 쨌 black text 쨌 blue accent ?먥븧??*/
+  .gbar { color: #ffffff !important; }
+  .gbar.soft { color: #111827 !important; }
+  .mapbg { opacity: .045; }
+  .sens .sc2.on b { color: #1D4ED8; }
+  .sens .sc2.on span { color: #1D4ED8; }
+</style>
+</head>
+<body>
+
+<!-- 01 표지 — 야구선수 성장 사진 스트립 -->
+<div class="slide cover">
+  <div class="title">
+    <div class="brandline">SPORTS <i>/</i> GROW</div>
+    <h1>주니어 선수의 성장 기록<br><span class="blue">스포츠 그로우</span></h1>
+  </div>
+  <div class="hero">
+    <img src="../../images/cover/05-team-illustration.png" alt="성장 단계의 유소년 야구 선수 3인">
+  </div>
+  <div class="growth"></div>
+</div>
+
+<!-- 02 Problem -->
+<div class="slide">
+  <div class="inner">
+    <div class="kicker">PROBLEM<span>문제인식 · 시장의 문제점</span></div>
+    <h2>선수 1명의 1년 기록은, <span class="red">다섯 곳에 흩어져</span> 있습니다</h2>
+    <div class="pg2">
+      <div></div>
+      <div>
+        <div class="srcs">
+          <div class="src"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span class="t">수첩</span><span class="d">훈련 일지</span></div>
+          <div class="src"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 10h16M10 4v16"/></svg><span class="t">엑셀</span><span class="d">시즌 집계</span></div>
+          <div class="src"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 1 1-3.2-6.4"/><path d="M4 20l1.6-4.2"/></svg><span class="t">카카오톡</span><span class="d">코치 피드백</span></div>
+          <div class="src"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="8" r="2.5"/></svg><span class="t">팀 운영 앱</span><span class="d">출석·경기</span></div>
+          <div class="src"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/></svg><span class="t">학원 CRM</span><span class="d">결제·상담</span></div>
+          <div class="src void"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg><span class="t">개인 성장 기록</span><span class="d">없음</span></div>
+        </div>
+        <div class="broken">5 SOURCES → 0 PROOF</div>
+      </div>
+    </div>
+    <div class="pg2fig">
+      <img src="../../images/problem/02-boy-question.png" alt="기록을 들여다보며 고민하는 주니어 야구 선수">
+      <div class="stat2"><b>2,216,160</b><span>국내 주니어 운동 인구<br>→ 야구·축구 443,232명</span></div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 1-1 문제 정의 · 1-2 타깃 페르소나 · 1-3 구조적 공백 · 부록 A</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 03 Solution -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">03 / 11</span></div>
+    <div class="kicker">SOLUTION<span>실현가능성 40% · 서비스 해결 방안</span></div>
+    <h2><span class="red">한 번 입력</span>하면, 네 개의 화면이 됩니다</h2>
+    <div class="sub">선수 1명의 <b>단일 데이터 원본</b> 위에 선수용 포트폴리오·학부모용 주간 리포트·코치용 관리 OS·기관용 리포트를 얹습니다.</div>
+    <div class="flow">
+      <div class="fbox"><div class="k">INPUT</div><div class="v">기록 입력 30초</div><small>훈련량 · 경기 · 목표</small></div>
+      <div class="farrow">→</div>
+      <div class="fbox core"><div class="k">CORE</div><div class="v">단일 데이터 원본</div><small>지표 룰 엔진 · 권한 · 동의</small></div>
+      <div class="farrow">→</div>
+      <div class="outs">
+        <div class="out"><b>선수</b><span>성장 포트폴리오</span></div>
+        <div class="out"><b>학부모</b><span>주간 리포트</span></div>
+        <div class="out"><b>코치</b><span>관리 OS</span></div>
+        <div class="out"><b>아카데미</b><span>기관 리포트</span></div>
+      </div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 1-6 해결 방식 · 2-3 경쟁 구도 · 2-4 기술 자산</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 05 Product -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">04 / 11</span></div>
+    <div class="kicker">PRODUCT<span>실현가능성 40% · 고객별 제공 기능</span></div>
+    <h2>같은 기록, <span class="red">네 개의 다른 화면</span></h2>
+    <div class="prod">
+      <div class="pcard">
+        <div class="ph"><div class="role">선수<small>사용자 · 데이터 주인</small></div><div class="tag">성장 포트폴리오</div></div>
+        <div class="ui">
+          <div class="uhead"><span>MY GROWTH</span><span>2027 SEASON</span></div>
+          <div class="uname">김도윤 <span>U15 · 투수</span></div>
+          <svg viewBox="0 0 300 46" style="width:100%;height:32px;margin-top:4px">
+            <polyline points="0,38 40,34 80,36 120,26 160,22 200,14 240,16 280,6" fill="none" stroke="#1D4ED8" stroke-width="2"/>
+            <polyline points="0,44 40,42 80,40 120,39 160,34 200,31 240,29 280,24" fill="none" stroke="#D1D5DB" stroke-width="1.4" stroke-dasharray="3 3"/>
+          </svg>
+          <div class="kpis">
+            <div class="kpi"><b>0.412</b><span>타율 +0.038</span></div>
+            <div class="kpi"><b>128<span style="font-size:7px">km/h</span></b><span>구속 +6</span></div>
+            <div class="kpi"><b>82%</b><span>목표 달성</span></div>
+          </div>
+        </div>
+        <div class="feats"><div>개인 홈페이지 · 시즌 카드 · 성장 그래프</div><div>목표 설정과 달성률, 코치 코멘트 누적</div></div>
+      </div>
+
+      <div class="pcard">
+        <div class="ph"><div class="role">학부모<small>결제자</small></div><div class="tag">주간 리포트</div></div>
+        <div class="ui">
+          <div class="uhead"><span>WEEKLY REPORT</span><span>3월 2주</span></div>
+          <div class="rep"><span>훈련</span><b>4회 · 6.5시간</b><span class="ok">▲</span></div>
+          <div class="rep"><span>경기</span><b>2경기 · 3안타</b><span class="ok">▲</span></div>
+          <div class="rep"><span>목표</span><b>2 / 3 달성</b><span class="ok">▲</span></div>
+          <div class="rep" style="border-bottom:0"><span>코치 피드백</span><b>“릴리스 안정”</b><span class="ok">NEW</span></div>
+        </div>
+        <div class="feats"><div>주 1회 자동 리포트 · 응원 기능</div><div>시즌 결산 카드와 진학 프로필 PDF</div></div>
+      </div>
+
+      <div class="pcard">
+        <div class="ph"><div class="role">코치<small>데이터 생산자 · 유통 채널</small></div><div class="tag">관리 OS</div></div>
+        <div class="ui">
+          <div class="uhead"><span>MY PLAYERS · 24</span><span>이번 주 입력 18</span></div>
+          <table class="tbl">
+            <tr><th>선수</th><th>훈련</th><th>목표</th><th>상태</th></tr>
+            <tr><td><span class="dot"></span>김도윤</td><td>4회</td><td>82%</td><td style="color:#2563EB">피드백 필요</td></tr>
+            <tr><td><span class="dot"></span>이준서</td><td>3회</td><td>74%</td><td>정상</td></tr>
+            <tr><td><span class="dot"></span>박시우</td><td>5회</td><td>91%</td><td>정상</td></tr>
+          </table>
+        </div>
+        <div class="feats"><div>선수 20명 통합 대시보드 · 과제 부여</div><div>30초 입력 · 검증 배지 · 이탈 알림</div></div>
+      </div>
+
+      <div class="pcard">
+        <div class="ph"><div class="role">아카데미<small>기관 고객 · 확장 거점</small></div><div class="tag">기관 리포트</div></div>
+        <div class="ui">
+          <div class="uhead"><span>ACADEMY DASHBOARD</span><span>3월</span></div>
+          <div class="u4">
+            <div class="kpi"><b>82</b><span>선수</span></div>
+            <div class="kpi"><b>7</b><span>코치</span></div>
+            <div class="kpi"><b>91%</b><span>입력률</span></div>
+            <div class="kpi"><b>+12</b><span>신규</span></div>
+          </div>
+          <div class="bars"><i style="height:46%"></i><i style="height:62%"></i><i style="height:55%"></i><i style="height:66%"></i><i style="height:70%"></i><i style="height:92%"></i><i style="height:84%"></i></div>
+        </div>
+        <div class="feats"><div>팀·선수 통합 관리 · 통계 필터</div><div>학부모 상담·홍보용 브랜딩 리포트</div></div>
+      </div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 2-2 핵심 기능 · 3-3 목표 고객 · 2-3 차별성</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 06 Roadmap -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">05 / 11</span></div>
+    <div class="kicker">ROADMAP<span>실현가능성 40% · 6개월 개발 일정</span></div>
+    <h2>3개월에 <span class="red">MVP·유료화</span>, 6개월에 기관 기능까지</h2>
+    <div class="sub">M1~M3에 핵심 루프(기록·통계·학부모 리포트)를 완성해 <b>M3 유료 베타</b>를 열고, <b>M4~M6 기관 기능 → M7~M9 QA·파일럿 10곳 → M9 정식 출시</b>로 이어갑니다.</div>
+    <div class="gantt">
+      <div class="grow head">
+        <div class="gl">개발 과업</div>
+        <div class="gm">M1</div><div class="gm">M2</div><div class="gm">M3</div><div class="gm">M4</div><div class="gm">M5</div><div class="gm">M6</div>
+        <div class="gm">M7</div><div class="gm">M8</div><div class="gm">M9</div><div class="gm">M10</div><div class="gm">M11</div><div class="gm">M12</div>
+      </div>
+      <div class="grow"><div class="gl">설계·기반<small>야구 24개 지표 · 인증·RBAC</small></div><div class="gbar" style="grid-column:2/span 3">설계·기반</div></div>
+      <div class="grow"><div class="gl">기록·통계<small>훈련·경기 기록 · 주·월 집계</small></div><div class="gbar" style="grid-column:3/span 3">기록·통계 모듈</div></div>
+      <div class="grow"><div class="gl">학부모 리포트<small>초대 · 권한 · 주간 알림</small></div><div class="gbar dark" style="grid-column:4/span 1">MVP</div></div>
+      <div class="grow"><div class="gl">코치·기관<small>대시보드 · 피드백 · 기관 보고서</small></div><div class="gbar" style="grid-column:5/span 3">기관 기능</div></div>
+      <div class="grow"><div class="gl" style="color:#4B5563">QA·보안<small>부하 테스트 · 개인정보 영향</small></div><div class="gbar soft" style="grid-column:7/span 2">QA</div></div>
+      <div class="grow"><div class="gl" style="color:#4B5563">파일럿<small>아카데미 10곳 · 선수 300명</small></div><div class="gbar soft" style="grid-column:8/span 3">파일럿 10곳</div></div>
+      <div class="grow"><div class="gl" style="color:#4B5563">정식 출시<small>구독 결제 · CS · 마케팅</small></div><div class="gbar soft" style="grid-column:10/span 1">v1.0</div></div>
+      <div class="grow"><div class="gl" style="color:#4B5563">고도화<small>OCR·음성 입력 · 이상치 관리</small></div><div class="gbar soft" style="grid-column:11/span 3">자동입력·확장</div></div>
+      <div class="grow"><div class="gl"><b>유료 구독 운영</b><small>요금제 · 결제 · 정산 · 리텐션</small></div><div class="gbar dark" style="grid-column:4/span 10">유료화 M3 → M12 월 940만 원</div></div>
+    </div>
+    <div class="miles">
+      <div class="mile" style="grid-column:4"><span class="d"></span><b>M3</b><span>MVP · 유료화 개시</span></div>
+      <div class="mile" style="grid-column:7"><span class="d"></span><b>M6</b><span>기관 기능 완료</span></div>
+      <div class="mile" style="grid-column:10"><span class="d"></span><b>M9</b><span>정식 출시</span></div>
+      <div class="mile" style="grid-column:13;justify-self:end"><span class="d"></span><b>M12</b><span>월 940만 원</span></div>
+    </div>
+    <div class="band" style="margin-top:10px">
+      <div class="k">STATUS</div>
+      <div class="txt">현재는 기술 완성도 <b>2단계(시제품)</b> — 프로토타입 4개 화면·지표 15/24 초안. <b>M3 실체화(MVP)·유료 베타</b> → <b>M6 상품화(기관 기능)</b> → <b>M9 정식 출시</b>, 협약기간 KPI 6개로 성과를 증빙합니다.</div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 2-5 개발 일정 · 2-6 개발 진행 정도 · 2-6-1 기술 완성도·협약기간 성과 · 3-10 전체 일정</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 06 Go-to-Market -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">06 / 11</span></div>
+    <div class="kicker">GO-TO-MARKET<span>성장전략 35% · 시장 진입 전략</span></div>
+    <h2>광고가 아니라 <span class="red">기관·코치가 데려옵니다</span></h2>
+    <div class="sub">아카데미 1곳이 코치 5명을, 코치 1명이 선수 20명을 데려오는 <b>B2B2C 유통</b>입니다. 1곳당 영업 비용이 낮은 순서로 지역을 확장합니다.</div>
+    <div class="gtm">
+      <div>
+        <div class="funnel2">
+          <div class="fh">12개월 유입 퍼널</div>
+          <div class="fs w1"><div class="bar2"><b>30곳</b><span>아카데미</span></div><span class="side">파트너 계약</span></div>
+          <div class="fs w2"><div class="bar2"><b>150명</b><span>코치</span></div><span class="side">기관당 5명</span></div>
+          <div class="fs w3"><div class="bar2"><b>3,000명</b><span>선수</span></div><span class="side">코치당 20명</span></div>
+          <div class="fs w4"><div class="bar2"><b>300명</b><span>유료 학부모</span></div><span class="side">전환 10%</span></div>
+        </div>
+        <div class="band" style="margin-top:10px;padding:11px 16px">
+          <div class="k">VALIDATION</div>
+          <div class="txt" style="font-size:10.5px">인터뷰 <b>코치 10 · 학부모 20</b> → 파일럿 <b>3곳 · 100명</b> → <b style="white-space:nowrap">유료 1곳</b>. 3개월 내 인터뷰 노트·미팅 기록·PoC 로그로 증빙합니다.</div>
+        </div>
+      </div>
+      <div>
+        <div class="chan">
+          <div class="chh"><span>유입 채널 4</span><span>공통 매개 = 리포트 샘플</span></div>
+          <div class="c"><b>코치 커뮤니티</b><span>야구 카페·밴드·단체방에 주간 리포트 샘플 공유</span></div>
+          <div class="c"><b>아카데미 설명회</b><span>분기 1회, 원장 대상 30분 데모 + 학부모 상담 자료</span></div>
+          <div class="c"><b>협회·대회 제휴</b><span>대회 기록 연동, 부스 운영, 시상 협찬</span></div>
+          <div class="c"><b>학부모 후기</b><span>실제 리포트·시즌 카드 사례가 전환을 만듭니다</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="waves">
+      <div class="wave on"><b>서울·경기</b><span>0~6개월</span><em>파트너 40곳</em></div>
+      <div class="wave"><b>부산·경남</b><span>6~12개월</span><em>파트너 20곳</em></div>
+      <div class="wave"><b>대구·경북</b><span>12~18개월</span><em>파트너 15곳</em></div>
+      <div class="wave"><b>인천·강원</b><span>18~24개월</span><em>파트너 15곳</em></div>
+      <div class="wave"><b>광주·대전</b><span>24~36개월</span><em>6종목과 함께</em></div>
+    </div>
+    <div class="band" style="margin-top:12px">
+      <div class="k">12M TARGET</div>
+      <div class="txt">파트너 <b>100곳</b> · 코치 <b>150명</b> · 선수 <b>3,000명</b> · 유료 <b>300명</b> · 매출 <b>0.3억</b></div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 3-3 목표 고객 · 3-3-1 고객 검증·PoC · 3-4 진출 지역 순서 · 3-5 마케팅 전략</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 07 Market -->
+<div class="slide">
+  <div class="inner">
+    <img class="mapbg" src="../figs/world-map.svg" alt="">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">07 / 11</span></div>
+    <div class="kicker">MARKET<span>성장전략 35% · TAM · SAM · SOM</span></div>
+    <h2>글로벌 <span class="red">76.6조</span> 중, 우리는 <span class="red">417억</span>에서 시작합니다</h2>
+    <div class="sub">TAM은 발표기관 전체 시장, SAM·SOM·RAM은 <b>인구 × ARPU 도달 상한</b>입니다. 정의가 달라 계층 간 합산은 하지 않습니다.</div>
+    <div class="mkt3">
+      <div class="tiers4">
+        <div class="t4"><div class="lv">TAM</div><div class="tx"><b>글로벌 주니어</b><span>발표기관 기준 전체 시장 · CAGR 9.9%</span></div><div class="ld"></div><div class="wh">48개월~</div></div>
+        <div class="t4"><div class="lv">SAM</div><div class="tx"><b>중국 · 일본</b><span>도달 상한 — 중국 4조 2,408억 + 일본 6,930억</span></div><div class="ld"></div><div class="wh">18~48개월</div></div>
+        <div class="t4"><div class="lv">SOM</div><div class="tx"><b>국내 전체 주니어</b><span>2,216,160명 × 연 ARPU 94,000원</span></div><div class="ld"></div><div class="wh">0~18개월</div></div>
+        <div class="t4 hot"><div class="lv">RAM</div><div class="tx"><b>국내 야구 · 축구</b><span>443,232명 × 94,000원 — 실제 공략 시장</span></div><div class="ld"></div><div class="wh">0~18개월</div></div>
+      </div>
+      <div class="venn">
+        <svg viewBox="0 0 400 400" aria-label="시장 계층 원교집합">
+          <circle cx="200" cy="200" r="198" fill="#F4F7FE" stroke="#FFFFFF" stroke-width="2"/>
+          <circle cx="200" cy="200" r="150" fill="#DCE8FD" stroke="#FFFFFF" stroke-width="2"/>
+          <circle cx="200" cy="200" r="102" fill="#A9C6FA" stroke="#FFFFFF" stroke-width="2"/>
+          <circle cx="200" cy="200" r="54" fill="#1D4ED8"/>
+        </svg>
+        <div class="vl tam"><b>TAM</b><span>76조 5,810억</span></div>
+        <div class="vl sam"><b>SAM</b><span>4조 9,338억</span></div>
+        <div class="vl som"><b>SOM</b><span>2,083억</span></div>
+        <div class="vl ram"><b>RAM</b><span>417억</span></div>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="eh"><b>ENTRY</b>진입 순서</div>
+      <div class="seq">
+        <div class="ec on">
+          <div class="ec-h"><span class="flag"><svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#FFFFFF"/><path d="M10 10A5 5 0 0 1 20 10A2.5 2.5 0 0 0 15 10A2.5 2.5 0 0 1 10 10Z" fill="#CD2E3A"/><path d="M10 10A5 5 0 0 0 20 10A2.5 2.5 0 0 1 15 10A2.5 2.5 0 0 0 10 10Z" fill="#0047A0"/><g fill="#111111"><g transform="translate(6.8 4.6) rotate(-56)"><rect x="-2.5" y="-1.8" width="5" height=".85"/><rect x="-2.5" y="0" width="5" height=".85"/><rect x="-2.5" y="1.8" width="5" height=".85"/></g><g transform="translate(23.2 15.4) rotate(-56)"><rect x="-2.5" y="-1.8" width="5" height=".85"/><rect x="-2.5" y="0" width="5" height=".85"/><rect x="-2.5" y="1.8" width="5" height=".85"/></g><g transform="translate(23.2 4.6) rotate(56)"><rect x="-2.5" y="-1.8" width="5" height=".85"/><rect x="-2.5" y="0" width="5" height=".85"/><rect x="-2.5" y="1.8" width="5" height=".85"/></g><g transform="translate(6.8 15.4) rotate(56)"><rect x="-2.5" y="-1.8" width="5" height=".85"/><rect x="-2.5" y="0" width="5" height=".85"/><rect x="-2.5" y="1.8" width="5" height=".85"/></g></g></svg></span><b>한국</b><i>0~18M</i></div>
+          <span>야구 1종목 MVP · RAM 417억에서 단위경제 검증</span>
+        </div>
+        <div class="ec">
+          <div class="ec-h"><span class="flag"><svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#FFFFFF"/><circle cx="15" cy="10" r="5.2" fill="#BC002D"/></svg></span><b>일본</b><i>18~36M</i></div>
+          <span>3종목 확장 · 고교 야구·축구 클럽 대상 PoC</span>
+        </div>
+        <div class="ec">
+          <div class="ec-h"><span class="flag"><svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#DE2910"/><path d="M0 -5 L1.18 -1.62 L4.76 -1.55 L1.9 0.62 L2.94 4.05 L0 1.9 L-2.94 4.05 L-1.9 0.62 L-4.76 -1.55 L-1.18 -1.62 Z" transform="translate(6 5.4) scale(0.62)" fill="#FFDE00"/><path d="M0 -5 L1.18 -1.62 L4.76 -1.55 L1.9 0.62 L2.94 4.05 L0 1.9 L-2.94 4.05 L-1.9 0.62 L-4.76 -1.55 L-1.18 -1.62 Z" transform="translate(12.1 2.6) scale(0.25)" fill="#FFDE00"/><path d="M0 -5 L1.18 -1.62 L4.76 -1.55 L1.9 0.62 L2.94 4.05 L0 1.9 L-2.94 4.05 L-1.9 0.62 L-4.76 -1.55 L-1.18 -1.62 Z" transform="translate(14.6 4.9) scale(0.25)" fill="#FFDE00"/><path d="M0 -5 L1.18 -1.62 L4.76 -1.55 L1.9 0.62 L2.94 4.05 L0 1.9 L-2.94 4.05 L-1.9 0.62 L-4.76 -1.55 L-1.18 -1.62 Z" transform="translate(14.6 8.1) scale(0.25)" fill="#FFDE00"/><path d="M0 -5 L1.18 -1.62 L4.76 -1.55 L1.9 0.62 L2.94 4.05 L0 1.9 L-2.94 4.05 L-1.9 0.62 L-4.76 -1.55 L-1.18 -1.62 Z" transform="translate(12.1 10.4) scale(0.25)" fill="#FFDE00"/></svg></span><b>중국</b><i>36~48M</i></div>
+          <span>20배 시장 · 기관 파트너십 기반 진입</span>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>출처: Global Growth Insights(2025) · 中国体育用品业联合会(2025) · 문부과학성(2024) · 국가데이터처(2025.03) · 대한체육회(2026.10.29) · 환율 ECB 2026.10.28</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 08 Business Model -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">08 / 11</span></div>
+    <div class="kicker">BUSINESS MODEL<span>실현가능성 40% · 수익 구조</span></div>
+    <h2>결제자는 학부모, <span class="red">유통은 코치와 아카데미</span></h2>
+    <div class="biz">
+      <div class="tiers">
+        <div class="tier">
+          <div class="tno">01</div>
+          <div>
+            <div class="tname">선수·학부모<small>PLAYER · PARENT</small></div>
+            <div class="tdesc">무제한 기록 · 주간 성장 리포트</div>
+          </div>
+          <div class="tprice">3,000<small>원/월</small></div>
+        </div>
+        <div class="tier key">
+          <div class="tno">02</div>
+          <div>
+            <div class="tname">코치 1인<small>COACH</small></div>
+            <div class="tdesc">선수 20명 관리 · 코치 대시보드</div>
+          </div>
+          <div class="tprice">30,000<small>원/월</small></div>
+        </div>
+        <div class="tier">
+          <div class="tno">03</div>
+          <div>
+            <div class="tname">기관<small>ACADEMY</small></div>
+            <div class="tdesc">코치 다수 · 기관 리포트 · 브랜딩</div>
+          </div>
+          <div class="tprice">100,000<small>원/월~</small></div>
+        </div>
+      </div>
+      <div class="piebox">
+        <div class="ph2">6-MONTH REVENUE MIX<span>목표수량 기준</span></div>
+        <div class="donut">
+          <svg viewBox="0 0 300 300" aria-label="6개월 매출 구성비">
+            <g transform="rotate(-90 150 150)">
+              <circle cx="150" cy="150" r="112" fill="none" stroke="#F1F5F9" stroke-width="34"/>
+              <circle cx="150" cy="150" r="112" fill="none" stroke="#1D4ED8" stroke-width="34" stroke-dasharray="373 331" stroke-dashoffset="0"/>
+              <circle cx="150" cy="150" r="112" fill="none" stroke="#60A5FA" stroke-width="34" stroke-dasharray="247 457" stroke-dashoffset="-377"/>
+              <circle cx="150" cy="150" r="112" fill="none" stroke="#BFDBFE" stroke-width="34" stroke-dasharray="71 633" stroke-dashoffset="-628"/>
+            </g>
+          </svg>
+          <div class="ctr"><b>5,040<small>만원</small></b><span>6개월 · 월 840만원</span></div>
+        </div>
+        <div class="legend">
+          <div class="lg"><i style="background:#1D4ED8"></i><span class="nm">코치 150명</span><span class="amt">2,700만</span><span class="pc">53.6%</span></div>
+          <div class="lg"><i style="background:#60A5FA"></i><span class="nm">기관 30곳</span><span class="amt">1,800만</span><span class="pc">35.7%</span></div>
+          <div class="lg"><i style="background:#BFDBFE"></i><span class="nm">선수·학부모 300명</span><span class="amt">540만</span><span class="pc">10.7%</span></div>
+        </div>
+        <div class="note">목표수량 도달 후 6개월 환산 · 애드온 제외<br>3,000원 · 30,000원 · 100,000원 × 6개월</div>
+      </div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 3-7 비즈니스 모델 · 3-3 목표 고객 · 3-9 매출 시나리오</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 10 Revenue -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">09 / 11</span></div>
+    <div class="kicker">REVENUE<span>성장전략 35% · 초기 매출 시나리오</span></div>
+    <h2>12개월 <span class="red">0.3억</span>, M12 월 <span class="red">940만</span>에서 다음 해로</h2>
+    <div class="sub">M3 유료 베타 이후 10개월의 램프입니다. 학부모 300명 · 코치 150명 · 아카데미 30곳 · 애드온이 M12에 목표 수량으로 겹쳐 <b>월 940만 원</b>, 일본·종목 확장이 더해지는 <b>M14에는 월 1,150만 원</b>까지 올라갑니다.</div>
+    <div class="rev">
+      <div>
+        <div class="rchart">
+          <div class="rbar"><div class="v">60</div><i style="height:5%"></i><div class="m">M3</div></div>
+          <div class="rbar"><div class="v">80</div><i style="height:7%"></i><div class="m">M4</div></div>
+          <div class="rbar"><div class="v">110</div><i style="height:10%"></i><div class="m">M5</div></div>
+          <div class="rbar"><div class="v">145</div><i style="height:13%"></i><div class="m">M6</div></div>
+          <div class="rbar"><div class="v">190</div><i style="height:17%"></i><div class="m">M7</div></div>
+          <div class="rbar"><div class="v">250</div><i style="height:22%"></i><div class="m">M8</div></div>
+          <div class="rbar"><div class="v">320</div><i style="height:28%"></i><div class="m">M9</div></div>
+          <div class="rbar"><div class="v">410</div><i style="height:36%"></i><div class="m">M10</div></div>
+          <div class="rbar"><div class="v">495</div><i style="height:43%"></i><div class="m">M11</div></div>
+          <div class="rbar"><div class="v">940</div><i style="height:82%"></i><div class="m">M12</div></div>
+          <div class="sep"></div>
+          <div class="rbar"><div class="v">1,050</div><i style="height:91%"></i><div class="m">M13</div></div>
+          <div class="rbar"><div class="v">1,150</div><i style="height:100%"></i><div class="m">M14</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:8.6px;color:#6B7280">
+          <span>단위: 만 원 / 월</span><span>M3 유료화 · Y1 누적 0.3억 → Y2 확장</span>
+        </div>
+      </div>
+      <div>
+        <div class="scen">
+          <div class="sc"><div><b>CONSERVATIVE</b><span>전환 6% · 기관 18곳</span></div><div class="amt2" style="color:#4B5563">0.18억</div></div>
+          <div class="sc key"><div><b>BASE CASE</b><span>전환 10% · 기관 30곳</span></div><div class="amt2" style="color:#1D4ED8">0.30억</div></div>
+          <div class="sc"><div><b>AGGRESSIVE</b><span>전환 15% · 기관 45곳</span></div><div class="amt2">0.45억</div></div>
+        </div>
+        <div class="mix2">
+          <div class="mx"><span>학부모 구독 300명</span><b>90만 / 월</b></div>
+          <div class="mx"><span>코치 플랜 150명</span><b>450만 / 월</b></div>
+          <div class="mx"><span>아카데미 30곳</span><b>300만 / 월</b></div>
+          <div class="mx"><span>애드온 (포토북·진학)</span><b>100만 / 월</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="y5">
+      <div class="y5h">5개년 매출 경로<span>단위: 억 원 / 연</span></div>
+      <div class="y5r">
+        <div class="y5c"><b>0.3<em>Y1</em></b><span>한국 야구 MVP</span><i style="width:2%"></i></div>
+        <div class="y5c"><b>2.0<em>Y2</em></b><span>3종목 · 일본 PoC</span><i style="width:9%"></i></div>
+        <div class="y5c"><b>4.7<em>Y3</em></b><span>일본 확장 · 중국 1건</span><i style="width:20%"></i></div>
+        <div class="y5c"><b>11.0<em>Y4</em></b><span>6종목 · 기관 리포트</span><i style="width:46%"></i></div>
+        <div class="y5c"><b>24.0<em>Y5</em></b><span>3개국 · 흑자 전환</span><i style="width:100%"></i></div>
+      </div>
+    </div>
+    <div class="band" style="margin-top:12px">
+      <div class="k">UNIT ECONOMY</div>
+      <div class="txt">목표는 점유율이 아니라 <b>단위경제 검증</b>입니다. RAM의 1.13%(4.7억)를 한국에서 증명하면, 같은 제품을 <em>20배 시장(중국)</em>에 복제합니다.</div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 3-9 자금 조달 · 3-10 5개년 마일스톤 · 3-7 단위경제</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 11 Execution Capability -->
+<div class="slide">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">10 / 11</span></div>
+    <div class="kicker">EXECUTION CAPABILITY<span>팀구성 15% · 대표자 역량</span></div>
+    <h2>만드는 사람이 아니라, <span class="red">만들게 하고 팔 수 있는 사람</span></h2>
+    <div class="sub">20년 동안 기획·운영·홍보를 한 사람이, 협회에서 회원을 관리하며 이해관계자를 조율해 왔습니다.</div>
+    <div class="exec">
+      <div class="tl2">
+        <div class="t"><b>20 YEARS</b><span>사업기획·운영 — 계획 수립부터 예산·실행·성과 점검까지 한 바퀴를 반복</span></div>
+        <div class="t"><b>PLAN · OPERATE · PROMOTE</b><span>기획·운영·홍보를 함께 담당 — 시장 조사에서 고객 확보, 운영 안정화까지 연결</span></div>
+        <div class="t"><b>ASSOCIATION</b><span>협회 회원 관리 — 다양한 이해관계자의 요구를 조율하고 신뢰를 쌓는 커뮤니케이션</span></div>
+        <div class="t" style="padding-bottom:0"><b>PRODUCT DESIGN</b><span>입력 30초 · 야구 24개 지표 · 역할별 권한 — 기술이 아니라 제품 설계의 결과</span></div>
+      </div>
+      <div>
+        <div class="cap">
+          <div class="c"><div class="h"><b>경영</b><em>CORE</em></div><p>60개월 로드맵, 8개 게이트, 5년 손익 관리</p><div class="b2"><i style="width:92%"></i></div></div>
+          <div class="c"><div class="h"><b>영업·네트워크</b><em>CORE</em></div><p>협회·체육단체·아카데미 운영자 네트워크</p><div class="b2"><i style="width:86%"></i></div></div>
+          <div class="c"><div class="h"><b>제품 기획</b><em>STRONG</em></div><p>5개 레이어, 역할별 기능 매트릭스 설계</p><div class="b2"><i style="width:88%"></i></div></div>
+          <div class="c"><div class="h"><b>운영·CS</b><em>STRONG</em></div><p>회원 관리·고객 응대·커뮤니케이션</p><div class="b2"><i style="width:84%"></i></div></div>
+          <div class="c"><div class="h"><b>데이터 활용</b><em>BUILDING</em></div><p>지표 정의·리포트 자동화 설계</p><div class="b2"><i style="width:66%"></i></div></div>
+          <div class="c"><div class="h"><b>개발 리드</b><em>HIRING</em></div><p>1개월차 CTO 채용, 대표는 요구사항·검수</p><div class="b2"><i style="width:34%"></i></div></div>
+        </div>
+        <div class="done">
+          <span><b>완료</b> 프로토타입 4개 화면</span>
+          <span><b>완료</b> 제품 정의 5개 레이어</span>
+          <span><b>완료</b> 5년 로드맵·8개 게이트</span>
+          <span><b>초안</b> 야구 24개 지표 중 15개</span>
+        </div>
+        <div class="band" style="margin-top:12px">
+          <div class="k">HONEST</div>
+          <div class="txt">"앱이 완성됐다"가 아니라 <b>작동하는 프로토타입과 제품 정의가 있고, 이제 개발 리드를 붙여 MVP를 만든다</b>는 단계입니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="team">
+      <div class="th"><span>TEAM BUILD · 5명 + 외부 협력</span><span>만드는 사람 → 파는 사람 → 붙잡는 사람 · 파일럿 3곳 · 협회 협의 · 보안 자문</span></div>
+      <div class="tr">
+        <div class="tm"><b>대표 · CEO/PM</b><span>기획·요구사항·파트너 영업·정부사업</span><em>완료</em></div>
+        <div class="tm"><b>CTO · 개발 리드</b><span>아키텍처·API·권한·배포</span><em>1개월차</em></div>
+        <div class="tm"><b>프론트엔드</b><span>웹·PWA·대시보드·리포트</span><em>2개월차</em></div>
+        <div class="tm"><b>프로덕트 디자이너</b><span>입력 UX·디자인 시스템·리포트</span><em class="dim">6개월차</em></div>
+        <div class="tm"><b>파트너십 매니저</b><span>아카데미·코치 영업·온보딩</span><em class="dim">6개월차</em></div>
+      </div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 4-1 대표자 현황·보유 자산 · 4-2 팀 구성·채용 순서 · 4-3 외부 협력 · 2-6 개발 진행 정도</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+<!-- 12 The Ask -->
+<div class="slide closing">
+  <div class="inner">
+    <div class="topbar"><span class="brand">SPORTS <i>/</i> GROW</span><span class="num">11 / 11</span></div>
+    <div class="kicker">THE ASK<span>투자 요청 · 사업 비전 및 추진 방향</span></div>
+    <h2 class="h2two">선수 1명의 기록이 <span class="red">증명되는 순간</span>,<br>시장은 우리 기준으로 다시 정렬됩니다.</h2>
+    <div class="ask2">
+      <div class="askbox2">
+        <div class="k">SEED ROUND · M1</div>
+        <div class="amt">3억<small> 원</small></div>
+        <div class="use">
+          <div class="donutwrap">
+            <svg viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.915" fill="none" stroke="#1D4ED8" stroke-width="9" stroke-dasharray="50 50" transform="rotate(-90 21 21)"/>
+              <circle cx="21" cy="21" r="15.915" fill="none" stroke="#2563EB" stroke-width="9" stroke-dasharray="20 80" stroke-dashoffset="-50" transform="rotate(-90 21 21)"/>
+              <circle cx="21" cy="21" r="15.915" fill="none" stroke="#1E3A8A" stroke-width="9" stroke-dasharray="20 80" stroke-dashoffset="-70" transform="rotate(-90 21 21)"/>
+              <circle cx="21" cy="21" r="15.915" fill="none" stroke="#D1D5DB" stroke-width="9" stroke-dasharray="10 90" stroke-dashoffset="-90" transform="rotate(-90 21 21)"/>
+            </svg>
+            <div class="cl">100%</div>
+          </div>
+          <div class="legend">
+            <div><i style="background:#1D4ED8"></i>개발·인건비<b>1.5억</b></div>
+            <div><i style="background:#2563EB"></i>마케팅·영업<b>0.6억</b></div>
+            <div><i style="background:#1E3A8A"></i>외주·인프라<b>0.6억</b></div>
+            <div><i style="background:#D1D5DB"></i>운영·예비<b>0.3억</b></div>
+          </div>
+        </div>
+        <div class="fn">12개월 소요 4억 = Seed 3억 + 정부지원 0.7억 + 자부담 0.3억<br><b>미선정 시</b> 9개월 축소 운영 · 1.7억 대안 조달</div>
+        <div class="plan">
+          <div><b>M1–M2</b><span>개발 리드·프론트 채용 · 지표 정의 · 기반 구축</span></div>
+          <div><b>M3</b><span>MVP 출시 · <b>유료 베타 개시</b></span></div>
+          <div><b>M4–M6</b><span>코치·기관 기능 완성 · QA·보안</span></div>
+          <div><b>M7–M12</b><span>파일럿 10곳 · 정식 출시 · 유료 300명</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="goals">
+          <div class="goal"><b>100곳</b><span>파트너 아카데미</span></div>
+          <div class="goal"><b>300명</b><span>유료 학부모</span></div>
+          <div class="goal"><b>0.3억</b><span>12개월 매출</span></div>
+        </div>
+        <div class="vision">
+          <div class="vi"><b>Y1 0.3억</b><span>한국 야구 MVP → v1.0</span></div>
+          <div class="vi"><b>Y2 2.0억</b><span>3종목 · 일본 PoC</span></div>
+          <div class="vi"><b>Y3 4.7억</b><span>일본 확장 · 중국 1건</span></div>
+          <div class="vi"><b>Y5 24.0억</b><span>6종목 · 3개국 · 흑자 전환</span></div>
+        </div>
+        <div class="band" style="margin-top:12px">
+          <div class="k">FUNDING PATH</div>
+          <div class="txt">5개년 조달 <b>105.1억</b> — Seed 3 + 정부 2.1 + Pre-A 10 + A 30 + B 60(선택). <b>창업자 지분 57.5%</b>, 옵션 풀 10%.</div>
+        </div>
+      </div>
+    </div>
+    <div class="close2">
+      <div class="q">Seed <span class="red">3억</span> — 파트너 100곳 · 유료 300명 · 12개월 매출 0.3억</div>
+      <div class="c"><b>SPORTS GROW</b><br>주니어 선수 성장 포트폴리오<br>2027 · Confidential</div>
+    </div>
+    <div class="foot"><span>출처: 사업계획서 3-9 자금 조달계획·대안 조달 · 3-10 5개년 마일스톤 · 4-2 팀 구성</span><span class="r">SPORTS GROW · IR 2027</span></div>
+  </div>
+</div>
+
+</body>
+</html>
