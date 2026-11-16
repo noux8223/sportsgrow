@@ -4,7 +4,7 @@
    ===================================================================== */
 "use strict";
 
-var VERSION = "sportsgrow-v11";
+var VERSION = "sportsgrow-v13";
 var STATIC_CACHE = VERSION + "-static";
 var RUNTIME_CACHE = "sportsgrow-runtime-v1";
 var OFFLINE_URL = "./offline.html";
@@ -30,6 +30,7 @@ var PRECACHE = [
   "./js/site.js",
   "./js/auth.js",
   "./js/app-shell.js",
+  "./js/demo-data.js",
   "./js/student.js",
   "./js/coach.js",
   "./js/academy.js",

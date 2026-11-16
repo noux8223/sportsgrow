@@ -87,6 +87,21 @@
     admin: ["admin"]
   };
 
+  var ROLE_PAGES = {
+    player: ["student.html"],
+    parent: ["student.html"],
+    coach: ["coach.html", "student.html"],
+    academy: ["academy.html"],
+    admin: ["admin.html"]
+  };
+
+  function resolveDestination(roleKey, nextPage) {
+    if (!nextPage) return null;
+    if (!/^[A-Za-z0-9._-]+\.html$/.test(nextPage)) return null;
+    var allowed = ROLE_PAGES[roleKey] || [];
+    return allowed.indexOf(nextPage) === -1 ? null : nextPage;
+  }
+
   /* ---------------------------------------------------------------
      Storage helpers (safe for file:// and private mode)
      --------------------------------------------------------------- */
@@ -203,27 +218,46 @@
   /* ---------------------------------------------------------------
      Role guards for dashboard pages
      --------------------------------------------------------------- */
+  var guardState = {
+    ran: false,
+    allowed: true,
+    painted: false,
+    redirecting: false
+  };
+
   function guard() {
+    if (!document.body) return true;
+    if (guardState.ran) return guardState.allowed;
+    guardState.ran = true;
+
     var pageRole = document.body.getAttribute("data-role");
-    if (!pageRole) return;
+    if (!pageRole) return guardState.allowed;
 
     var session = getSession();
     var allowed = PAGE_ROLES[pageRole] || [pageRole];
     if (!session || allowed.indexOf(session.role) === -1) {
-      var params = new URLSearchParams();
-      if (pageRole !== "admin") params.set("role", pageRole);
-      params.set("next", window.location.pathname.split("/").pop() || pageRole + ".html");
-      if (session) params.set("denied", "1");
-      window.location.replace(
-        (pageRole === "admin" ? "admin-login.html" : "login.html") + "?" + params.toString()
-      );
-      return;
+      guardState.allowed = false;
+      window.__sportsgrowDenied = true;
+
+      if (!guardState.redirecting) {
+        guardState.redirecting = true;
+        var params = new URLSearchParams();
+        if (pageRole !== "admin") params.set("role", pageRole);
+        params.set("next", window.location.pathname.split("/").pop() || pageRole + ".html");
+        if (session) params.set("denied", "1");
+        window.location.replace(
+          (pageRole === "admin" ? "admin-login.html" : "login.html") + "?" + params.toString()
+        );
+      }
+      return false;
     }
 
     document.body.setAttribute("data-session-role", session.role);
     document.body.classList.add("is-" + session.role);
+    guardState.painted = true;
     paintSession();
     bindLogout();
+    return true;
   }
 
   /* ---------------------------------------------------------------
@@ -336,7 +370,7 @@
         pwToggle.setAttribute("aria-label", show ? "비밀번호 숨기기" : "비밀번호 표시");
         pwToggle.setAttribute("aria-pressed", show ? "true" : "false");
         var use = pwToggle.querySelector("use");
-        if (use) use.setAttribute("href", show ? "#i-eye" : "#i-eye");
+        if (use) use.setAttribute("href", show ? "#i-eye-off" : "#i-eye");
       });
     }
 
@@ -370,7 +404,7 @@
 
       saveSession(currentRole);
 
-      var destination = nextPage && nextPage.indexOf("http") !== 0 ? nextPage : role.page;
+      var destination = resolveDestination(currentRole, nextPage) || role.page;
       window.setTimeout(function () {
         window.location.href = destination;
       }, 420);
@@ -422,9 +456,11 @@
      Boot
      --------------------------------------------------------------- */
   function boot() {
-    guard();
-    paintSession();
-    bindLogout();
+    if (!guard()) return;
+    if (!guardState.painted) {
+      paintSession();
+      bindLogout();
+    }
     initLogin();
 
     if (!document.querySelector(".toast-stack")) {
@@ -433,12 +469,6 @@
       stack.setAttribute("aria-live", "polite");
       document.body.appendChild(stack);
     }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
   }
 
   window.SportsGrow = {
@@ -452,4 +482,12 @@
     },
     toast: toast
   };
+
+  guard();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
 })();

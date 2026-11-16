@@ -22,6 +22,22 @@
     settings: "sportsgrow.admin.settings.v1"
   };
 
+  var DEMO_KEYS = [
+    "sportsgrow.demo.v1",
+    "sportsgrow.player.training.v1",
+    "sportsgrow.player.games.v1",
+    "sportsgrow.player.visibility.v1",
+    "sportsgrow.player.profile.v1",
+    "sportsgrow.player.media.v1",
+    "sportsgrow.player.gallery.v1",
+    "sportsgrow.player.cheers.v1",
+    "sportsgrow.parent.requests.v1",
+    "sportsgrow.coach.notes.v1",
+    "sportsgrow.coach.goals.v1",
+    "sportsgrow.coach.customPlayers.v1",
+    "sportsgrow.academy.teams.v1"
+  ];
+
   var TYPE_LABEL = {
     students: "학생",
     parents: "학부모",
@@ -205,6 +221,75 @@
   }
 
   /* ---------------------------------------------------------------
+     Demo ledger (학생·코치·아카데미·관리자가 공유)
+     --------------------------------------------------------------- */
+  var LEDGER_KEY = "sportsgrow.demo.v1";
+
+  function readLedger() {
+    if (window.SportsGrowDemo && window.SportsGrowDemo.load) {
+      try {
+        return window.SportsGrowDemo.load();
+      } catch (err) {
+        return null;
+      }
+    }
+    try {
+      var raw = window.localStorage.getItem(LEDGER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function ledgerPlayer(state) {
+    if (!state) return null;
+    if (window.SportsGrowDemo && window.SportsGrowDemo.player) {
+      try {
+        var viaApi = window.SportsGrowDemo.player(state);
+        if (viaApi) return viaApi;
+      } catch (err) {
+        /* 아래 탐색으로 넘어간다 */
+      }
+    }
+    var lists = [state.players, state.students, state.roster, state.members];
+    for (var i = 0; i < lists.length; i += 1) {
+      if (!Array.isArray(lists[i])) continue;
+      for (var j = 0; j < lists[i].length; j += 1) {
+        var player = lists[i][j];
+        if (player && (player.id === "p-haram" || player.name === "김하람")) return player;
+      }
+    }
+    if (state.player && (state.player.id === "p-haram" || state.player.name === "김하람")) {
+      return state.player;
+    }
+    return null;
+  }
+
+  function ledgerNumber(method, player) {
+    var api = window.SportsGrowDemo;
+    if (!player || !api || typeof api[method] !== "function") return null;
+    try {
+      var value = api[method](player);
+      return typeof value === "number" && isFinite(value) ? value : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function applyLedgerToMembers() {
+    var player = ledgerPlayer(readLedger());
+    if (!player) return;
+    var target = members.students.filter(function (item) {
+      return item.id === "ST-1001";
+    })[0];
+    if (!target) return;
+    var days = ledgerNumber("weekDays", player);
+    var goal = ledgerNumber("goalAverage", player);
+    if (days != null) target.sessions = Math.max(0, Math.round(days));
+    if (goal != null) target.growth = Math.max(0, Math.min(100, Math.round(goal)));
+  }
+
+  /* ---------------------------------------------------------------
      Seed data — students
      --------------------------------------------------------------- */
   function student(id, name, age, position, org, guardian, phone, email, joinedDays, status, plan, sessions, attendance, growth, coach) {
@@ -218,20 +303,20 @@
 
   function seedStudents() {
     return [
-      student("ST-1001", "김하람", 14, "내야수 · 2루수", "한빛중학교 야구부", "이정은", "010-2841-7732", "player@sportsgrow.kr", 268, "활성", "월간", 42, 94, 87, "박정우"),
-      student("ST-1002", "이준서", 15, "투수", "한빛중학교 야구부", "박미영", "010-3317-4820", "junseo@sportsgrow.kr", 241, "활성", "연간", 38, 91, 84, "박정우"),
-      student("ST-1003", "박서준", 13, "포수", "대명중학교 야구부", "최수진", "010-4472-1183", "seojun@sportsgrow.kr", 214, "활성", "월간", 35, 88, 79, "김성훈"),
-      student("ST-1004", "최민준", 14, "외야수", "한빛중학교 야구부", "정은영", "010-5528-9041", "minjun@sportsgrow.kr", 198, "활성", "월간", 33, 86, 76, "박정우"),
-      student("ST-1005", "정하준", 15, "유격수", "신정고등학교 야구부", "강혜진", "010-6630-2274", "hajun@sportsgrow.kr", 176, "활성", "연간", 40, 96, 91, "이재현"),
-      student("ST-1006", "강도윤", 13, "3루수", "한빛중학교 야구부", "윤미라", "010-7714-6698", "doyun@sportsgrow.kr", 161, "활성", "월간", 29, 82, 71, "박정우"),
-      student("ST-1007", "조은우", 14, "1루수", "대명중학교 야구부", "장선영", "010-8826-3305", "eunwoo@sportsgrow.kr", 143, "대기", "월간", 12, 74, 64, "김성훈"),
-      student("ST-1008", "윤시우", 15, "투수", "신정고등학교 야구부", "서정민", "010-9933-7712", "siwoo@sportsgrow.kr", 128, "활성", "연간", 37, 90, 86, "이재현"),
-      student("ST-1009", "장지호", 12, "내야수", "한빛초등학교 야구부", "김소연", "010-2244-8871", "jiho@sportsgrow.kr", 112, "활성", "월간", 26, 89, 73, "최윤재"),
-      student("ST-1010", "임하윤", 14, "외야수", "한빛중학교 야구부", "임재호", "010-3355-9026", "hayun@sportsgrow.kr", 97, "활성", "월간", 31, 87, 78, "박정우"),
-      student("ST-1011", "한지민", 13, "투수", "대명중학교 야구부", "한상우", "010-4466-1129", "jimin@sportsgrow.kr", 82, "활성", "월간", 24, 80, 69, "김성훈"),
-      student("ST-1012", "오세훈", 16, "포수", "신정고등학교 야구부", "오미경", "010-5577-6614", "sehun@sportsgrow.kr", 64, "휴면", "연간", 8, 58, 61, "이재현"),
-      student("ST-1013", "서지훈", 14, "내야수", "한빛중학교 야구부", "서미란", "010-6688-2230", "jihoon@sportsgrow.kr", 41, "활성", "월간", 19, 92, 82, "박정우"),
-      student("ST-1014", "문예준", 12, "외야수", "한빛초등학교 야구부", "문경수", "010-7799-4458", "yejun@sportsgrow.kr", 23, "대기", "월간", 5, 70, 58, "최윤재")
+      student("ST-1001", "김하람", 14, "내야수 · 2루수", "한빛중학교 야구부", "이정은", "", "player@sportsgrow.kr", 268, "활성", "월간", 42, 94, 87, "박정우"),
+      student("ST-1002", "이준서", 15, "투수", "한빛중학교 야구부", "박미영", "", "junseo@sportsgrow.kr", 241, "활성", "연간", 38, 91, 84, "박정우"),
+      student("ST-1003", "박서준", 13, "포수", "대명중학교 야구부", "최수진", "", "seojun@sportsgrow.kr", 214, "활성", "월간", 35, 88, 79, "김성훈"),
+      student("ST-1004", "최민준", 14, "외야수", "한빛중학교 야구부", "정은영", "", "minjun@sportsgrow.kr", 198, "활성", "월간", 33, 86, 76, "박정우"),
+      student("ST-1005", "정하준", 15, "유격수", "신정고등학교 야구부", "강혜진", "", "hajun@sportsgrow.kr", 176, "활성", "연간", 40, 96, 91, "이재현"),
+      student("ST-1006", "강도윤", 13, "3루수", "한빛중학교 야구부", "윤미라", "", "doyun@sportsgrow.kr", 161, "활성", "월간", 29, 82, 71, "박정우"),
+      student("ST-1007", "조은우", 14, "1루수", "대명중학교 야구부", "장선영", "", "eunwoo@sportsgrow.kr", 143, "대기", "월간", 12, 74, 64, "김성훈"),
+      student("ST-1008", "윤시우", 15, "투수", "신정고등학교 야구부", "서정민", "", "siwoo@sportsgrow.kr", 128, "활성", "연간", 37, 90, 86, "이재현"),
+      student("ST-1009", "장지호", 12, "내야수", "한빛초등학교 야구부", "김소연", "", "jiho@sportsgrow.kr", 112, "활성", "월간", 26, 89, 73, "최윤재"),
+      student("ST-1010", "임하윤", 14, "외야수", "한빛중학교 야구부", "임재호", "", "hayun@sportsgrow.kr", 97, "활성", "월간", 31, 87, 78, "박정우"),
+      student("ST-1011", "한지민", 13, "투수", "대명중학교 야구부", "한상우", "", "jimin@sportsgrow.kr", 82, "활성", "월간", 24, 80, 69, "김성훈"),
+      student("ST-1012", "오세훈", 16, "포수", "신정고등학교 야구부", "오미경", "", "sehun@sportsgrow.kr", 64, "휴면", "연간", 8, 58, 61, "이재현"),
+      student("ST-1013", "서지훈", 14, "내야수", "한빛중학교 야구부", "서미란", "", "jihoon@sportsgrow.kr", 41, "활성", "월간", 19, 92, 82, "박정우"),
+      student("ST-1014", "문예준", 12, "외야수", "한빛초등학교 야구부", "문경수", "", "yejun@sportsgrow.kr", 23, "대기", "월간", 5, 70, 58, "최윤재")
     ];
   }
 
@@ -267,23 +352,23 @@
     return {
       students: seedStudents(),
       parents: [
-        parent("PA-2001", "이정은", "모", "김하람", "010-2841-7732", "parent@sportsgrow.kr", 266, "활성", "무료"),
-        parent("PA-2002", "박미영", "모", "이준서", "010-3317-4820", "miyoung@sportsgrow.kr", 239, "활성", "무료"),
-        parent("PA-2003", "최수진", "모", "박서준", "010-4472-1183", "sujin@sportsgrow.kr", 212, "활성", "무료"),
-        parent("PA-2004", "정은영", "모", "최민준", "010-5528-9041", "eunyoung@sportsgrow.kr", 196, "활성", "무료"),
-        parent("PA-2005", "강혜진", "모", "정하준", "010-6630-2274", "hyejin@sportsgrow.kr", 174, "활성", "무료"),
-        parent("PA-2006", "윤미라", "모", "강도윤", "010-7714-6698", "mira@sportsgrow.kr", 159, "휴면", "무료"),
-        parent("PA-2007", "장선영", "모", "조은우", "010-8826-3305", "sunyoung@sportsgrow.kr", 141, "대기", "무료")
+        parent("PA-2001", "이정은", "모", "김하람", "", "parent@sportsgrow.kr", 266, "활성", "무료"),
+        parent("PA-2002", "박미영", "모", "이준서", "", "miyoung@sportsgrow.kr", 239, "활성", "무료"),
+        parent("PA-2003", "최수진", "모", "박서준", "", "sujin@sportsgrow.kr", 212, "활성", "무료"),
+        parent("PA-2004", "정은영", "모", "최민준", "", "eunyoung@sportsgrow.kr", 196, "활성", "무료"),
+        parent("PA-2005", "강혜진", "모", "정하준", "", "hyejin@sportsgrow.kr", 174, "활성", "무료"),
+        parent("PA-2006", "윤미라", "모", "강도윤", "", "mira@sportsgrow.kr", 159, "휴면", "무료"),
+        parent("PA-2007", "장선영", "모", "조은우", "", "sunyoung@sportsgrow.kr", 141, "대기", "무료")
       ],
       coaches: [
-        coach("CO-3001", "박정우", "한빛중학교 야구부", "감독", "010-2201-7788", "coach@sportsgrow.kr", 302, "활성", "월간", 4),
-        coach("CO-3002", "김성훈", "대명중학교 야구부", "코치", "010-3312-8844", "sunghoon@sportsgrow.kr", 245, "활성", "월간", 3),
-        coach("CO-3003", "이재현", "신정고등학교 야구부", "감독", "010-4423-9911", "jaehyun@sportsgrow.kr", 188, "활성", "연간", 3),
-        coach("CO-3004", "최윤재", "한빛초등학교 야구부", "코치", "010-5534-6622", "yoonjae@sportsgrow.kr", 132, "활성", "월간", 2),
-        coach("CO-3005", "한지훈", "한빛 베이스볼랩", "타격 코치", "010-6645-7733", "jihoon.coach@sportsgrow.kr", 76, "대기", "연간", 0)
+        coach("CO-3001", "박정우", "한빛중학교 야구부", "감독", "", "coach@sportsgrow.kr", 302, "활성", "월간", 4),
+        coach("CO-3002", "김성훈", "대명중학교 야구부", "코치", "", "sunghoon@sportsgrow.kr", 245, "활성", "월간", 3),
+        coach("CO-3003", "이재현", "신정고등학교 야구부", "감독", "", "jaehyun@sportsgrow.kr", 188, "활성", "연간", 3),
+        coach("CO-3004", "최윤재", "한빛초등학교 야구부", "코치", "", "yoonjae@sportsgrow.kr", 132, "활성", "월간", 2),
+        coach("CO-3005", "한지훈", "한빛 베이스볼랩", "타격 코치", "", "jihoon.coach@sportsgrow.kr", 76, "대기", "연간", 0)
       ],
       academies: [
-        academy("AC-4001", "한빛 스포츠아카데미", "아카데미", 5, 82, "정민호", "02-1234-5678", "admin@sportsgrow.kr", 356, "활성", "연간"),
+        academy("AC-4001", "한빛 스포츠아카데미", "아카데미", 5, 82, "정민호", "", "admin@sportsgrow.kr", 356, "활성", "연간"),
         academy("AC-4002", "대명 스포츠클럽", "클럽", 3, 41, "최지훈", "02-2345-6789", "daemyeong@sportsgrow.kr", 231, "활성", "연간"),
         academy("AC-4003", "신정 야구교실", "교실", 2, 24, "김태윤", "02-3456-7890", "sinjeong@sportsgrow.kr", 118, "활성", "월간"),
         academy("AC-4004", "한빛 베이스볼랩", "센터", 1, 12, "서지원", "02-4567-8901", "baseballab@sportsgrow.kr", 47, "대기", "월간")
@@ -534,7 +619,7 @@
     return {
       siteName: "Sports Grow",
       supportEmail: "hello@sportsgrow.kr",
-      supportPhone: "02-1234-5678",
+      supportPhone: "",
       adminEmail: "ops@sportsgrow.kr",
       dueDay: "10",
       autoRenew: "on",
@@ -833,10 +918,10 @@
 
   function memberCells(item) {
     if (item.type === "parents") {
-      return [personCell(item), esc(item.child), esc(item.phone), prettyDate(item.joined), statusTag(item.status), planTag(item.plan), actionButton(item)];
+      return [personCell(item), esc(item.child), esc(item.phone || "—"), prettyDate(item.joined), statusTag(item.status), planTag(item.plan), actionButton(item)];
     }
     if (item.type === "coaches") {
-      return [personCell(item), esc(item.team), esc(item.position), esc(item.phone), prettyDate(item.joined), statusTag(item.status), actionButton(item)];
+      return [personCell(item), esc(item.team), esc(item.position), esc(item.phone || "—"), prettyDate(item.joined), statusTag(item.status), actionButton(item)];
     }
     if (item.type === "academies") {
       return [personCell(item), esc(item.orgType), item.teams + "팀 · " + item.players + "명", esc(item.manager), prettyDate(item.joined), statusTag(item.status), planTag(item.plan), actionButton(item)];
@@ -931,7 +1016,7 @@
 
     var rows = [
       ["이메일", item.email],
-      ["연락처", item.phone],
+      ["연락처", item.phone || "—"],
       ["가입일", prettyDate(item.joined)],
       ["요금제", item.plan],
       ["최근 로그인", prettyDate(isoDaysAgo(hash(item.id) % 18))]
@@ -1556,11 +1641,18 @@
   }
 
   function resetDemoData() {
-    var ok = window.confirm("관리자 데모 데이터를 모두 초기화할까요?\n회원 추가, 입금 상태, 공지, 문의, 로그, 설정 변경 내용이 삭제됩니다.");
+    var ok = window.confirm(
+      "데모 데이터를 모두 초기화할까요?\n" +
+        "회원 추가, 입금 상태, 공지, 문의, 로그, 설정 변경 내용과 함께 " +
+        "학생 기록(훈련·경기·프로필·갤러리), 학부모 요청, 코치 메모·목표, 아카데미 팀 기록이 모두 삭제됩니다."
+    );
     if (!ok) return;
-    Object.keys(KEYS).forEach(function (key) {
+    var keys = Object.keys(KEYS).map(function (key) {
+      return KEYS[key];
+    }).concat(DEMO_KEYS);
+    keys.forEach(function (key) {
       try {
-        window.localStorage.removeItem(KEYS[key]);
+        window.localStorage.removeItem(key);
       } catch (err) {
         /* noop */
       }
@@ -2041,7 +2133,12 @@
     members = Store.readStore(KEYS.members, null) || seedMembers();
     ["students", "parents", "coaches", "academies"].forEach(function (type) {
       if (!Array.isArray(members[type])) members[type] = [];
+      members[type].forEach(function (item) {
+        if (/^01\d-/.test(String(item.phone || ""))) item.phone = "";
+      });
     });
+
+    applyLedgerToMembers();
 
     payments = Store.readStore(KEYS.payments, null);
     if (!Array.isArray(payments)) payments = seedPayments(members);

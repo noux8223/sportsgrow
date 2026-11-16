@@ -144,6 +144,62 @@
     );
   }
 
+  /* ---------------------------------------------------------------
+     Demo ledger (학생·코치·아카데미·관리자가 공유)
+     --------------------------------------------------------------- */
+  var LEDGER_KEY = "sportsgrow.demo.v1";
+
+  function readLedger() {
+    if (window.SportsGrowDemo && window.SportsGrowDemo.load) {
+      try {
+        return window.SportsGrowDemo.load();
+      } catch (err) {
+        return null;
+      }
+    }
+    try {
+      var raw = window.localStorage.getItem(LEDGER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function ledgerPlayer(state) {
+    if (!state) return null;
+    if (window.SportsGrowDemo && window.SportsGrowDemo.player) {
+      try {
+        var viaApi = window.SportsGrowDemo.player(state);
+        if (viaApi) return viaApi;
+      } catch (err) {
+        /* 아래 탐색으로 넘어간다 */
+      }
+    }
+    var lists = [state.players, state.students, state.roster, state.members];
+    for (var i = 0; i < lists.length; i += 1) {
+      if (!Array.isArray(lists[i])) continue;
+      for (var j = 0; j < lists[i].length; j += 1) {
+        var player = lists[i][j];
+        if (player && (player.id === "p-haram" || player.name === "김하람")) return player;
+      }
+    }
+    if (state.player && (state.player.id === "p-haram" || state.player.name === "김하람")) {
+      return state.player;
+    }
+    return null;
+  }
+
+  function ledgerNumber(method, player) {
+    var api = window.SportsGrowDemo;
+    if (!player || !api || typeof api[method] !== "function") return null;
+    try {
+      var value = api[method](player);
+      return typeof value === "number" && isFinite(value) ? value : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
   function fileStamp() {
     var d = new Date();
     return (
@@ -204,6 +260,57 @@
     return list[index % list.length];
   }
 
+  function haramTeam() {
+    var baseball = teams.filter(function (team) {
+      return team.sport === "야구";
+    });
+    var u15 = baseball.filter(function (team) {
+      return team.age === "U15";
+    })[0];
+    return u15 || baseball[0] || teams[0] || null;
+  }
+
+  function haramRecord(team, slot) {
+    var player = ledgerPlayer(readLedger());
+    var weekly = ledgerNumber("weekMinutes", player);
+    var goal = ledgerNumber("goalAverage", player);
+    var positions = POSITIONS[team.sport] || POSITIONS.기타;
+    return {
+      id: "p-haram",
+      name: "김하람",
+      teamId: team.id,
+      team: team.name,
+      sport: team.sport,
+      age: team.age,
+      grade: gradeFor(team.age, 1),
+      position: slot && slot.position ? slot.position : positions[0],
+      weekly: weekly == null ? 320 : Math.max(0, Math.round(weekly)),
+      participation: slot ? slot.participation : 82,
+      goal: goal == null ? 0 : clamp(goal, 0, 100),
+      tone: slot && slot.tone ? slot.tone : "green"
+    };
+  }
+
+  function ensureHaram() {
+    var team = haramTeam();
+    if (!team) return;
+
+    var slotIndex = -1;
+    players.forEach(function (player, index) {
+      if (player.name === "김하람" || player.id === "p-haram") slotIndex = index;
+    });
+    if (slotIndex < 0) {
+      players.forEach(function (player, index) {
+        if (slotIndex < 0 && player.teamId === team.id) slotIndex = index;
+      });
+    }
+
+    var slot = slotIndex >= 0 ? players[slotIndex] : null;
+    var record = haramRecord(team, slot);
+    if (slotIndex >= 0) players[slotIndex] = record;
+    else players.push(record);
+  }
+
   function buildPlayers() {
     players = [];
     teamById = {};
@@ -246,6 +353,8 @@
         });
       }
     });
+
+    ensureHaram();
   }
 
   function effectivePart(value, period) {

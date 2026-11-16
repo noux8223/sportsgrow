@@ -60,8 +60,8 @@
 
     <div class="sidebar-tip" data-player-only>
       <div class="sidebar-tip__head"><svg class="icon" aria-hidden="true"><use href="#i-flame" /></svg>Weekly goal</div>
-      <strong>이번 주 4 / 5회 훈련</strong>
-      <p>1회만 더 기록하면 주간 목표를 달성합니다.</p>
+      <strong id="sidebarWeekGoal">이번 주 7 / 5회 훈련</strong>
+      <p id="sidebarWeekGoalNote">이번 주 훈련 목표를 달성했습니다.</p>
       <a href="#training">훈련 기록하기 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
     </div>
 
@@ -183,7 +183,7 @@
 
           <div class="profile-grid">
             <article class="profile-card">
-              <div class="profile-card__body">
+              <div class="profile-card__body" id="profileCardBody">
                 <div class="profile-card__head">
                   <span class="profile-avatar" aria-hidden="true">하</span>
                   <div class="profile-card__id">
@@ -251,30 +251,30 @@
               <span class="stat__label">이번 주 훈련량</span>
             </div>
             <div class="stat__value"><span data-stat-week>320</span><small>분</small></div>
-            <div class="stat__foot"><span class="delta"><svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg>+12%</span> 지난주 285분</div>
+            <div class="stat__foot"><span class="delta" id="weekDelta"></span> <span id="weekPrev"></span></div>
           </div>
           <div class="stat stat--lime">
             <div class="stat__top">
               <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg></span>
               <span class="stat__label">주간 훈련 목표</span>
             </div>
-            <div class="stat__value"><span data-stat-week-count>4</span><small>/ 5회</small></div>
-            <div class="stat__foot">목표 달성까지 <b style="color:var(--ink)">1회</b> 남음</div>
+            <div class="stat__value"><span data-stat-week-count>7</span><small>/ 5회</small></div>
+            <div class="stat__foot" id="weekGoalFoot"></div>
           </div>
           <div class="stat stat--clay">
             <div class="stat__top">
               <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-trophy" /></svg></span>
               <span class="stat__label">시즌 타율</span>
             </div>
-            <div class="stat__value">.312</div>
-            <div class="stat__foot"><span class="delta"><svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg>▲ .024</span> 최근 10경기</div>
+            <div class="stat__value" id="seasonAvg">.000</div>
+            <div class="stat__foot"><span class="delta" id="seasonDelta"></span> <span>지난달 대비</span></div>
           </div>
           <div class="stat stat--blue">
             <div class="stat__top">
               <span class="stat__ico"><svg class="icon" aria-hidden="true"><use href="#i-chart" /></svg></span>
               <span class="stat__label">목표 달성률</span>
             </div>
-            <div class="stat__value"><span data-stat-goal>78</span><small>%</small></div>
+            <div class="stat__value"><span data-stat-goal>0</span><small>%</small></div>
             <div class="stat__foot">단기 2개 · 장기 1개 진행 중</div>
           </div>
         </div>
@@ -302,25 +302,14 @@
             <div class="panel__head">
               <div>
                 <h2 class="panel__title"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg>목표 달성 현황</h2>
-                <p class="panel__sub">2026년 10월 기준</p>
+                <p class="panel__sub">이번 달 기준</p>
               </div>
               <a class="panel__link" href="#games">전체 목표 <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg></a>
             </div>
-            <div class="progress-row">
-              <div class="progress-row__head"><span>주 4회 이상 훈련</span><b>100%</b></div>
-              <div class="progress"><i style="--w:100%"></i></div>
-            </div>
-            <div class="progress-row">
-              <div class="progress-row__head"><span>10월 타율 .320</span><b>88%</b></div>
-              <div class="progress"><i style="--w:88%"></i></div>
-            </div>
-            <div class="progress-row">
-              <div class="progress-row__head"><span>시즌 30안타</span><b>72%</b></div>
-              <div class="progress"><i class="progress--lime" style="--w:72%"></i></div>
-            </div>
+            <div id="homeGoals"></div>
             <div class="note-callout" style="margin-top:14px">
               <svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
-              <span>최근 3주간 꾸준히 기록 중이에요. 이번 주 목표를 달성하면 4주 연속 달성입니다.</span>
+              <span id="goalNote">최근 3주간 꾸준히 기록 중이에요.</span>
             </div>
           </div>
         </div>
@@ -372,7 +361,7 @@
             <div class="training-summary">
               <div><span>이번 주</span><strong><span data-stat-week>320</span><small>분</small></strong></div>
               <div><span>이번 달</span><strong><span data-stat-month>800</span><small>분</small></strong></div>
-              <div><span>연속 기록</span><strong>7<small>일</small></strong></div>
+              <div><span>연속 기록</span><strong><span id="streakDays">7</span><small>일</small></strong></div>
             </div>
             <div class="bar-chart bar-chart--tall" id="trainingChart" role="img" aria-label="훈련량 차트"></div>
             <div class="panel__foot">
@@ -440,35 +429,7 @@
           </button>
         </div>
 
-        <div class="goal-grid" style="margin-bottom:10px">
-          <article class="goal-card">
-            <div class="goal-card__head">
-              <span class="goal-card__badge"><svg class="icon" aria-hidden="true"><use href="#i-target" /></svg></span>
-              <div class="goal-card__title"><span>단기 목표 · D-14</span><strong>10월 타율 .320 달성</strong></div>
-              <span class="goal-card__pct">88%</span>
-            </div>
-            <div class="progress"><i style="--w:88%"></i></div>
-            <div class="goal-card__foot"><span>현재 .312</span><b>코치 확인 완료</b></div>
-          </article>
-          <article class="goal-card">
-            <div class="goal-card__head">
-              <span class="goal-card__badge"><svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg></span>
-              <div class="goal-card__title"><span>단기 목표 · 달성</span><strong>주 4회 이상 훈련</strong></div>
-              <span class="goal-card__pct">100%</span>
-            </div>
-            <div class="progress"><i class="progress--lime" style="--w:100%"></i></div>
-            <div class="goal-card__foot"><span>4주 연속 달성</span><b>2026.10.26 완료</b></div>
-          </article>
-          <article class="goal-card" style="grid-column:1/-1">
-            <div class="goal-card__head">
-              <span class="goal-card__badge goal-card__badge--long"><svg class="icon" aria-hidden="true"><use href="#i-flag" /></svg></span>
-              <div class="goal-card__title"><span>장기 목표 · 2026 시즌</span><strong>시즌 30안타 · 출루율 .400</strong></div>
-              <span class="goal-card__pct goal-card__pct--blue">72%</span>
-            </div>
-            <div class="progress"><i class="progress--blue" style="--w:72%"></i></div>
-            <div class="goal-card__foot"><span>현재 22안타 · 출루율 .401</span><b>시즌 종료 2026.11.30</b></div>
-          </article>
-        </div>
+        <div class="goal-grid" style="margin-bottom:10px" id="goalCards"></div>
 
         <div class="grid-2">
           <div class="panel">
@@ -795,6 +756,26 @@
         <label for="gamePerformance">개인 성과</label>
         <input class="input" type="text" id="gamePerformance" name="performance" placeholder="예: 4타수 3안타 2타점" required />
       </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="gameScore">경기 점수</label>
+          <input class="input" type="text" id="gameScore" name="score" placeholder="예: 5 : 3" />
+        </div>
+        <div class="field">
+          <label for="gameAtBats">타수</label>
+          <input class="input" type="number" id="gameAtBats" name="atBats" min="0" max="20" step="1" value="0" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="gameHits">안타</label>
+          <input class="input" type="number" id="gameHits" name="hits" min="0" max="20" step="1" value="0" />
+        </div>
+        <div class="field">
+          <label for="gameWalks">볼넷</label>
+          <input class="input" type="number" id="gameWalks" name="walks" min="0" max="20" step="1" value="0" />
+        </div>
+      </div>
       <button class="btn btn--dark btn--block" type="submit" style="margin-top:16px">
         <svg class="icon" aria-hidden="true"><use href="#i-check" /></svg>
         경기 기록 저장
@@ -942,6 +923,7 @@
 <script src="js/icons.js" defer></script>
 <script src="js/auth.js" defer></script>
 <script src="js/app-shell.js" defer></script>
+<script src="js/demo-data.js" defer></script>
 <script src="js/student.js" defer></script>
 <script src="js/pwa.js" defer></script>
 </body>

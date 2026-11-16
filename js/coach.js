@@ -63,6 +63,118 @@
   }
 
   /* ---------------------------------------------------------------
+     Demo ledger (학생·코치·아카데미·관리자가 공유)
+     --------------------------------------------------------------- */
+  var LEDGER_KEY = "sportsgrow.demo.v1";
+
+  function readLedger() {
+    if (window.SportsGrowDemo && window.SportsGrowDemo.load) {
+      try {
+        return window.SportsGrowDemo.load();
+      } catch (err) {
+        return null;
+      }
+    }
+    try {
+      var raw = window.localStorage.getItem(LEDGER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function ledgerPlayer(state) {
+    if (!state) return null;
+    if (window.SportsGrowDemo && window.SportsGrowDemo.player) {
+      try {
+        var viaApi = window.SportsGrowDemo.player(state);
+        if (viaApi) return viaApi;
+      } catch (err) {
+        /* 아래 탐색으로 넘어간다 */
+      }
+    }
+    var lists = [state.players, state.students, state.roster, state.members];
+    for (var i = 0; i < lists.length; i += 1) {
+      if (!Array.isArray(lists[i])) continue;
+      for (var j = 0; j < lists[i].length; j += 1) {
+        var player = lists[i][j];
+        if (player && (player.id === "p-haram" || player.name === "김하람")) return player;
+      }
+    }
+    if (state.player && (state.player.id === "p-haram" || state.player.name === "김하람")) {
+      return state.player;
+    }
+    return null;
+  }
+
+  function ledgerValue(method, player, fallback) {
+    var api = window.SportsGrowDemo;
+    if (!player || !api || typeof api[method] !== "function") return fallback;
+    try {
+      var value = api[method](player);
+      return value == null ? fallback : value;
+    } catch (err) {
+      return fallback;
+    }
+  }
+
+  function monthEndLabel(offset) {
+    var now = new Date();
+    var end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+    return (
+      end.getFullYear() +
+      "." +
+      String(end.getMonth() + 1).padStart(2, "0") +
+      "." +
+      String(end.getDate()).padStart(2, "0")
+    );
+  }
+
+  function isPastDue(due) {
+    var parts = String(due || "").split(".").map(Number);
+    if (parts.length !== 3 || !parts[0]) return false;
+    var date = new Date(parts[0], parts[1] - 1, parts[2]);
+    if (isNaN(date.getTime())) return false;
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  }
+
+  function clampPct(value) {
+    var numeric = Number(value);
+    if (!isFinite(numeric)) return 0;
+    return Math.max(0, Math.min(100, Math.round(numeric)));
+  }
+
+  function trainingLabel(record) {
+    if (!record) return "";
+    var minutes = Number(record.minutes);
+    var type = String(record.type || record.kind || record.category || "").trim();
+    var detail = (type ? type + " " : "") + (isFinite(minutes) ? minutes + "분" : "");
+    detail = detail.trim() || "훈련 기록";
+    var date = String(record.date || "");
+    if (!date || date === daysAgo(0)) return "오늘 · " + detail;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return shortDate(date) + " · " + detail;
+    return detail;
+  }
+
+  function ledgerGoals(player) {
+    var raw = ledgerValue("goalsFor", player, null);
+    if (!Array.isArray(raw) || !raw.length) return null;
+    return raw.map(function (goal, index) {
+      var item = goal || {};
+      var type = item.type === "장기" || item.type === "단기" ? item.type : index ? "장기" : "단기";
+      var value = item.pct != null ? item.pct : item.progress != null ? item.progress : item.value;
+      return {
+        type: type,
+        title: String(item.title || item.name || item.label || "목표"),
+        pct: clampPct(value),
+        due: item.due || item.dueDate || item.deadline || monthEndLabel(type === "장기" ? 1 : 0)
+      };
+    });
+  }
+
+  /* ---------------------------------------------------------------
      Seed players
      --------------------------------------------------------------- */
   function makeGoals(shortTitle, longTitle, shortPct, longPct) {
@@ -155,6 +267,45 @@
   if (!goalOverrides || typeof goalOverrides !== "object") goalOverrides = {};
   players.forEach(function (player) {
     if (goalOverrides[player.id]) player.goals = goalOverrides[player.id];
+  });
+
+  /* 원장의 김하람이 있으면 p1 숫자만 원장 계산값으로 덮어쓴다 */
+  var ledgerState = readLedger();
+  var ledgerHaram = ledgerPlayer(ledgerState);
+  var haramFromLedger = false;
+
+  if (ledgerHaram) {
+    var haramSeed = players.filter(function (player) {
+      return player.id === "p1";
+    })[0];
+
+    if (haramSeed) {
+      var weekMinutes = ledgerValue("weekMinutes", ledgerHaram, null);
+      var goalAverage = ledgerValue("goalAverage", ledgerHaram, null);
+      var latestLabel = trainingLabel(ledgerValue("latestTraining", ledgerHaram, null));
+      var ledgerGoalList = ledgerGoals(ledgerHaram);
+
+      if (typeof weekMinutes === "number" && isFinite(weekMinutes)) {
+        haramSeed.minutes = Math.max(0, Math.round(weekMinutes));
+      }
+      if (typeof goalAverage === "number" && isFinite(goalAverage)) {
+        haramSeed.goal = clampPct(goalAverage);
+      }
+      if (latestLabel) haramSeed.last = latestLabel;
+      if (ledgerGoalList) {
+        haramSeed.goals = ledgerGoalList;
+        haramFromLedger = true;
+      }
+    }
+  }
+
+  /* 원장에 연결되지 않은 선수의 지난 절대 마감일은 이번 달·다음 달 말로 옮긴다 */
+  players.forEach(function (player) {
+    if (player.id === "p1" && haramFromLedger) return;
+    (player.goals || []).forEach(function (goal) {
+      if (!isPastDue(goal.due)) return;
+      goal.due = monthEndLabel(goal.type === "장기" ? 1 : 0);
+    });
   });
 
   /* ---------------------------------------------------------------
@@ -887,8 +1038,27 @@
      Parent requests
      --------------------------------------------------------------- */
   function loadParentRequests() {
+    var state = readLedger();
+    if (state && Array.isArray(state.requests)) return state.requests;
     var stored = Store.readStore(REQUESTS_KEY, null);
     return Array.isArray(stored) ? stored : [];
+  }
+
+  function saveLedger(state) {
+    if (window.SportsGrowDemo && window.SportsGrowDemo.save) {
+      try {
+        window.SportsGrowDemo.save(state);
+        return true;
+      } catch (err) {
+        return false;
+      }
+    }
+    try {
+      window.localStorage.setItem(LEDGER_KEY, JSON.stringify(state));
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   function renderParentRequests() {
@@ -958,7 +1128,12 @@
   }
 
   function updateRequestStatus(id, status) {
-    var list = loadParentRequests();
+    var state = readLedger();
+    var list = state && Array.isArray(state.requests) ? state.requests : null;
+    var onLedger = !!list;
+
+    if (!list) list = loadParentRequests();
+
     var target = null;
     list.forEach(function (req) {
       if (req.id === id) {
@@ -968,7 +1143,16 @@
       }
     });
     if (!target) return;
-    Store.writeStore(REQUESTS_KEY, list);
+
+    if (onLedger) {
+      if (!saveLedger(state)) {
+        Store.toast("데모 원장을 저장하지 못했습니다.", "warn");
+        return;
+      }
+    } else {
+      Store.writeStore(REQUESTS_KEY, list);
+    }
+
     renderParentRequests();
     Store.toast(
       status === "done" ? "요청을 확인 완료로 표시했습니다." : "요청을 대기 상태로 되돌렸습니다."

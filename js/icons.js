@@ -17,6 +17,7 @@
     '<symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="m8.2 12.2 2.5 2.5 5.1-5.4"/></symbol>',
     '<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="2.2"/><path d="M8 10V7.2a4 4 0 0 1 8 0V10M12 14v2.6"/></symbol>',
     '<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12S6.3 5.9 12 5.9 21.2 12 21.2 12 17.7 18.1 12 18.1 2.8 12 2.8 12Z"/><circle cx="12" cy="12" r="2.9"/></symbol>',
+    '<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M2.8 12S6.3 5.9 12 5.9c1.6 0 3 .4 4.2 1M21.2 12s-1.2 2.1-3.5 3.6M12 18.1c-5.7 0-9.2-6.1-9.2-6.1"/><circle cx="12" cy="12" r="2.9"/><path d="m4.5 4.5 15 15"/></symbol>',
     '<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7.5 15.8 3.7-4.7 3.1 2.8L20 7"/><circle cx="20" cy="7" r="1.2"/></symbol>',
     '<symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20h17M6.5 20v-6M11 20V8.5M15.5 20v-9M20 20V5"/></symbol>',
     '<symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h3.2l2.3-5.4 3.3 11 2.4-6.3 1.7 3.2H21"/></symbol>',

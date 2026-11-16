@@ -125,16 +125,16 @@
             </div>
 
             <div class="ha-stats">
-              <div><span>타율</span><strong>.312</strong><em>▲ .024</em></div>
-              <div><span>출루율</span><strong>.401</strong><em>▲ .018</em></div>
-              <div><span>훈련</span><strong>14<small>회</small></strong><em>이번 달</em></div>
+              <div><span>타율</span><strong data-ha-avg>.312</strong><em data-ha-avg-delta>▲ .024</em></div>
+              <div><span>출루율</span><strong data-ha-obp>.401</strong><em data-ha-obp-delta>▲ .018</em></div>
+              <div><span>훈련</span><strong><span data-ha-month>14</span><small>회</small></strong><em>이번 달</em></div>
             </div>
 
             <div class="ha-goal">
-              <div class="ha-ring" aria-hidden="true"><b>78%</b></div>
+              <div class="ha-ring" aria-hidden="true"><b data-ha-goal-rate>78%</b></div>
               <div class="ha-goal__text">
                 <strong>이번 달 목표 달성률</strong>
-                <span>주 4회 훈련 · 타율 .320 달성까지 12%</span>
+                <span data-ha-goal-note>주 5회 훈련 · 이번 달 타율 .320 목표</span>
               </div>
               <span class="tag tag--green" style="margin-left:auto">순항 중</span>
             </div>
@@ -795,6 +795,7 @@
 </footer>
 
 <script src="js/icons.js" defer></script>
+<script src="js/demo-data.js" defer></script>
 <script src="js/site.js" defer></script>
 <script src="js/pwa.js" defer></script>
 </body>

@@ -4,18 +4,21 @@
 (function () {
   "use strict";
 
-  var Store = window.AppShell || { readStore: function () {}, writeStore: function () {} };
-  var TRAINING_KEY = "sportsgrow.player.training.v1";
-  var GAMES_KEY = "sportsgrow.player.games.v1";
-  var VISIBILITY_KEY = "sportsgrow.player.visibility.v1";
-  var PROFILE_KEY = "sportsgrow.player.profile.v1";
-  var MEDIA_KEY = "sportsgrow.player.media.v1";
-  var CHEERS_KEY = "sportsgrow.player.cheers.v1";
-  var REQUESTS_KEY = "sportsgrow.parent.requests.v1";
-
+  var Demo = window.SportsGrowDemo;
   var SESSION =
     window.SportsGrow && window.SportsGrow.getSession ? window.SportsGrow.getSession() : null;
-  var ROLE = SESSION ? SESSION.role : "player";
+  var ROLE = SESSION ? SESSION.role : null;
+
+  /* No session (or an unsupported role): do not seed, render, or write storage. */
+  if (!Demo) return;
+  if (!SESSION || ["player", "parent", "coach"].indexOf(ROLE) === -1) return;
+
+  var Store = window.AppShell || {
+    toast: function () {},
+    openModal: function () {},
+    closeModal: function () {},
+    showView: function () {}
+  };
   var IS_STUDENT = ROLE === "player";
   var IS_PARENT = ROLE === "parent";
   var IS_COACH = ROLE === "coach";
@@ -35,103 +38,159 @@
   }
 
   /* ---------------------------------------------------------------
+     Single demo ledger
+     --------------------------------------------------------------- */
+  var state = Demo.load();
+  var player = Demo.player(state);
+  if (!player) return;
+
+  if (!Array.isArray(player.training)) player.training = [];
+  if (!Array.isArray(player.games)) player.games = [];
+  if (!Array.isArray(player.history)) player.history = [];
+  if (!player.visibility || typeof player.visibility !== "object") {
+    player.visibility = { profile: "team", training: "team", games: "team", goals: "private" };
+  }
+  if (!state.cheers || typeof state.cheers !== "object" || Array.isArray(state.cheers)) {
+    state.cheers = {};
+  }
+  if (!Array.isArray(state.requests)) state.requests = [];
+  if (!Array.isArray(state.gallery)) state.gallery = [];
+
+  var training = player.training;
+  var games = player.games;
+  var cheers = state.cheers;
+  var requests = state.requests;
+  var gallery = normalizeGallery(state.gallery);
+  var heroMedia = normalizeHero(state.heroMedia);
+  var growthMetric = "avg";
+
+  function commitTraining(next) {
+    var previous = player.training;
+    player.training = next;
+    if (!Demo.save(state)) {
+      player.training = previous;
+      return false;
+    }
+    training = next;
+    return true;
+  }
+
+  function commitGames(next) {
+    var previous = player.games;
+    player.games = next;
+    if (!Demo.save(state)) {
+      player.games = previous;
+      return false;
+    }
+    games = next;
+    return true;
+  }
+
+  function commitCheers(next) {
+    var previous = state.cheers;
+    state.cheers = next;
+    if (!Demo.save(state)) {
+      state.cheers = previous;
+      return false;
+    }
+    cheers = next;
+    return true;
+  }
+
+  function commitRequests(next) {
+    var previous = state.requests;
+    state.requests = next;
+    if (!Demo.save(state)) {
+      state.requests = previous;
+      return false;
+    }
+    requests = next;
+    return true;
+  }
+
+  function commitGallery(next) {
+    var previous = state.gallery;
+    state.gallery = next;
+    if (!Demo.save(state)) {
+      state.gallery = previous;
+      return false;
+    }
+    gallery = next;
+    return true;
+  }
+
+  function commitHero(item) {
+    var previous = state.heroMedia;
+    state.heroMedia = item;
+    if (!Demo.save(state)) {
+      state.heroMedia = previous;
+      return false;
+    }
+    heroMedia = item;
+    return true;
+  }
+
+  var PROFILE_KEYS = ["sport", "team", "position", "grade", "age", "region", "bats"];
+
+  function commitProfile(data) {
+    var previous = {};
+    PROFILE_KEYS.forEach(function (key) {
+      previous[key] = player[key];
+    });
+    Object.assign(player, data);
+    if (!Demo.save(state)) {
+      PROFILE_KEYS.forEach(function (key) {
+        player[key] = previous[key];
+      });
+      return false;
+    }
+    return true;
+  }
+
+  function commitVisibility(next) {
+    var previous = player.visibility;
+    player.visibility = next;
+    if (!Demo.save(state)) {
+      player.visibility = previous;
+      return false;
+    }
+    return true;
+  }
+
+  /* ---------------------------------------------------------------
      Date helpers
      --------------------------------------------------------------- */
   var DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
 
-  function dateKey(date) {
-    return (
-      date.getFullYear() +
-      "-" +
-      String(date.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(date.getDate()).padStart(2, "0")
-    );
-  }
-
-  function daysAgo(n) {
-    var d = new Date();
-    d.setHours(12, 0, 0, 0);
-    d.setDate(d.getDate() - n);
-    return dateKey(d);
+  function pad2(value) {
+    return String(value).padStart(2, "0");
   }
 
   function parseDate(key) {
-    var parts = key.split("-").map(Number);
-    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0, 0);
-  }
-
-  function shortDate(key) {
-    var d = parseDate(key);
-    return (
-      String(d.getMonth() + 1).padStart(2, "0") +
-      "." +
-      String(d.getDate()).padStart(2, "0") +
-      " (" +
-      DAY_NAMES[d.getDay()] +
-      ")"
-    );
+    var parts = String(key == null ? "" : key).split("-");
+    if (parts.length < 3) return null;
+    var year = Number(parts[0]);
+    var month = Number(parts[1]);
+    var day = Number(parts[2]);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day, 12, 0, 0, 0);
   }
 
   function todayKey() {
-    return dateKey(new Date());
+    return Demo.todayKey();
   }
 
-  /* ---------------------------------------------------------------
-     Seed data
-     --------------------------------------------------------------- */
-  var seedTraining = [
-    { offset: 0, type: "타격", minutes: 35, intensity: "high", memo: "타격 120구 · 수비 40분" },
-    { offset: 1, type: "웨이트", minutes: 35, intensity: "mid", memo: "하체 중심 코어 훈련" },
-    { offset: 2, type: "러닝", minutes: 60, intensity: "low", memo: "베이스 러닝 5km" },
-    { offset: 3, type: "수비", minutes: 30, intensity: "high", memo: "내야 땅볼 · 더블플레이" },
-    { offset: 4, type: "타격", minutes: 70, intensity: "mid", memo: "티배팅 80구 · 라이브 40구" },
-    { offset: 5, type: "컨디셔닝", minutes: 40, intensity: "mid", memo: "민첩성 · 순발력 훈련" },
-    { offset: 6, type: "수비", minutes: 50, intensity: "high", memo: "송구 정확도 훈련" },
-    { offset: 7, type: "웨이트", minutes: 60, intensity: "mid", memo: "상체 근력 보강" },
-    { offset: 8, type: "타격", minutes: 90, intensity: "high", memo: "배팅 머신 120구" },
-    { offset: 10, type: "수비", minutes: 75, intensity: "mid", memo: "외야 펑고 · 중계 플레이" },
-    { offset: 13, type: "러닝", minutes: 60, intensity: "low", memo: "인터벌 러닝" },
-    { offset: 16, type: "타격", minutes: 80, intensity: "high", memo: "타격 폼 교정" },
-    { offset: 20, type: "웨이트", minutes: 45, intensity: "mid", memo: "하체 스쿼트" },
-    { offset: 23, type: "회복", minutes: 70, intensity: "low", memo: "스트레칭 · 폼롤러" }
-  ];
-
-  var seedGames = [
-    { date: "2026-10-26", competition: "서울시 중학교 야구 리그", opponent: "○○중학교", result: "승", score: "5 : 3", performance: "4타수 3안타 2타점", achieved: true },
-    { date: "2026-10-24", competition: "서울시 중학교 야구 리그", opponent: "△△중학교", result: "승", score: "7 : 4", performance: "3타수 1안타 1볼넷", achieved: false },
-    { date: "2026-10-21", competition: "주말 리그", opponent: "□□중학교", result: "패", score: "2 : 6", performance: "4타수 1안타", achieved: false },
-    { date: "2026-10-18", competition: "서울시 유소년 야구대회", opponent: "◇◇중학교", result: "무", score: "4 : 4", performance: "3타수 2안타 1타점", achieved: true },
-    { date: "2026-10-12", competition: "주말 리그", opponent: "◎◎중학교", result: "승", score: "9 : 1", performance: "4타수 2안타 2득점", achieved: true }
-  ];
-
-  function loadTraining() {
-    var stored = Store.readStore(TRAINING_KEY, null);
-    if (Array.isArray(stored) && stored.length) return stored;
-    var seeded = seedTraining.map(function (item, index) {
-      return {
-        id: "seed-t-" + index,
-        date: daysAgo(item.offset),
-        type: item.type,
-        minutes: item.minutes,
-        intensity: item.intensity,
-        memo: item.memo
-      };
-    });
-    Store.writeStore(TRAINING_KEY, seeded);
-    return seeded;
+  function daysAgo(n) {
+    return Demo.daysAgo(n);
   }
 
-  function loadGames() {
-    var stored = Store.readStore(GAMES_KEY, null);
-    if (Array.isArray(stored) && stored.length) return stored;
-    var seeded = seedGames.slice();
-    Store.writeStore(GAMES_KEY, seeded);
-    return seeded;
+  function shortDate(key) {
+    return Demo.shortDate(key);
   }
 
-  var training = loadTraining();
-  var games = loadGames();
+  function escapeHtml(value) {
+    return Demo.escapeHtml(value);
+  }
 
   /* ---------------------------------------------------------------
      Static helpers
@@ -152,16 +211,22 @@
   };
 
   function sortTraining(list) {
-    return list
-      .slice()
-      .sort(function (a, b) {
-        return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
-      });
+    return list.slice().sort(function (a, b) {
+      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    });
   }
 
   function sum(list) {
     return list.reduce(function (total, item) {
       return total + Number(item.minutes || 0);
+    }, 0);
+  }
+
+  function sumWindow(from, to) {
+    var keys = [];
+    for (var i = from; i <= to; i++) keys.push(daysAgo(i));
+    return training.reduce(function (total, item) {
+      return keys.indexOf(item.date) !== -1 ? total + Number(item.minutes || 0) : total;
     }, 0);
   }
 
@@ -175,14 +240,189 @@
 
   function monthTraining() {
     var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth();
     return training.filter(function (item) {
       var d = parseDate(item.date);
-      return d.getFullYear() === year && d.getMonth() === month;
+      return d && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
     });
   }
 
+  function latestGame() {
+    var sorted = games.slice().sort(function (a, b) {
+      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    });
+    return sorted[0] || null;
+  }
+
+  function seasonStats() {
+    var totals = { atBats: 0, hits: 0, walks: 0, games: games.length };
+    games.forEach(function (game) {
+      totals.atBats += Number(game.atBats || 0);
+      totals.hits += Number(game.hits || 0);
+      totals.walks += Number(game.walks || 0);
+    });
+    totals.avg = totals.atBats > 0 ? totals.hits / totals.atBats : 0;
+    return totals;
+  }
+
+  function monthStats() {
+    var now = new Date();
+    var totals = { atBats: 0, hits: 0, walks: 0, games: 0 };
+    games.forEach(function (game) {
+      var d = parseDate(game.date);
+      if (!d || d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) return;
+      totals.games += 1;
+      totals.atBats += Number(game.atBats || 0);
+      totals.hits += Number(game.hits || 0);
+      totals.walks += Number(game.walks || 0);
+    });
+    totals.avg = totals.atBats > 0 ? totals.hits / totals.atBats : 0;
+    return totals;
+  }
+
+  function formatAvg(value) {
+    return (Number(value) || 0).toFixed(3).replace(/^0/, "");
+  }
+
+  function streakDays() {
+    var streak = 0;
+    for (var i = 0; i < 366; i++) {
+      var key = daysAgo(i);
+      var has = training.some(function (item) {
+        return item.date === key;
+      });
+      if (!has) break;
+      streak += 1;
+    }
+    return streak;
+  }
+
+  /* ---------------------------------------------------------------
+     Visibility
+     --------------------------------------------------------------- */
+  var VIS_LABEL = { public: "전체 공개", team: "팀 공개", private: "비공개" };
+
+  function visibilityOf(section) {
+    return (player.visibility && player.visibility[section]) || "private";
+  }
+
+  function canSee(section) {
+    return IS_STUDENT || visibilityOf(section) !== "private";
+  }
+
+  function privateBlock(what) {
+    return (
+      '<div class="empty-state"><svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>' +
+      "<strong>비공개</strong><p>" +
+      escapeHtml(what) +
+      "은 비공개로 설정되어 있습니다.</p></div>"
+    );
+  }
+
+  function setPrivateArea(container, isPrivate, what) {
+    if (!container) return;
+    var content = Array.prototype.slice.call(container.children).filter(function (el) {
+      return !el.hasAttribute("data-private-note");
+    });
+    var note = container.querySelector("[data-private-note]");
+    if (isPrivate) {
+      content.forEach(function (el) {
+        el.hidden = true;
+      });
+      if (!note) {
+        note = document.createElement("div");
+        note.setAttribute("data-private-note", "");
+        container.appendChild(note);
+      }
+      note.innerHTML = privateBlock(what);
+      note.hidden = false;
+    } else {
+      content.forEach(function (el) {
+        el.hidden = false;
+      });
+      if (note) note.hidden = true;
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Home KPI
+     --------------------------------------------------------------- */
+  function renderStats() {
+    var weekMinutes = Demo.weekMinutes(player);
+    var weekDays = Demo.weekDays(player);
+    var monthMinutes = Demo.monthMinutes(player);
+    var previousWeek = sumWindow(7, 13);
+    var change = previousWeek > 0 ? Math.round(((weekMinutes - previousWeek) / previousWeek) * 100) : 0;
+
+    document.querySelectorAll("[data-stat-week]").forEach(function (el) {
+      el.textContent = weekMinutes;
+    });
+    document.querySelectorAll("[data-stat-week-count]").forEach(function (el) {
+      el.textContent = weekDays;
+    });
+    document.querySelectorAll("[data-stat-month]").forEach(function (el) {
+      el.textContent = monthMinutes;
+    });
+
+    var weekDelta = document.getElementById("weekDelta");
+    if (weekDelta) {
+      weekDelta.innerHTML =
+        '<svg class="icon" aria-hidden="true"><use href="#i-trend" /></svg>' +
+        (change > 0 ? "+" : "") +
+        change +
+        "%";
+    }
+    var weekPrev = document.getElementById("weekPrev");
+    if (weekPrev) weekPrev.textContent = "지난주 " + previousWeek + "분";
+
+    var weekGoalFoot = document.getElementById("weekGoalFoot");
+    if (weekGoalFoot) {
+      var left = Math.max(0, Demo.WEEKLY_GOAL_DAYS - weekDays);
+      weekGoalFoot.innerHTML =
+        left === 0
+          ? "이번 주 목표를 달성했습니다."
+          : '목표 달성까지 <b style="color:var(--ink)">' + left + "회</b> 남음";
+    }
+
+    var sidebarWeekGoal = document.getElementById("sidebarWeekGoal");
+    if (sidebarWeekGoal) {
+      sidebarWeekGoal.textContent =
+        "이번 주 " + weekDays + " / " + Demo.WEEKLY_GOAL_DAYS + "회 훈련";
+    }
+    var sidebarWeekGoalNote = document.getElementById("sidebarWeekGoalNote");
+    if (sidebarWeekGoalNote) {
+      sidebarWeekGoalNote.textContent =
+        weekDays >= Demo.WEEKLY_GOAL_DAYS
+          ? "이번 주 훈련 목표를 달성했습니다."
+          : Math.max(0, Demo.WEEKLY_GOAL_DAYS - weekDays) +
+            "회만 더 기록하면 주간 목표를 달성합니다.";
+    }
+
+    var goalValue = document.querySelector("[data-stat-goal]");
+    if (goalValue) goalValue.textContent = Demo.goalAverage(player);
+
+    var season = seasonStats();
+    var seasonAvg = document.getElementById("seasonAvg");
+    if (seasonAvg) seasonAvg.textContent = formatAvg(season.avg);
+
+    var seasonDelta = document.getElementById("seasonDelta");
+    if (seasonDelta) {
+      var series = Demo.growthSeries(player, "avg");
+      var values = series.values || [];
+      var diff = values.length > 1 ? values[values.length - 1] - values[values.length - 2] : 0;
+      seasonDelta.textContent =
+        (diff > 0.0005 ? "▲ " : diff < -0.0005 ? "▼ " : "— ") + formatAvg(Math.abs(diff));
+    }
+
+    var streak = document.getElementById("streakDays");
+    if (streak) streak.textContent = streakDays();
+
+    var monthTag = document.getElementById("monthTag");
+    if (monthTag) monthTag.textContent = "이번 달 " + monthMinutes + "분";
+  }
+
+  /* ---------------------------------------------------------------
+     Charts
+     --------------------------------------------------------------- */
   function renderBars(container, items, mode) {
     if (!container) return;
     var max = Math.max.apply(
@@ -228,8 +468,9 @@
         .reduce(function (acc, item) {
           return acc + Number(item.minutes || 0);
         }, 0);
+      var parsed = parseDate(key);
       items.push({
-        label: DAY_NAMES[parseDate(key).getDay()],
+        label: parsed ? DAY_NAMES[parsed.getDay()] : "",
         value: total,
         today: key === todayKey()
       });
@@ -256,29 +497,6 @@
       buckets.push({ label: w === 0 ? "이번 주" : w + "주 전", value: value });
     }
     return buckets;
-  }
-
-  /* ---------------------------------------------------------------
-     Stats / charts
-     --------------------------------------------------------------- */
-  function renderStats() {
-    var week = weekTraining();
-    var month = monthTraining();
-    var weekMinutes = sum(week);
-    var monthMinutes = sum(month);
-
-    document.querySelectorAll("[data-stat-week]").forEach(function (el) {
-      el.textContent = weekMinutes;
-    });
-    document.querySelectorAll("[data-stat-week-count]").forEach(function (el) {
-      el.textContent = week.length;
-    });
-    document.querySelectorAll("[data-stat-month]").forEach(function (el) {
-      el.textContent = monthMinutes;
-    });
-
-    var monthTag = document.getElementById("monthTag");
-    if (monthTag) monthTag.textContent = "이번 달 " + monthMinutes + "분";
   }
 
   var overviewRange = "week";
@@ -334,9 +552,9 @@
       info.icon +
       '" /></svg></span>' +
       '<div class="training-item__main"><strong>' +
-      item.type +
+      escapeHtml(item.type) +
       " · " +
-      item.minutes +
+      Number(item.minutes || 0) +
       "분" +
       "</strong><span>" +
       shortDate(item.date) +
@@ -349,30 +567,28 @@
       "</span>" +
       (withDelete
         ? '<button class="icon-action" type="button" data-delete-training="' +
-          item.id +
+          escapeHtml(item.id) +
           '" aria-label="' +
-          item.type +
+          escapeHtml(item.type) +
           ' 기록 삭제"><svg class="icon" aria-hidden="true"><use href="#i-trash" /></svg></button>'
         : "") +
       "</div></div>"
     );
   }
 
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
   function renderTraining() {
+    var visible = canSee("training");
     var sorted = sortTraining(training);
     var recent = document.getElementById("recentTraining");
     if (recent) {
-      recent.innerHTML = sorted.slice(0, 4).map(function (item) {
-        return trainingRow(item, false);
-      }).join("");
+      recent.innerHTML = visible
+        ? sorted
+            .slice(0, 4)
+            .map(function (item) {
+              return trainingRow(item, false);
+            })
+            .join("")
+        : privateBlock("훈련 기록");
     }
 
     var list = document.getElementById("trainingList");
@@ -382,15 +598,21 @@
       return type === "all" || item.type === type;
     });
     if (list) {
-      list.innerHTML = filtered.length
-        ? filtered.map(function (item) {
-            return trainingRow(item, true);
-          }).join("")
-        : '<div class="empty-state"><svg class="icon" aria-hidden="true"><use href="#i-activity" /></svg><strong>해당 종류의 기록이 없습니다.</strong><p>훈련을 기록하면 이곳에 표시됩니다.</p></div>';
+      if (!visible) {
+        list.innerHTML = privateBlock("훈련 기록");
+      } else {
+        list.innerHTML = filtered.length
+          ? filtered
+              .map(function (item) {
+                return trainingRow(item, IS_STUDENT);
+              })
+              .join("")
+          : '<div class="empty-state"><svg class="icon" aria-hidden="true"><use href="#i-activity" /></svg><strong>해당 종류의 기록이 없습니다.</strong><p>훈련을 기록하면 이곳에 표시됩니다.</p></div>';
+      }
     }
 
     var count = document.getElementById("trainingCount");
-    if (count) count.textContent = "총 " + filtered.length + "건의 기록";
+    if (count) count.textContent = visible ? "총 " + filtered.length + "건의 기록" : "비공개";
   }
 
   function renderIntensity() {
@@ -421,6 +643,15 @@
   /* ---------------------------------------------------------------
      Games
      --------------------------------------------------------------- */
+  function gameDeleteButton(game) {
+    if (!IS_STUDENT) return "";
+    return (
+      '<button class="icon-action" type="button" data-delete-game="' +
+      escapeHtml(game.id) +
+      '" aria-label="경기 기록 삭제"><svg class="icon" aria-hidden="true"><use href="#i-trash" /></svg></button>'
+    );
+  }
+
   function gameRow(game) {
     var statusClass =
       game.result === "승" ? "status--good" : game.result === "패" ? "status--risk" : "status--info";
@@ -433,12 +664,12 @@
       escapeHtml(game.opponent) +
       '</strong><div class="muted">' +
       escapeHtml(game.competition) +
-      (game.score ? " · " + game.score : "") +
+      (game.score ? " · " + escapeHtml(game.score) : "") +
       "</div></td>" +
       '<td><span class="status ' +
       statusClass +
       '">' +
-      game.result +
+      escapeHtml(game.result) +
       "</span></td>" +
       "<td>" +
       escapeHtml(game.performance) +
@@ -447,12 +678,14 @@
       (game.achieved
         ? '<span class="status status--good">달성</span>'
         : '<span class="muted">—</span>') +
+      gameDeleteButton(game) +
       "</td>" +
       "</tr>"
     );
   }
 
   function renderGames() {
+    var visible = canSee("games");
     var sorted = games.slice().sort(function (a, b) {
       return a.date < b.date ? 1 : -1;
     });
@@ -463,58 +696,161 @@
       return result === "all" || game.result === result;
     });
     if (body) {
-      body.innerHTML = filtered.length
-        ? filtered.map(gameRow).join("")
-        : '<tr><td colspan="5"><div class="empty-state"><strong>해당 조건의 경기 기록이 없습니다.</strong><p>경기 기록을 추가해 보세요.</p></div></td></tr>';
+      if (!visible) {
+        body.innerHTML =
+          '<tr><td colspan="5">' + privateBlock("경기 기록") + "</td></tr>";
+      } else {
+        body.innerHTML = filtered.length
+          ? filtered.map(gameRow).join("")
+          : '<tr><td colspan="5"><div class="empty-state"><strong>해당 조건의 경기 기록이 없습니다.</strong><p>경기 기록을 추가해 보세요.</p></div></td></tr>';
+      }
     }
 
     var recent = document.getElementById("recentGames");
     if (recent) {
-      recent.innerHTML = sorted.slice(0, 3).map(function (game) {
-        return (
-          '<div class="training-item">' +
-          '<span class="training-item__ico training-item__ico--clay"><svg class="icon" aria-hidden="true"><use href="#i-trophy" /></svg></span>' +
-          '<div class="training-item__main"><strong>vs ' +
-          escapeHtml(game.opponent) +
-          " · " +
-          game.score +
-          " " +
-          game.result +
-          "</strong><span>" +
-          shortDate(game.date) +
-          " · " +
-          escapeHtml(game.competition) +
-          "</span></div>" +
-          '<div class="training-item__meta"><span class="intensity intensity--low">' +
-          escapeHtml(game.performance) +
-          "</span></div></div>"
-        );
-      }).join("");
+      if (!visible) {
+        recent.innerHTML = privateBlock("경기 기록");
+      } else {
+        recent.innerHTML = sorted
+          .slice(0, 3)
+          .map(function (game) {
+            var scorePart = game.score ? " · " + escapeHtml(game.score) : "";
+            return (
+              '<div class="training-item">' +
+              '<span class="training-item__ico training-item__ico--clay"><svg class="icon" aria-hidden="true"><use href="#i-trophy" /></svg></span>' +
+              '<div class="training-item__main"><strong>vs ' +
+              escapeHtml(game.opponent) +
+              scorePart +
+              " " +
+              escapeHtml(game.result) +
+              "</strong><span>" +
+              shortDate(game.date) +
+              " · " +
+              escapeHtml(game.competition) +
+              "</span></div>" +
+              '<div class="training-item__meta"><span class="intensity intensity--low">' +
+              escapeHtml(game.performance) +
+              "</span>" +
+              gameDeleteButton(game) +
+              "</div></div>"
+            );
+          })
+          .join("");
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     Goals
+     --------------------------------------------------------------- */
+  function goalDetail(goal) {
+    if (goal.horizon === "long") return "시즌 " + seasonStats().hits + "안타";
+    if (goal.title.indexOf("타율") !== -1) return "이번 달 " + formatAvg(monthStats().avg);
+    return "이번 주 " + Demo.weekDays(player) + " / " + Demo.WEEKLY_GOAL_DAYS + "일";
+  }
+
+  function renderGoals() {
+    var goals = Demo.goalsFor(player);
+    var visible = canSee("goals");
+
+    var home = document.getElementById("homeGoals");
+    if (home) {
+      home.innerHTML = visible
+        ? goals
+            .map(function (goal) {
+              var barClass = goal.horizon === "long" ? "progress--blue" : "progress--lime";
+              return (
+                '<div class="progress-row">' +
+                '<div class="progress-row__head"><span>' +
+                escapeHtml(goal.title) +
+                "</span><b>" +
+                goal.pct +
+                "%</b></div>" +
+                '<div class="progress"><i class="' +
+                barClass +
+                '" style="--w:' +
+                goal.pct +
+                '%"></i></div>' +
+                "</div>"
+              );
+            })
+            .join("")
+        : privateBlock("목표");
+    }
+
+    var cards = document.getElementById("goalCards");
+    if (cards) {
+      cards.innerHTML = visible
+        ? goals
+            .map(function (goal) {
+              var long = goal.horizon === "long";
+              return (
+                '<article class="goal-card"' +
+                (long ? ' style="grid-column:1/-1"' : "") +
+                ">" +
+                '<div class="goal-card__head">' +
+                '<span class="goal-card__badge' +
+                (long ? " goal-card__badge--long" : "") +
+                '"><svg class="icon" aria-hidden="true"><use href="#' +
+                (long ? "i-flag" : "i-target") +
+                '" /></svg></span>' +
+                '<div class="goal-card__title"><span>' +
+                (long ? "장기 목표 · 2026 시즌" : "단기 목표") +
+                "</span><strong>" +
+                escapeHtml(goal.title) +
+                "</strong></div>" +
+                '<span class="goal-card__pct' +
+                (long ? " goal-card__pct--blue" : "") +
+                '">' +
+                goal.pct +
+                "%</span>" +
+                "</div>" +
+                '<div class="progress"><i class="' +
+                (long ? "progress--blue" : "progress--lime") +
+                '" style="--w:' +
+                goal.pct +
+                '%"></i></div>' +
+                '<div class="goal-card__foot"><span>' +
+                escapeHtml(goalDetail(goal)) +
+                "</span><b>" +
+                (goal.pct >= 100 ? "달성" : "진행 중") +
+                "</b></div>" +
+                "</article>"
+              );
+            })
+            .join("")
+        : '<div class="empty-state" style="grid-column:1/-1">' + privateBlock("목표") + "</div>";
+    }
+
+    var note = document.getElementById("goalNote");
+    if (note) {
+      if (!visible) {
+        note.textContent = "목표는 비공개로 설정되어 있습니다.";
+      } else {
+        var days = Demo.weekDays(player);
+        note.textContent =
+          days >= Demo.WEEKLY_GOAL_DAYS
+            ? "이번 주 " + days + "일 훈련으로 주간 목표를 달성했습니다. 다음 목표는 이번 달 타율 .320입니다."
+            : "이번 주 " + days + "일 훈련했습니다. " + Math.max(0, Demo.WEEKLY_GOAL_DAYS - days) + "일 더 기록하면 주간 목표를 달성합니다.";
+      }
     }
   }
 
   /* ---------------------------------------------------------------
      Growth line chart
      --------------------------------------------------------------- */
-  var GROWTH = {
-    avg: {
-      values: [0.268, 0.281, 0.277, 0.295, 0.301, 0.312],
-      labels: ["5월", "6월", "7월", "8월", "9월", "10월"],
-      foot: "5월 .268 → 10월 .312 (+.044)",
-      best: 5
-    },
-    obp: {
-      values: [0.352, 0.361, 0.358, 0.379, 0.392, 0.401],
-      labels: ["5월", "6월", "7월", "8월", "9월", "10월"],
-      foot: "5월 .352 → 10월 .401 (+.049)",
-      best: 5
-    }
-  };
-
   function renderGrowth(metric) {
-    var data = GROWTH[metric] || GROWTH.avg;
+    growthMetric = metric || growthMetric;
+    var data = Demo.growthSeries(player, growthMetric);
     var container = document.getElementById("growthChart");
+    var foot = document.getElementById("growthFoot");
     if (!container) return;
+
+    if (!canSee("games")) {
+      container.innerHTML = '<p class="muted" style="padding:24px">비공개</p>';
+      if (foot) foot.textContent = "비공개";
+      return;
+    }
 
     var width = 440;
     var height = 190;
@@ -622,7 +958,7 @@
       " " +
       height +
       '" role="img" aria-label="' +
-      (metric === "avg" ? "타율" : "출루율") +
+      (growthMetric === "avg" ? "타율" : "출루율") +
       ' 성장 추이">' +
       "<defs><linearGradient id='areaGradient' x1='0' y1='0' x2='0' y2='1'>" +
       "<stop offset='0%' stop-color='#14805d' stop-opacity='.22'/>" +
@@ -643,22 +979,12 @@
       "</g>" +
       "</svg>";
 
-    var foot = document.getElementById("growthFoot");
     if (foot) foot.textContent = data.foot;
   }
 
   /* ---------------------------------------------------------------
      Visibility & profile
      --------------------------------------------------------------- */
-  var DEFAULT_VISIBILITY = {
-    profile: "team",
-    training: "team",
-    games: "team",
-    goals: "private"
-  };
-
-  var VIS_LABEL = { public: "전체 공개", team: "팀 공개", private: "비공개" };
-
   function applyVisibility(values) {
     document.querySelectorAll("[data-visibility]").forEach(function (select) {
       var key = select.getAttribute("data-visibility");
@@ -668,10 +994,31 @@
     if (badge) badge.textContent = VIS_LABEL[values.profile] || "비공개";
   }
 
+  function applyProfile() {
+    document.querySelectorAll("[data-profile-field]").forEach(function (el) {
+      var key = el.getAttribute("data-profile-field");
+      if (player[key]) el.textContent = player[key];
+    });
+    var line =
+      (player.sport || "야구") +
+      " · " +
+      (player.position || "") +
+      " · " +
+      (player.bats || "") +
+      " · " +
+      (player.team || "");
+    document.querySelectorAll("[data-profile-line]").forEach(function (el) {
+      el.textContent = line;
+    });
+  }
+
+  function renderProfile() {
+    applyProfile();
+    setPrivateArea(document.getElementById("profileCardBody"), !canSee("profile"), "프로필 정보");
+  }
+
   function initVisibility() {
-    var stored = Store.readStore(VISIBILITY_KEY, null);
-    var values = Object.assign({}, DEFAULT_VISIBILITY, stored || {});
-    applyVisibility(values);
+    applyVisibility(player.visibility);
 
     if (!IS_STUDENT) {
       document.querySelectorAll("[data-visibility]").forEach(function (select) {
@@ -688,8 +1035,13 @@
       document.querySelectorAll("[data-visibility]").forEach(function (select) {
         next[select.getAttribute("data-visibility")] = select.value;
       });
-      Store.writeStore(VISIBILITY_KEY, next);
+      if (!commitVisibility(next)) {
+        applyVisibility(player.visibility);
+        Store.toast("저장 공간이 부족해 공개 범위를 저장하지 못했습니다.", "warn");
+        return;
+      }
       applyVisibility(next);
+      renderAll();
       var saved = document.getElementById("visibilitySaved");
       if (saved) {
         var d = new Date();
@@ -697,59 +1049,35 @@
           "마지막 저장 · " +
           d.getFullYear() +
           "." +
-          String(d.getMonth() + 1).padStart(2, "0") +
+          pad2(d.getMonth() + 1) +
           "." +
-          String(d.getDate()).padStart(2, "0");
+          pad2(d.getDate());
       }
       Store.toast("공개 범위를 저장했습니다.");
     });
   }
 
   function initProfile() {
-    var stored = Store.readStore(PROFILE_KEY, null);
-    applyProfile(stored);
+    renderProfile();
 
     var form = document.getElementById("profileForm");
-    if (!form) return;
-    if (!IS_STUDENT) return;
+    if (!form || !IS_STUDENT) return;
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       var data = {};
       form.querySelectorAll("[data-profile-input]").forEach(function (input) {
         data[input.getAttribute("data-profile-input")] = input.value.trim();
       });
-      data.line =
-        (data.sport || "야구") +
-        " · " +
-        data.team +
-        " · " +
-        data.position +
-        " · " +
-        data.grade +
-        " · " +
-        data.bats;
-      if (!Store.writeStore(PROFILE_KEY, data)) {
+      if (!commitProfile(data)) {
         Store.toast("저장 공간이 부족해 프로필을 저장하지 못했습니다.", "warn");
         return;
       }
 
-      applyProfile(data);
+      renderProfile();
 
       document.getElementById("profileModal").hidden = true;
       document.body.classList.remove("is-locked");
       Store.toast("프로필 정보를 저장했습니다.");
-    });
-  }
-
-  function applyProfile(stored) {
-    if (!stored) return;
-
-    document.querySelectorAll("[data-profile-field]").forEach(function (el) {
-      var key = el.getAttribute("data-profile-field");
-      if (stored[key]) el.textContent = stored[key];
-    });
-    document.querySelectorAll("[data-profile-line]").forEach(function (line) {
-      if (stored.line) line.textContent = stored.line;
     });
   }
 
@@ -759,21 +1087,12 @@
   var IMAGE_MAX_SIDE = 1280;
   var VIDEO_MAX_BYTES = 2 * 1024 * 1024;
 
-  var media = (function () {
-    var raw;
-    try {
-      raw = window.localStorage.getItem(MEDIA_KEY);
-    } catch (err) {
-      raw = null;
-    }
-    if (raw === null) return null;
-
-    var stored = Store.readStore(MEDIA_KEY, null);
-    if (!stored || stored.type === "none") return null;
-    if (typeof stored !== "object" || !stored.src) return null;
-    if (!/^(data:(image|video)\/|images\/)/.test(String(stored.src))) return null;
-    return stored;
-  })();
+  function normalizeHero(item) {
+    if (!item || item.type === "none") return null;
+    if (typeof item !== "object" || !item.src) return null;
+    if (!/^(data:(image|video)\/|images\/)/.test(String(item.src))) return null;
+    return item;
+  }
 
   function mediaNode(item) {
     var el;
@@ -806,12 +1125,12 @@
 
     var label = document.getElementById("mediaUploadLabel");
     var removeBtn = document.getElementById("mediaRemoveBtn");
-    var valid = !!(media && media.src && media.type);
+    var valid = !!(heroMedia && heroMedia.src && heroMedia.type);
 
     if (top) top.classList.toggle("has-cover", valid);
 
     if (valid) {
-      cover.appendChild(mediaNode(media));
+      cover.appendChild(mediaNode(heroMedia));
       if (label) label.textContent = "배경 사진 · 영상 변경";
       if (removeBtn) removeBtn.hidden = false;
     } else {
@@ -821,17 +1140,14 @@
   }
 
   function saveMedia(item) {
-    var previous = media;
-    media = item;
-    if (!Store.writeStore(MEDIA_KEY, item)) {
-      media = previous;
+    if (!commitHero(item)) {
       applyMedia();
       Store.toast("저장 공간이 부족합니다. 더 작은 사진이나 영상을 선택해 주세요.", "warn");
       return;
     }
     applyMedia();
     Store.toast(
-      item.type === "video" ? "배경 영상을 저장했습니다." : "배경 사진을 저장했습니다."
+      item && item.type === "video" ? "배경 영상을 저장했습니다." : "배경 사진을 저장했습니다."
     );
   }
 
@@ -924,8 +1240,10 @@
     if (removeBtn) {
       removeBtn.addEventListener("click", function (event) {
         event.stopPropagation();
-        media = null;
-        Store.writeStore(MEDIA_KEY, { type: "none" });
+        if (!commitHero(null)) {
+          Store.toast("저장 공간이 부족해 삭제하지 못했습니다.", "warn");
+          return;
+        }
         applyMedia();
         Store.toast("배경 사진·영상을 삭제했습니다.");
       });
@@ -935,42 +1253,58 @@
   /* ---------------------------------------------------------------
      Growth feed & parent cheers
      --------------------------------------------------------------- */
-  var FEED_POSTS = [
-    {
-      id: "feed-1",
-      type: "훈련",
-      date: daysAgo(0),
-      title: "오늘 타격 훈련 90분을 마쳤습니다",
-      body: "하체 회전을 유지하면서 공을 끝까지 보는 연습에 집중했습니다. 배팅 머신 120구와 수비 40분을 함께 했고, 마지막 30구는 라인 드라이브 타구가 나왔습니다.",
-      meta: "타격 120구 · 수비 40분 · 강도 상"
-    },
-    {
-      id: "feed-2",
-      type: "경기",
-      date: daysAgo(3),
-      title: "vs ○○중학교 · 4타수 3안타 2타점",
-      body: "주자 2·3루 상황에서 우전 적시타로 2타점을 기록했습니다. 수비에서는 6회 더블플레이로 이닝을 마무리했습니다.",
-      meta: "서울시 중학교 야구 리그 · 5 : 3 승"
-    },
-    {
-      id: "feed-3",
-      type: "목표",
-      date: daysAgo(5),
-      title: "주 4회 이상 훈련 · 4주 연속 달성",
-      body: "이번 주까지 네 주 연속으로 주간 훈련 목표를 채웠습니다. 다음 목표는 10월 타율 .320 달성입니다.",
-      meta: "단기 목표 달성 · 4주 연속"
-    }
-  ];
-
   var FEED_TAG = { 훈련: "tag--green", 경기: "tag--blue", 목표: "tag--lime" };
 
-  var cheers = (function () {
-    var stored = Store.readStore(CHEERS_KEY, null);
-    return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
-  })();
+  function buildFeed() {
+    var posts = [];
+    var latest = Demo.latestTraining(player);
+    if (latest) {
+      var intensity = INTENSITY[latest.intensity] || INTENSITY.mid;
+      posts.push({
+        id: "training-" + latest.id,
+        type: "훈련",
+        date: latest.date,
+        title: latest.type + " " + Number(latest.minutes || 0) + "분 훈련을 마쳤습니다",
+        body:
+          (latest.memo ? latest.memo + " — " : "") +
+          "오늘의 기록이 주간 훈련 현황에 바로 반영됩니다.",
+        meta: latest.type + " " + Number(latest.minutes || 0) + "분 · 강도 " + intensity.label
+      });
+    }
 
-  function pad2(value) {
-    return String(value).padStart(2, "0");
+    var game = latestGame();
+    if (game) {
+      posts.push({
+        id: "game-" + game.id,
+        type: "경기",
+        date: game.date,
+        title: "vs " + game.opponent + " · " + game.performance,
+        body:
+          (game.score ? game.score + " " + game.result + " 경기에서 " : "") +
+          game.performance +
+          "을 기록했습니다. 다음 경기에서도 같은 흐름을 이어갑니다.",
+        meta:
+          game.competition + (game.score ? " · " + game.score + " " + game.result : " · " + game.result)
+      });
+    }
+
+    var days = Demo.weekDays(player);
+    posts.push({
+      id: "goal-week",
+      type: "목표",
+      date: todayKey(),
+      title:
+        days >= Demo.WEEKLY_GOAL_DAYS
+          ? "주 5회 훈련 목표를 달성했습니다"
+          : "주 5회 훈련 목표 · " + days + "/" + Demo.WEEKLY_GOAL_DAYS + "일",
+      body:
+        days >= Demo.WEEKLY_GOAL_DAYS
+          ? "이번 주 " + days + "일 훈련으로 주간 목표를 채웠습니다. 다음 목표는 이번 달 타율 .320입니다."
+          : "이번 주 " + days + "일 훈련했습니다. " + Math.max(0, Demo.WEEKLY_GOAL_DAYS - days) + "일 더 기록하면 목표를 달성합니다.",
+      meta: "주간 목표 · " + days + "/" + Demo.WEEKLY_GOAL_DAYS + "일"
+    });
+
+    return posts;
   }
 
   function stamp(date) {
@@ -1019,7 +1353,7 @@
             "</p></div>" +
             (mine
               ? '<button class="icon-action" type="button" data-delete-cheer="' +
-                post.id +
+                escapeHtml(post.id) +
                 '" data-cheer-id="' +
                 escapeHtml(cheer.id) +
                 '" aria-label="내 응원글 삭제"><svg class="icon" aria-hidden="true"><use href="#i-trash" /></svg></button>'
@@ -1038,11 +1372,13 @@
     if (IS_PARENT) {
       formHtml =
         '<form class="cheer-form" data-cheer-form="' +
-        post.id +
+        escapeHtml(post.id) +
         '">' +
         '<textarea class="textarea textarea--sm" name="cheer" rows="2" maxlength="200" aria-label="' +
         escapeHtml(post.title) +
-        ' 게시물에 응원글 작성" placeholder="김하람 선수에게 응원의 한마디를 남겨주세요." required></textarea>' +
+        ' 게시물에 응원글 작성" placeholder="' +
+        escapeHtml(player.name) +
+        ' 선수에게 응원의 한마디를 남겨주세요." required></textarea>' +
         '<div class="cheer-form__foot"><span>학부모 계정으로 작성 · 최대 200자</span>' +
         '<button class="btn btn--dark btn--sm" type="submit"><svg class="icon" aria-hidden="true"><use href="#i-send" /></svg>응원 남기기</button></div>' +
         "</form>";
@@ -1051,14 +1387,18 @@
     return (
       '<article class="feed-card">' +
       '<div class="feed-card__head">' +
-      '<span class="feed-card__avatar" aria-hidden="true">하</span>' +
-      '<div class="feed-card__who"><strong>김하람</strong><span>학생 · ' +
+      '<span class="feed-card__avatar" aria-hidden="true">' +
+      escapeHtml(String(player.name || "하").charAt(0)) +
+      "</span>" +
+      '<div class="feed-card__who"><strong>' +
+      escapeHtml(player.name) +
+      "</strong><span>학생 · " +
       shortDate(post.date) +
       "</span></div>" +
       '<span class="tag ' +
       tagClass +
       '">' +
-      post.type +
+      escapeHtml(post.type) +
       "</span>" +
       "</div>" +
       "<h3>" +
@@ -1082,12 +1422,15 @@
     var container = document.getElementById("feedList");
     if (!container) return;
 
+    var posts = buildFeed();
     var total = 0;
-    container.innerHTML = FEED_POSTS.map(function (post) {
-      var list = Array.isArray(cheers[post.id]) ? cheers[post.id] : [];
-      total += list.length;
-      return feedCard(post, list);
-    }).join("");
+    container.innerHTML = posts
+      .map(function (post) {
+        var list = Array.isArray(cheers[post.id]) ? cheers[post.id] : [];
+        total += list.length;
+        return feedCard(post, list);
+      })
+      .join("");
 
     var count = document.getElementById("feedCheerCount");
     if (count) count.textContent = "응원 " + total;
@@ -1125,8 +1468,9 @@
       field.focus();
       return;
     }
-    if (!Array.isArray(cheers[postId])) cheers[postId] = [];
-    cheers[postId].push({
+
+    var list = (cheers[postId] || []).slice();
+    list.push({
       id: "c-" + Date.now(),
       author: SESSION.name,
       authorEmail: SESSION.email,
@@ -1134,19 +1478,28 @@
       createdAt: new Date().toISOString(),
       createdLabel: stamp()
     });
-    Store.writeStore(CHEERS_KEY, cheers);
+    var next = Object.assign({}, cheers);
+    next[postId] = list;
+    if (!commitCheers(next)) {
+      Store.toast("저장 공간이 부족해 응원글을 저장하지 못했습니다.", "warn");
+      return;
+    }
     renderFeed();
-    Store.toast("응원글을 남겼습니다. 김하람 선수에게 전달됩니다.");
+    Store.toast("응원글을 남겼습니다. " + player.name + " 선수에게 전달됩니다.");
   }
 
   function handleCheerDelete(btn) {
     if (!IS_PARENT || !SESSION) return;
     var postId = btn.getAttribute("data-delete-cheer");
     var cheerId = btn.getAttribute("data-cheer-id");
-    cheers[postId] = (cheers[postId] || []).filter(function (cheer) {
+    var next = Object.assign({}, cheers);
+    next[postId] = (cheers[postId] || []).filter(function (cheer) {
       return !(cheer.id === cheerId && cheer.authorEmail === SESSION.email);
     });
-    Store.writeStore(CHEERS_KEY, cheers);
+    if (!commitCheers(next)) {
+      Store.toast("저장 공간이 부족해 응원글을 삭제하지 못했습니다.", "warn");
+      return;
+    }
     renderFeed();
     Store.toast("응원글을 삭제했습니다.");
   }
@@ -1154,7 +1507,6 @@
   /* ---------------------------------------------------------------
      Media gallery (photo / video + comments)
      --------------------------------------------------------------- */
-  var GALLERY_KEY = "sportsgrow.player.gallery.v1";
   var COMMENT_MAX = 300;
 
   var ROLE_LABEL = { player: "학생", parent: "학부모", coach: "코치" };
@@ -1169,68 +1521,18 @@
     return "";
   }
 
-  function gallerySeed() {
-    var created = new Date();
-    created.setDate(created.getDate() - 2);
-    created.setHours(18, 20, 0, 0);
-    var coachAt = new Date(created.getTime() + 95 * 60 * 1000);
-    var parentAt = new Date(created.getTime() + 200 * 60 * 1000);
-    return [
-      {
-        id: "gallery-seed-1",
-        type: "image",
-        src: "images/player-haram-game.jpg",
-        caption: "주말 리그 경기 전, 몸을 푸는 시간",
-        author: "김하람",
-        authorEmail: "player@sportsgrow.kr",
-        authorRole: "player",
-        createdAt: created.toISOString(),
-        comments: [
-          {
-            id: "gallery-seed-1-c1",
-            author: "박정우",
-            authorEmail: "coach@sportsgrow.kr",
-            authorRole: "coach",
-            text: "경기 전 준비 자세가 좋습니다. 오늘은 하체 회전에 집중해서 타석에 들어가 보세요.",
-            createdAt: coachAt.toISOString()
-          },
-          {
-            id: "gallery-seed-1-c2",
-            author: "이정은",
-            authorEmail: "parent@sportsgrow.kr",
-            authorRole: "parent",
-            text: "오늘도 안전하게 경기하고 와요. 응원하고 있을게요!",
-            createdAt: parentAt.toISOString()
-          }
-        ]
-      }
-    ];
-  }
-
   function normalizeGallery(raw) {
-    if (!Array.isArray(raw)) return gallerySeed();
+    if (!Array.isArray(raw)) return [];
     return raw.filter(function (item) {
       return item && item.src && typeof item.src === "string";
     });
   }
 
-  var gallery = (function () {
-    var raw;
-    try {
-      raw = window.localStorage.getItem(GALLERY_KEY);
-    } catch (err) {
-      raw = null;
-    }
-    if (raw === null) return gallerySeed();
-    return normalizeGallery(Store.readStore(GALLERY_KEY, []));
-  })();
-
   function saveGallery(next) {
-    if (!Store.writeStore(GALLERY_KEY, next)) {
+    if (!commitGallery(next)) {
       Store.toast("저장 공간이 부족합니다. 더 작은 사진이나 동영상을 올려 주세요.", "warn");
       return false;
     }
-    gallery = next;
     renderGallery();
     return true;
   }
@@ -1304,7 +1606,7 @@
       '<img class="gallery-card__img" src="' +
       escapeHtml(item.src) +
       '" alt="' +
-      escapeHtml(item.caption || "김하람 선수 활동 사진") +
+      escapeHtml(item.caption || player.name + " 선수 활동 사진") +
       '" loading="lazy" />'
     );
   }
@@ -1398,8 +1700,7 @@
     if (nav) nav.textContent = total;
     var foot = document.getElementById("galleryFoot");
     if (foot) {
-      foot.textContent =
-        "사진 " + photos + " · 동영상 " + videos + " · 댓글 " + comments;
+      foot.textContent = "사진 " + photos + " · 동영상 " + videos + " · 댓글 " + comments;
     }
 
     grid.querySelectorAll("[data-gallery-comment-form]").forEach(function (form) {
@@ -1516,7 +1817,10 @@
     var caption = document.getElementById("galleryCaption");
     if (caption) caption.value = "";
     var meta = document.getElementById("galleryUploadMeta");
-    if (meta) meta.textContent = "사진은 최대 1280px로 자동 압축됩니다. 동영상은 2MB 이하만 올릴 수 있습니다.";
+    if (meta) {
+      meta.textContent =
+        "사진은 최대 1280px로 자동 압축됩니다. 동영상은 2MB 이하만 올릴 수 있습니다.";
+    }
     var submit = document.getElementById("galleryUploadSubmit");
     if (submit) submit.disabled = false;
   }
@@ -1676,11 +1980,6 @@
   /* ---------------------------------------------------------------
      Parent → coach requests
      --------------------------------------------------------------- */
-  var requests = (function () {
-    var stored = Store.readStore(REQUESTS_KEY, null);
-    return Array.isArray(stored) ? stored : [];
-  })();
-
   function requestCard(req) {
     var done = req.status === "done";
     return (
@@ -1703,7 +2002,9 @@
       "<p>" +
       escapeHtml(req.body) +
       "</p>" +
-      '<div class="request-card__foot"><span>대상 · 김하람 선수</span><span>' +
+      '<div class="request-card__foot"><span>대상 · ' +
+      escapeHtml(player.name) +
+      " 선수</span><span>" +
       (done ? "코치 확인 완료" : "코치 확인 전") +
       "</span>" +
       (done
@@ -1755,23 +2056,28 @@
         return;
       }
 
-      requests.push({
-        id: "r-" + Date.now(),
-        type: type,
-        title: title,
-        body: body,
-        player: "김하람",
-        parent: SESSION.name,
-        parentEmail: SESSION.email,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        createdLabel: stamp()
-      });
-      Store.writeStore(REQUESTS_KEY, requests);
+      var next = requests.concat([
+        {
+          id: "r-" + Date.now(),
+          type: type,
+          title: title,
+          body: body,
+          player: player.name,
+          parent: SESSION.name,
+          parentEmail: SESSION.email,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+          createdLabel: stamp()
+        }
+      ]);
+      if (!commitRequests(next)) {
+        Store.toast("저장 공간이 부족해 요청을 보내지 못했습니다.", "warn");
+        return;
+      }
 
       form.reset();
-      var player = document.getElementById("requestPlayer");
-      if (player) player.value = "김하람";
+      var playerField = document.getElementById("requestPlayer");
+      if (playerField) playerField.value = player.name;
       renderRequests();
       if (Store.closeModal) Store.closeModal("requestModal");
       Store.toast("코치에게 요청을 보냈습니다.");
@@ -1783,16 +2089,19 @@
     if (!cancel) return;
     if (!IS_PARENT) return;
     var id = cancel.getAttribute("data-cancel-request");
-    requests = requests.filter(function (req) {
+    var next = requests.filter(function (req) {
       return req.id !== id;
     });
-    Store.writeStore(REQUESTS_KEY, requests);
+    if (!commitRequests(next)) {
+      Store.toast("저장 공간이 부족해 요청을 취소하지 못했습니다.", "warn");
+      return;
+    }
     renderRequests();
     Store.toast("요청을 취소했습니다.");
   });
 
   /* ---------------------------------------------------------------
-     Bindings
+     Forms & bindings
      --------------------------------------------------------------- */
   function bindRangeButtons(selector, onChange) {
     document.querySelectorAll(selector).forEach(function (btn) {
@@ -1828,21 +2137,23 @@
         return;
       }
 
-      training.push({
-        id: "t-" + Date.now(),
-        date: date,
-        type: type,
-        minutes: Math.min(360, minutes),
-        intensity: intensity,
-        memo: memo
-      });
-      Store.writeStore(TRAINING_KEY, training);
+      var next = training.concat([
+        {
+          id: "t-" + Date.now(),
+          date: date,
+          type: type,
+          minutes: Math.min(360, minutes),
+          intensity: intensity,
+          memo: memo
+        }
+      ]);
+      if (!commitTraining(next)) {
+        Store.toast("저장 공간이 부족해 훈련 기록을 저장하지 못했습니다.", "warn");
+        return;
+      }
 
-      renderStats();
-      renderOverviewChart();
-      renderTrainingChart();
-      renderTraining();
-      renderIntensity();
+      renderAll();
+      renderFeed();
 
       form.reset();
       var dateInput = document.getElementById("trainingDate");
@@ -1865,22 +2176,41 @@
         Store.toast("경기 기록은 학생 계정에서만 수정할 수 있습니다.", "warn");
         return;
       }
+      var scoreField = document.getElementById("gameScore");
+      var atBatsField = document.getElementById("gameAtBats");
+      var hitsField = document.getElementById("gameHits");
+      var walksField = document.getElementById("gameWalks");
+
       var game = {
+        id: "gm-" + Date.now(),
         date: document.getElementById("gameDate").value,
         competition: document.getElementById("gameCompetition").value.trim(),
         opponent: document.getElementById("gameOpponent").value.trim(),
         result: document.getElementById("gameResult").value,
-        score: "",
+        score: scoreField ? scoreField.value.trim() : "",
         performance: document.getElementById("gamePerformance").value.trim(),
-        achieved: false
+        achieved: false,
+        atBats: Math.max(0, Number(atBatsField ? atBatsField.value : 0) || 0),
+        hits: Math.max(0, Number(hitsField ? hitsField.value : 0) || 0),
+        walks: Math.max(0, Number(walksField ? walksField.value : 0) || 0)
       };
       if (!game.date || !game.competition || !game.opponent || !game.performance) {
         Store.toast("모든 항목을 입력해 주세요.", "warn");
         return;
       }
-      games.push(game);
-      Store.writeStore(GAMES_KEY, games);
-      renderGames();
+      if (game.hits > game.atBats) {
+        Store.toast("안타 수는 타수보다 클 수 없습니다.", "warn");
+        return;
+      }
+
+      if (!commitGames(games.concat([game]))) {
+        Store.toast("저장 공간이 부족해 경기 기록을 저장하지 못했습니다.", "warn");
+        return;
+      }
+
+      renderAll();
+      renderFeed();
+
       form.reset();
       var dateInput = document.getElementById("gameDate");
       if (dateInput) dateInput.value = todayKey();
@@ -1893,13 +2223,19 @@
   /* ---------------------------------------------------------------
      Init
      --------------------------------------------------------------- */
-  renderStats();
-  renderOverviewChart();
-  renderTrainingChart();
-  renderTraining();
-  renderIntensity();
-  renderGames();
-  renderGrowth("avg");
+  function renderAll() {
+    renderStats();
+    renderOverviewChart();
+    renderTrainingChart();
+    renderTraining();
+    renderIntensity();
+    renderGames();
+    renderGoals();
+    renderProfile();
+    renderGrowth(growthMetric);
+  }
+
+  renderAll();
   initVisibility();
   initProfile();
   initMedia();
@@ -1942,16 +2278,36 @@
       return;
     }
     var id = del.getAttribute("data-delete-training");
-    training = training.filter(function (item) {
+    var next = training.filter(function (item) {
       return item.id !== id;
     });
-    Store.writeStore(TRAINING_KEY, training);
-    renderStats();
-    renderOverviewChart();
-    renderTrainingChart();
-    renderTraining();
-    renderIntensity();
+    if (!commitTraining(next)) {
+      Store.toast("저장 공간이 부족해 훈련 기록을 삭제하지 못했습니다.", "warn");
+      return;
+    }
+    renderAll();
+    renderFeed();
     Store.toast("훈련 기록을 삭제했습니다.");
+  });
+
+  document.addEventListener("click", function (event) {
+    var del = event.target.closest("[data-delete-game]");
+    if (!del) return;
+    if (!IS_STUDENT) {
+      Store.toast("경기 기록은 학생 계정에서만 삭제할 수 있습니다.", "warn");
+      return;
+    }
+    var id = del.getAttribute("data-delete-game");
+    var next = games.filter(function (game) {
+      return game.id !== id;
+    });
+    if (!commitGames(next)) {
+      Store.toast("저장 공간이 부족해 경기 기록을 삭제하지 못했습니다.", "warn");
+      return;
+    }
+    renderAll();
+    renderFeed();
+    Store.toast("경기 기록을 삭제했습니다.");
   });
 
   var bell = document.getElementById("notificationsBtn");
@@ -1967,7 +2323,6 @@
         Store.toast("프로필 수정은 학생 계정에서만 가능합니다.", "warn");
         return;
       }
-      var stored = Store.readStore(PROFILE_KEY, {});
       var modal = document.getElementById("profileModal");
       if (!modal) {
         Store.toast("프로필 수정 기능을 준비 중입니다.", "warn");
@@ -1976,13 +2331,13 @@
       modal.hidden = false;
       document.body.classList.add("is-locked");
       var map = {
-        sport: stored.sport || "야구",
-        age: stored.age || "14",
-        team: stored.team || "한빛중학교 야구부",
-        position: stored.position || "내야수 · 2루수",
-        grade: stored.grade || "중학교 2학년",
-        bats: stored.bats || "우투우타",
-        region: stored.region || "서울"
+        sport: player.sport || "야구",
+        age: player.age || "14",
+        team: player.team || "한빛중학교 야구부",
+        position: player.position || "내야수 · 2루수",
+        grade: player.grade || "중학교 2학년",
+        bats: player.bats || "우투우타",
+        region: player.region || "서울"
       };
       Object.keys(map).forEach(function (key) {
         var input = modal.querySelector('[data-profile-input="' + key + '"]');
