@@ -4,40 +4,43 @@
    ===================================================================== */
 "use strict";
 
-var VERSION = "sportsgrow-v13";
+var VERSION = "sportsgrow-v22";
 var STATIC_CACHE = VERSION + "-static";
-var RUNTIME_CACHE = "sportsgrow-runtime-v1";
 var OFFLINE_URL = "./offline.html";
 
 var PRECACHE = [
   "./",
   "./index.html",
   "./login.html",
-  "./admin-login.html",
   "./student.html",
   "./coach.html",
   "./academy.html",
-  "./admin.html",
   "./offline.html",
+  "./legal/terms.html",
+  "./legal/privacy.html",
+  "./legal/billing.html",
+  "./accept-invite.html",
+  "./reset-password.html",
+  "./pick-role.html",
+  "./js/env.js",
+  "./js/deployment-mode.json",
+  "./js/api.js",
+  "./js/auth-api.js",
+  "./js/public-actions.js",
   "./manifest.json",
   "./css/base.css",
   "./css/landing.css",
   "./css/login.css",
-  "./css/app.css",
-  "./css/admin.css",
   "./css/pwa.css",
+  "./css/fonts/pretendard.css",
+  "./css/fonts/PretendardVariable.woff2",
   "./js/icons.js",
   "./js/site.js",
-  "./js/auth.js",
-  "./js/app-shell.js",
-  "./js/demo-data.js",
-  "./js/student.js",
-  "./js/coach.js",
-  "./js/academy.js",
-  "./js/admin.js",
+  "./js/auth-login-api.js",
+  "./js/api-dashboard.js",
+  "./js/api.js",
+  "./js/auth-api.js",
   "./js/pwa.js",
-  "./images/player-haram-game.jpg",
-  "./images/player-haram-portrait.png",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png",
@@ -49,9 +52,16 @@ var PRECACHE = [
    --------------------------------------------------------------- */
 self.addEventListener("install", function (event) {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then(function (cache) {
-      return cache.addAll(PRECACHE);
-    })
+    fetch("./js/deployment-mode.json", { cache: "no-store" })
+      .then(function (response) { return response.ok ? response.json() : { demoLogin: true }; })
+      .catch(function () { return { demoLogin: true }; })
+      .then(function (mode) {
+        var assets = PRECACHE.slice();
+        if (mode.demoLogin !== false) {
+          assets.push("./admin-login.html", "./admin.html", "./css/admin.css", "./css/app.css", "./js/auth.js", "./js/admin.js", "./js/demo-data.js", "./js/app-shell.js", "./js/student.js", "./js/coach.js", "./js/academy.js", "./images/player-haram-game.jpg", "./images/player-haram-portrait.png");
+        }
+        return caches.open(STATIC_CACHE).then(function (cache) { return cache.addAll(assets); });
+      })
   );
 });
 
@@ -63,7 +73,7 @@ self.addEventListener("activate", function (event) {
         return Promise.all(
           keys
             .filter(function (key) {
-              return key !== STATIC_CACHE && key !== RUNTIME_CACHE;
+              return key !== STATIC_CACHE;
             })
             .map(function (key) {
               return caches.delete(key);
@@ -93,6 +103,9 @@ self.addEventListener("fetch", function (event) {
   var url = new URL(request.url);
   if (url.protocol !== "http:" && url.protocol !== "https:") return;
 
+  /* Authenticated API responses must never enter either cache. */
+  if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) return;
+
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request));
     return;
@@ -103,10 +116,6 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  /* Pretendard 등 외부 폰트 자산은 런타임 캐시 */
-  if (url.hostname === "cdn.jsdelivr.net") {
-    event.respondWith(staleWhileRevalidate(event, request, RUNTIME_CACHE));
-  }
 });
 
 async function networkFirst(request) {
@@ -141,7 +150,7 @@ async function staleWhileRevalidate(event, request, cacheName) {
 
   var network = fetch(request)
     .then(async function (response) {
-      if (response && (response.ok || response.type === "opaque")) {
+      if (response && !response.headers.has("Set-Cookie") && (response.ok || response.type === "opaque")) {
         await cache.put(request, response.clone());
       }
       return response;

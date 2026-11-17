@@ -209,6 +209,10 @@
     document.querySelectorAll("[data-logout]").forEach(function (trigger) {
       trigger.addEventListener("click", function (event) {
         event.preventDefault();
+        if (window.SportsGrowAuthApi && window.SportsGrowAuthApi.enabled) {
+          window.SportsGrowAuthApi.logout().catch(function () { window.location.href = "login.html"; });
+          return;
+        }
         safeClear();
         window.location.href = "index.html";
       });
@@ -229,6 +233,11 @@
     if (!document.body) return true;
     if (guardState.ran) return guardState.allowed;
     guardState.ran = true;
+
+    if (window.SportsGrowAuthApi && window.SportsGrowAuthApi.enabled) {
+      guardState.allowed = true;
+      return true;
+    }
 
     var pageRole = document.body.getAttribute("data-role");
     if (!pageRole) return guardState.allowed;
@@ -277,6 +286,7 @@
     var demoRoleName = document.getElementById("demoRoleName");
     var submitLabel = document.getElementById("loginSubmitLabel");
     var lockedRole = form.getAttribute("data-lock-role");
+    var apiMode = !!(window.SportsGrowAuthApi && window.SportsGrowAuthApi.enabled);
     if (lockedRole && !ROLES[lockedRole]) lockedRole = null;
     var requestedRole = params.get("role");
     var currentRole = lockedRole || (ROLES[requestedRole] ? requestedRole : null);
@@ -362,6 +372,18 @@
       });
     }
 
+    if (apiMode) {
+      var roleOptions = document.querySelector(".role-options");
+      var demoBox = document.querySelector(".demo-box");
+      var keepLogin = document.getElementById("keepLogin");
+      var securityCopy = document.querySelector(".login-security span");
+      if (roleOptions) roleOptions.hidden = true;
+      if (demoBox) demoBox.hidden = true;
+      if (keepLogin && keepLogin.closest("label")) keepLogin.closest("label").hidden = true;
+      if (securityCopy) securityCopy.textContent = "계정과 소속 권한은 서버에서 확인합니다. 로그인 상태는 보호된 세션 쿠키로 유지됩니다.";
+      if (!isAdminLogin && submitLabel) submitLabel.textContent = "계정으로 로그인";
+    }
+
     var pwToggle = document.getElementById("passwordToggle");
     if (pwToggle) {
       pwToggle.addEventListener("click", function () {
@@ -385,6 +407,24 @@
       if (!email || !password) {
         showError("이메일과 비밀번호를 모두 입력해 주세요.");
         (email ? passwordInput : emailInput).focus();
+        return;
+      }
+
+      if (apiMode) {
+        var apiButton = form.querySelector('button[type="submit"]');
+        if (apiButton) {
+          apiButton.disabled = true;
+          apiButton.classList.add("is-loading");
+          if (submitLabel) submitLabel.textContent = "로그인 중…";
+        }
+        window.SportsGrowAuthApi.login(email, password, nextPage, isAdminLogin).catch(function (error) {
+          showError(error.message || "로그인할 수 없습니다. 입력 정보를 확인해 주세요.");
+          if (apiButton) {
+            apiButton.disabled = false;
+            apiButton.classList.remove("is-loading");
+          }
+          if (submitLabel) submitLabel.textContent = isAdminLogin ? "사이트 관리자로 로그인" : "계정으로 로그인";
+        });
         return;
       }
 
@@ -422,7 +462,8 @@
 
     /* session continuation */
     var continueBar = document.getElementById("sessionBar");
-    if (continueBar && session) {
+    if (apiMode && continueBar) continueBar.hidden = true;
+    if (!apiMode && continueBar && session) {
       var role = ROLES[session.role];
       continueBar.hidden = false;
       var nameEl = continueBar.querySelector("[data-continue-name]");
@@ -447,6 +488,18 @@
     if (forgot) {
       forgot.addEventListener("click", function (event) {
         event.preventDefault();
+        if (apiMode) {
+          var address = (emailInput.value || "").trim().toLowerCase();
+          if (!address) {
+            showError("비밀번호 재설정 안내를 받을 이메일을 입력해 주세요.");
+            emailInput.focus();
+            return;
+          }
+          window.SportsGrowApi.request("/auth/password/forgot", { method: "POST", body: { email: address }, redirectOn401: false })
+            .then(function () { toast("계정이 확인되면 비밀번호 재설정 안내를 보내드립니다."); })
+            .catch(function (error) { showError(error.message || "요청을 처리하지 못했습니다."); });
+          return;
+        }
         toast("데모에서는 비밀번호 재설정을 지원하지 않습니다.", "warn");
       });
     }
@@ -477,6 +530,7 @@
     getSession: getSession,
     saveSession: saveSession,
     logout: function () {
+      if (window.SportsGrowAuthApi && window.SportsGrowAuthApi.enabled) return window.SportsGrowAuthApi.logout();
       safeClear();
       window.location.href = "index.html";
     },

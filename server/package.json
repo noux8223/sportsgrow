@@ -1,0 +1,38 @@
+{
+  "name": "sportsgrow-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "build:pilot": "node scripts/build-pilot.mjs",
+    "migrate": "tsx src/migrate.ts",
+    "bootstrap:staff": "tsx src/bootstrap-staff.ts",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1170.0",
+    "@aws-sdk/client-sesv2": "^3.1170.0",
+    "@aws-sdk/s3-request-presigner": "^3.1170.0",
+    "@fastify/cookie": "^11.0.2",
+    "argon2": "^0.41.1",
+    "dotenv": "^18.0.10",
+    "fastify": "^5.2.1",
+    "pg": "^8.13.3",
+    "sharp": "^0.35.5",
+    "yazl": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/pg": "^8.11.11",
+    "@types/yazl": "^3.3.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "allowScripts": {
+    "sharp@0.35.5": true,
+    "argon2@0.41.1": true
+  }
+}

@@ -5,6 +5,8 @@
 (function () {
   "use strict";
 
+  if (window.SportsGrowApi && window.SportsGrowApi.enabled) return;
+
   var Store = window.AppShell || {
     readStore: function () { return null; },
     writeStore: function () { return false; },

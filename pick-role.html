@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1a1e">
+  <title>소속 선택 — Sports Grow</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    body{min-height:100vh;background:#f3f5f4;color:#102326;font-family:inherit}
+    main{width:min(680px,calc(100% - 32px));margin:8vh auto;padding:32px;background:#fff;border:1px solid #e1e7e5;border-radius:20px;box-shadow:0 18px 60px #10232612}
+    h1{margin:8px 0;font-size:clamp(1.6rem,5vw,2.2rem)}
+    .eyebrow{color:#6d7976;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+    #membershipList{display:grid;gap:10px;margin:24px 0;padding:0;list-style:none}
+    .membership-option{display:flex;width:100%;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid #dce4e1;border-radius:14px;background:#fff;color:inherit;text-align:left;cursor:pointer}
+    .membership-option:hover,.membership-option:focus-visible{border-color:#809c28;outline:3px solid #d9f55f55}
+    .membership-option strong,.membership-option small{display:block}
+    .membership-option small{margin-top:4px;color:#6d7976}
+    #message{min-height:1.5em;color:#8b342a}
+    .logout{padding:8px 0;border:0;background:none;color:#52615e;text-decoration:underline;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Sports Grow · 계정</p>
+    <h1>사용할 소속을 선택해 주세요</h1>
+    <p>선택한 소속의 역할 권한으로 화면과 기록을 엽니다.</p>
+    <p id="message" role="status" aria-live="polite">소속을 확인하고 있습니다…</p>
+    <ul id="membershipList" aria-label="내 소속"></ul>
+    <button type="button" class="logout" id="logoutButton">로그아웃</button>
+  </main>
+  <script src="js/env.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth-api.js"></script>
+  <script>
+    (function(){
+      "use strict";
+      var roles={athlete:"선수",guardian:"보호자",coach:"코치",org_admin:"기관 관리자"};
+      var params=new URLSearchParams(location.search);
+      var requested=params.get("next");
+      var list=document.getElementById("membershipList");
+      var message=document.getElementById("message");
+      function showError(error){message.textContent=error.message||"소속을 불러오지 못했습니다. 다시 로그인해 주세요.";}
+      window.SportsGrowAuthApi.me().then(function(data){
+        var memberships=data.memberships||[];
+        if(!memberships.length){if(data.user&&data.user.platformStaff){var ops=window.SportsGrowAuthApi.operationsPage();if(ops){location.replace(ops);return;}}throw new Error("연결된 소속을 찾을 수 없습니다.");}
+        message.textContent="소속을 선택하면 해당 역할의 화면으로 이동합니다.";
+        memberships.forEach(function(membership){
+          var item=document.createElement("li");
+          var button=document.createElement("button");button.type="button";button.className="membership-option";
+          var details=document.createElement("span");var name=document.createElement("strong");var role=document.createElement("small");
+          name.textContent=membership.orgName;role.textContent=roles[membership.role]||"소속 사용자";
+          details.append(name,role);
+          var action=document.createElement("span");action.textContent="선택 →";action.setAttribute("aria-hidden","true");
+          button.append(details,action);
+          button.addEventListener("click",function(){button.disabled=true;message.textContent="소속을 전환하고 있습니다…";window.SportsGrowAuthApi.selectMembership(membership,requested).catch(function(error){button.disabled=false;showError(error);});});
+          item.appendChild(button);list.appendChild(item);
+        });
+      }).catch(showError);
+      document.getElementById("logoutButton").addEventListener("click",function(){window.SportsGrowAuthApi.logout();});
+    })();
+  </script>
+</body>
+</html>

@@ -322,12 +322,16 @@
   function showMaintenanceBanner() {
     var settings = readAdminSettings();
     if (!settings || settings.maintenance !== true) return;
+    insertMaintenanceBanner("점검 모드 · 일부 기능이 일시 중지될 수 있습니다. 현재는 데모 화면을 둘러볼 수 있습니다.");
+  }
+
+  function insertMaintenanceBanner(message) {
     if (document.querySelector("[data-maintenance-banner]")) return;
 
     var banner = document.createElement("div");
     banner.setAttribute("data-maintenance-banner", "");
     banner.setAttribute("role", "status");
-    banner.textContent = "점검 모드 · 일부 기능이 일시 중지될 수 있습니다. 현재는 데모 화면을 둘러볼 수 있습니다.";
+    banner.textContent = message;
     banner.style.cssText = [
       "background:#fff4e5",
       "color:#8a4b1e",
@@ -345,5 +349,17 @@
     else document.body.insertBefore(banner, document.body.firstChild);
   }
 
-  showMaintenanceBanner();
+  if (window.SportsGrowApi && window.SportsGrowApi.enabled) {
+    function pollStatus() {
+      window.SportsGrowApi.request("/status", { redirectOn401: false }).then(function (status) {
+        if (status.maintenance) insertMaintenanceBanner(status.message || "서비스 점검 중입니다. 잠시 후 다시 확인해 주세요.");
+        else {
+          var banner = document.querySelector("[data-maintenance-banner]");
+          if (banner) banner.remove();
+        }
+      }).catch(function () {});
+    }
+    pollStatus();
+    window.setInterval(function () { if (document.visibilityState !== "hidden") pollStatus(); }, 30000);
+  } else showMaintenanceBanner();
 })();

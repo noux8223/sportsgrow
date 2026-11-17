@@ -16,6 +16,16 @@ desktop.ini
 
 # Dependencies (not used by this static demo)
 node_modules/
+server/node_modules/
+server/dist/
+server/.env
+dist/
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfplan
+infra/*.auto.tfvars
+infra/backend.hcl
 
 # Local-only test pages
 _view-preview.html

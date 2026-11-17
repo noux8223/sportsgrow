@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  if (window.SportsGrowApi && window.SportsGrowApi.enabled) return;
+
   var Store = window.AppShell || { readStore: function () {}, writeStore: function () {} };
   var NOTES_KEY = "sportsgrow.coach.notes.v1";
   var GOALS_KEY = "sportsgrow.coach.goals.v1";

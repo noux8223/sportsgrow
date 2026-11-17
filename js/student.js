@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  if (window.SportsGrowApi && window.SportsGrowApi.enabled) return;
+
   var Demo = window.SportsGrowDemo;
   var SESSION =
     window.SportsGrow && window.SportsGrow.getSession ? window.SportsGrow.getSession() : null;
