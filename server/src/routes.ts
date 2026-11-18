@@ -158,7 +158,10 @@ export async function registerProductRoutes(app: FastifyInstance) {
         if (!password) { await client.query('ROLLBACK'); return fail(reply, 400, 'password_required', '새 계정 비밀번호를 입력해 주세요.'); }
         user = await client.query('INSERT INTO users(email,password_hash,name) VALUES($1,$2,$3) RETURNING id', [inv.email, await digestPassword(password), String(name).trim()]);
       }
-      const member = await client.query('INSERT INTO memberships(org_id,user_id,role,athlete_id) VALUES($1,$2,$3,$4) ON CONFLICT(org_id,user_id,role) DO UPDATE SET athlete_id=EXCLUDED.athlete_id RETURNING id', [inv.org_id, user.rows[0].id, inv.role, inv.role === 'athlete' ? inv.athlete_id : null]);
+      const member = inv.role === 'athlete'
+        ? await client.query('INSERT INTO memberships(org_id,user_id,role,athlete_id) VALUES($1,$2,$3,$4) ON CONFLICT(org_id,user_id,role) DO UPDATE SET athlete_id=EXCLUDED.athlete_id WHERE memberships.athlete_id IS NULL OR memberships.athlete_id=EXCLUDED.athlete_id RETURNING id', [inv.org_id, user.rows[0].id, inv.role, inv.athlete_id])
+        : await client.query('INSERT INTO memberships(org_id,user_id,role,athlete_id) VALUES($1,$2,$3,$4) ON CONFLICT(org_id,user_id,role) DO UPDATE SET athlete_id=memberships.athlete_id RETURNING id', [inv.org_id, user.rows[0].id, inv.role, null]);
+      if (!member.rowCount) { await client.query('ROLLBACK'); return fail(reply, 409, 'membership_exists', '이미 다른 선수로 등록된 계정입니다.'); }
       if (inv.role === 'guardian') await client.query('INSERT INTO guardian_links(org_id,guardian_user_id,athlete_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [inv.org_id, user.rows[0].id, inv.athlete_id]);
       if (inv.role === 'coach' && inv.athlete_id) await client.query('INSERT INTO coach_assignments(org_id,coach_user_id,athlete_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING', [inv.org_id, user.rows[0].id, inv.athlete_id]);
       await client.query('UPDATE invites SET accepted_at=now() WHERE id=$1', [inv.id]);
@@ -202,7 +205,8 @@ export async function registerProductRoutes(app: FastifyInstance) {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query("UPDATE athletes SET status='active' WHERE id=$1", [athlete.id]);
+      const activated = await client.query("UPDATE athletes SET status='active' WHERE id=$1 AND status='draft'", [athlete.id]);
+      if (!activated.rowCount) { await client.query('ROLLBACK'); return fail(reply, 409, 'athlete_not_draft', '초안 상태의 선수만 활성화할 수 있습니다.'); }
       await client.query("INSERT INTO goals(org_id,athlete_id,title,metric,target_numeric) VALUES($1,$2,'주간 훈련 5일','week_training_days',5),($1,$2,'월간 타율 0.320','month_batting_average',0.320),($1,$2,'시즌 안타 30개','season_hits',30) ON CONFLICT(athlete_id,metric) DO NOTHING", [athlete.org_id, athlete.id]);
       await client.query('COMMIT');
     } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }

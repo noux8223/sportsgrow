@@ -10,6 +10,7 @@ const hash = (value: string) => createHash('sha256').update(value).digest('hex')
 const digestPassword = (password: string) => argon2.hash(password, {
   type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1,
 });
+const dummyPasswordHash = digestPassword(randomBytes(32).toString('base64url'));
 const fail = (reply: { code: (code: number) => { send: (body: unknown) => unknown } }, status: number, error: string, message: string) =>
   reply.code(status).send({ error, message });
 
@@ -37,7 +38,8 @@ export async function registerIdentityRoutes(app: FastifyInstance) {
     const limited = await pool.query(`SELECT scope FROM login_attempts WHERE created_at > now() - CASE scope WHEN 'ip' THEN interval '60 seconds' ELSE interval '1 hour' END AND ((scope='ip' AND key_hash=$1) OR (scope='email' AND key_hash=$2)) GROUP BY scope HAVING count(*) >= CASE scope WHEN 'ip' THEN 5 ELSE 10 END`, [ipKey, emailKey]);
     if (limited.rowCount) return fail(reply, 429, 'login_rate_limited', '로그인 시도가 많습니다. 잠시 후 다시 시도해 주세요.');
     const found = await pool.query('SELECT id, password_hash, name FROM users WHERE email=$1', [email]);
-    const valid = found.rowCount ? await argon2.verify(found.rows[0].password_hash, password).catch(() => false) : false;
+    const passwordHash = found.rowCount ? found.rows[0].password_hash as string : await dummyPasswordHash;
+    const valid = await argon2.verify(passwordHash, password).catch(() => false);
     if (!valid) {
       await pool.query("INSERT INTO login_attempts(scope,key_hash) VALUES ('ip',$1),('email',$2)", [ipKey, emailKey]);
       return fail(reply, 401, 'invalid_credentials', '이메일 또는 비밀번호가 올바르지 않습니다.');

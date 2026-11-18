@@ -51,7 +51,7 @@ export async function runWeeklyReports(now = new Date()){
   const gate=await jobQuery("SELECT ($1::timestamptz AT TIME ZONE 'Asia/Seoul') < date_trunc('week', $1::timestamptz AT TIME ZONE 'Asia/Seoul') + time '07:00' AS before_window, (date_trunc('week', $1::timestamptz AT TIME ZONE 'Asia/Seoul')::date - 7)::text AS week_start",[now]);
   if(gate.rows[0].before_window)return;
   const date=String(gate.rows[0].week_start).slice(0,10);
-  const athletes=await jobQuery("SELECT a.id,a.org_id,a.display_name FROM athletes a WHERE a.status='active' AND EXISTS(SELECT 1 FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=a.id AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1)");
+  const athletes=await jobQuery("SELECT a.id,a.org_id,a.display_name FROM athletes a WHERE a.status='active' AND EXISTS(SELECT 1 FROM LATERAL(SELECT c.granted FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=a.id AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1) latest WHERE latest.granted)");
   for(const athlete of athletes.rows){
     if((await jobQuery('SELECT 1 FROM weekly_reports WHERE athlete_id=$1 AND week_start=$2',[athlete.id,date])).rowCount)continue;
     const consent=await jobQuery("SELECT c.granted FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=$1 AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1",[athlete.id]);

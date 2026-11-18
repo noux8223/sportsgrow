@@ -20,11 +20,11 @@ export async function reencodePhoto(bytes:Buffer):Promise<Buffer>{
   return image.rotate().resize({width:1600,height:1600,fit:'inside',withoutEnlargement:true}).jpeg({quality:82,mozjpeg:true}).toBuffer();
 }
 
-async function portraitGranted(athleteId: string, userId: string) {
+export async function portraitGranted(athleteId: string, userId: string) {
   const age = await pool.query("SELECT date_part('year',age((now() AT TIME ZONE 'Asia/Seoul')::date,birth_date))::int years FROM athletes WHERE id=$1", [athleteId]);
   if (!age.rowCount) return false;
   if (age.rows[0].years >= 18) return true;
-  const grant = await pool.query("SELECT ce.granted FROM consent_events ce JOIN policy_versions p ON p.id=ce.policy_version_id WHERE ce.athlete_id=$1 AND ce.purpose='portrait' AND p.kind='privacy' ORDER BY ce.created_at DESC LIMIT 1", [athleteId]);
+  const grant = await pool.query("SELECT ce.granted FROM consent_events ce JOIN policy_versions p ON p.id=ce.policy_version_id WHERE ce.athlete_id=$1 AND ce.guardian_user_id=$2 AND ce.purpose='portrait' AND p.kind='privacy' ORDER BY ce.created_at DESC LIMIT 1", [athleteId, userId]);
   return grant.rows[0]?.granted === true;
 }
 
@@ -83,7 +83,7 @@ export async function registerMediaRoutes(app: FastifyInstance) {
     reply.header('Cache-Control','private, no-store').header('X-Content-Type-Options','nosniff');
     return {media};
   });
-  app.delete<{Params:{id:string}}>('/api/media/:id',async(request,reply)=>{
+  app.delete<{Params:{id:string};Querystring:{ticketId?:string}}>('/api/media/:id',async(request,reply)=>{
     if(!bucket)return fail(reply,503,'media_unconfigured','사진 저장소가 설정되지 않았습니다.');
     const session=await currentSession(request);
     if(!session)return fail(reply,401,'unauthenticated','로그인이 필요합니다.');
@@ -94,10 +94,17 @@ export async function registerMediaRoutes(app: FastifyInstance) {
     const staff=Boolean((await pool.query('SELECT 1 FROM platform_staff WHERE user_id=$1',[session.user_id])).rowCount);
     const linkedGuardian=role==='guardian'&&Boolean((await pool.query('SELECT 1 FROM guardian_links WHERE org_id=$1 AND guardian_user_id=$2 AND athlete_id=$3',[item.org_id,session.user_id,item.athlete_id])).rowCount);
     const athleteOwner=role==='athlete'&&membership.rows[0]?.athlete_id===item.athlete_id;
-    if(item.created_by!==session.user_id&&role!=='org_admin'&&!staff&&!linkedGuardian&&!athleteOwner)return fail(reply,403,'forbidden','연결된 선수의 사진을 삭제할 권한이 없습니다.');
+    const directDelete=item.created_by===session.user_id||role==='org_admin'||linkedGuardian||athleteOwner;
+    let ticketId:string|undefined;
+    if(staff&&!directDelete){
+      ticketId=request.query.ticketId;
+      if(typeof ticketId!=='string'||!/^[0-9a-f-]{36}$/i.test(ticketId))return fail(reply,404,'not_found','사진을 찾을 수 없습니다.');
+      if(!(await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open'",[ticketId])).rowCount)return fail(reply,404,'not_found','사진을 찾을 수 없습니다.');
+    }
+    if(!directDelete&&!ticketId)return fail(reply,403,'forbidden','연결된 선수의 사진을 삭제할 권한이 없습니다.');
     await s3.send(new DeleteObjectCommand({Bucket:bucket,Key:item.bucket_key}));
     await pool.query('UPDATE media_assets SET deleted_at=now() WHERE id=$1',[item.id]);
-    await pool.query("INSERT INTO audit_events(actor_user_id,org_id,athlete_id,action,object_type,object_id) VALUES($1,$2,$3,'media.delete','media',$4)",[session.user_id,item.org_id,item.athlete_id,item.id]);
+    await pool.query("INSERT INTO audit_events(actor_user_id,org_id,athlete_id,ticket_id,action,object_type,object_id) VALUES($1,$2,$3,$4,'media.delete','media',$5)",[session.user_id,item.org_id,item.athlete_id,ticketId??null,item.id]);
     return reply.code(204).send();
   });
   app.post<{Params:{id:string};Body:{body?:string}}>('/api/media/:id/comments',async(request,reply)=>{

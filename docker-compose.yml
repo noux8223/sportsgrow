@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: local_migrate_password
     ports:
       - "5432:5432"
-    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "pg_stat_statements.track=all"]
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "pg_stat_statements.track=top"]
     volumes:
       - sportsgrow_pg:/var/lib/postgresql/data
       - ./server/sql/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
