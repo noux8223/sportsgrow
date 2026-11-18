@@ -28,6 +28,7 @@
 | 로컬 데이터베이스 | `.agents/skills/local-postgres/` |
 | 여러 워커 | `.agents/skills/orca-coordination/` |
 | 커밋 | `.agents/skills/git-workflow/` |
+| 브라우저 확인 | `.agents/skills/dev-servers/` |
 
 ---
 
@@ -56,3 +57,4 @@
 - [ ] `docs/context/CURRENT_STATE.md`의 미커밋 범위
 - [ ] 이번 작업의 스킬 하나
 - [ ] 다른 워커와 파일이 겹치면 Run과 Task로 등록
+- [ ] 화면을 브라우저로 보면 `node scripts/dev-servers.mjs`로 API, 웹, 루트 정적 서버를 연 뒤 확인

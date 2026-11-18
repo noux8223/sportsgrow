@@ -13,7 +13,7 @@
 
 | 모드 | 읽는 것 |
 | --- | --- |
-| Coordinator | 이 파일, `docs/context/CURRENT_STATE.md`, 작업에 해당하는 스킬 하나 |
+| Coordinator | 이 파일, `docs/context/CURRENT_STATE.md`, 작업에 해당하는 스킬 하나. 화면을 브라우저로 보면 먼저 `dev-servers` |
 | Orca Worker | 주입된 Task Capsule. Capsule의 허용 파일만 수정 |
 | Reviewer | Capsule, 변경 파일, `git diff`, 테스트 결과. 구현·커밋·푸시 금지 |
 | Standalone | 이 파일과 [`SKILLS.md`](SKILLS.md)에서 스킬 하나 |
@@ -143,3 +143,4 @@ Next.js, NestJS, Redis, Prisma, Drizzle, Kysely는 파일럿 경로가 아닙니
 | `local-postgres` | `.agents/skills/local-postgres/` | 로컬 Postgres, 마이그레이션 |
 | `orca-coordination` | `.agents/skills/orca-coordination/` | 워커 분할과 기동 |
 | `git-workflow` | `.agents/skills/git-workflow/` | 커밋과 푸시 |
+| `dev-servers` | `.agents/skills/dev-servers/` | 브라우저 확인 전에 API 3000, 웹 5173, 루트 정적 8765을 열 때 |

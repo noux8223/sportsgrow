@@ -1,4 +1,15 @@
-import type { Membership, Session, SessionUser } from './types'
+import type {
+  Athlete,
+  AthleteSummary,
+  GameRow,
+  Membership,
+  OrgMember,
+  Session,
+  SessionUser,
+  TrainingIntensity,
+  TrainingRow,
+  WeeklyReport,
+} from './types'
 
 const CLIENT_HEADER = 'x-sportsgrow-client'
 
@@ -78,4 +89,74 @@ export async function selectMembership(membershipId: string): Promise<void> {
 
 export async function logout(): Promise<void> {
   await request<void>('/api/auth/logout', { method: 'POST' })
+}
+
+export async function fetchAthletes(orgId: string): Promise<Athlete[]> {
+  const payload = await request<{ athletes: Athlete[] }>(
+    `/api/orgs/${encodeURIComponent(orgId)}/athletes`,
+  )
+  return payload.athletes
+}
+
+export async function fetchMembers(orgId: string): Promise<OrgMember[]> {
+  const payload = await request<{ members: OrgMember[] }>(
+    `/api/orgs/${encodeURIComponent(orgId)}/members`,
+  )
+  return payload.members
+}
+
+export async function fetchSummary(athleteId: string): Promise<AthleteSummary> {
+  return request<AthleteSummary>(`/api/athletes/${encodeURIComponent(athleteId)}/summary`)
+}
+
+export async function fetchTraining(athleteId: string): Promise<TrainingRow[]> {
+  const payload = await request<{ training: TrainingRow[] }>(
+    `/api/athletes/${encodeURIComponent(athleteId)}/training`,
+  )
+  return payload.training
+}
+
+export async function fetchGames(athleteId: string): Promise<GameRow[]> {
+  const payload = await request<{ games: GameRow[] }>(
+    `/api/athletes/${encodeURIComponent(athleteId)}/games`,
+  )
+  return payload.games
+}
+
+export async function fetchWeeklyReports(athleteId: string): Promise<WeeklyReport[]> {
+  const payload = await request<{ reports: WeeklyReport[] }>(
+    `/api/athletes/${encodeURIComponent(athleteId)}/reports/weekly`,
+  )
+  return payload.reports
+}
+
+export interface TrainingInput {
+  trainedOn: string
+  type: string
+  minutes: number
+  intensity: TrainingIntensity
+  memo?: string
+}
+
+export async function createTraining(athleteId: string, input: TrainingInput): Promise<void> {
+  await request<TrainingRow>(`/api/athletes/${encodeURIComponent(athleteId)}/training`, {
+    method: 'POST',
+    body: input,
+  })
+}
+
+export interface GameInput {
+  playedOn: string
+  competition?: string
+  opponent?: string
+  atBats: number
+  hits: number
+  walks: number
+}
+
+export async function createGame(athleteId: string, input: GameInput): Promise<void> {
+  await request<GameRow>(`/api/athletes/${encodeURIComponent(athleteId)}/games`, {
+    method: 'POST',
+    body: input,
+  })
 }

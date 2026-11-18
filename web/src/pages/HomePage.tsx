@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { ApiError } from '../api'
+import { ApiError, fetchAthletes, fetchMembers, fetchTraining } from '../api'
+import AthleteDashboard from '../components/AthleteDashboard'
 import RecordForm from '../components/RecordForm'
-import { roleLabel, isMinorRole } from '../types'
-import type { Membership, Session, SessionUser } from '../types'
+import TrainingList from '../components/TrainingList'
+import { athleteStatusLabel } from '../format'
+import { useAsyncData } from '../hooks/useAsyncData'
+import { isMinorRole, roleLabel } from '../types'
+import type { Athlete, Membership, Session, SessionUser } from '../types'
 
 interface HomePageProps {
   session: Session
@@ -50,7 +54,39 @@ function PlatformNotice({ compact = false }: { compact?: boolean }) {
   )
 }
 
+function AthleteSelector({
+  athletes,
+  selected,
+  onSelect,
+}: {
+  athletes: Athlete[]
+  selected: Athlete
+  onSelect: (athleteId: string) => void
+}) {
+  return (
+    <div className="toolbar">
+      <label>
+        <span>선수 선택</span>
+        <select value={selected.id} onChange={(event) => onSelect(event.target.value)}>
+          {athletes.map((athlete) => (
+            <option key={athlete.id} value={athlete.id}>
+              {athlete.displayName}
+              {athlete.teamName ? ` · ${athlete.teamName}` : ''}
+            </option>
+          ))}
+        </select>
+      </label>
+      <span className="badge badge-quiet">{athleteStatusLabel(selected.status)}</span>
+    </div>
+  )
+}
+
 function StudentGuardianHome({ membership, user }: { membership: Membership; user: SessionUser }) {
+  const athletes = useAsyncData(() => fetchAthletes(membership.orgId), `athletes:${membership.orgId}`)
+  const [selectedId, setSelectedId] = useState<string | null>(membership.athleteIds[0] ?? null)
+  const list = athletes.data ?? []
+  const selected = list.find((athlete) => athlete.id === selectedId) ?? list[0] ?? null
+
   return (
     <>
       <p className="eyebrow">선수 · 보호자</p>
@@ -59,27 +95,78 @@ function StudentGuardianHome({ membership, user }: { membership: Membership; use
         {user.name}님의 훈련과 경기 기록, 목표, 주간 리포트를 {membership.orgName}에서 확인합니다.
       </p>
 
-      <div className="card-grid">
-        <article className="card">
-          <h2>이번 주 기록</h2>
-          <p className="empty">아직 불러온 기록이 없습니다. 기록 API를 연결하면 이 자리에 표시됩니다.</p>
-        </article>
-        <article className="card">
-          <h2>목표</h2>
-          <p className="empty">목표는 다음 단계에서 연결합니다.</p>
-        </article>
-        <article className="card">
-          <h2>주간 리포트</h2>
-          <p className="empty">리포트 수신 설정과 지난 리포트는 다음 단계에서 연결합니다.</p>
-        </article>
-      </div>
+      {athletes.loading ? <p className="hint">선수 정보를 불러오는 중입니다.</p> : null}
+      {athletes.error ? (
+        <p className="alert" role="alert">
+          {athletes.error}
+        </p>
+      ) : null}
 
-      <p className="hint">기록 입력은 담당 코치가 코치 홈에서 합니다. 학생과 보호자는 기록을 조회합니다.</p>
+      {!athletes.loading && !athletes.error && list.length === 0 ? (
+        <section className="card">
+          <p className="empty">연결된 선수가 없습니다. 기관 관리자에게 문의해 주세요.</p>
+        </section>
+      ) : null}
+
+      {selected ? (
+        <>
+          {list.length > 1 ? (
+            <AthleteSelector athletes={list} selected={selected} onSelect={setSelectedId} />
+          ) : (
+            <p className="hint">
+              {selected.displayName}
+              {selected.teamName ? ` · ${selected.teamName}` : ''} ·{' '}
+              {athleteStatusLabel(selected.status)}
+            </p>
+          )}
+
+          <AthleteDashboard key={selected.id} athleteId={selected.id} role={membership.role} />
+        </>
+      ) : null}
+
+      {membership.role === 'guardian' ? (
+        <p className="hint">
+          훈련과 경기 기록은 선수 계정과 담당 코치가 저장합니다. 보호자는 기록을 조회합니다.
+        </p>
+      ) : null}
+    </>
+  )
+}
+
+function CoachAthletePanel({ athlete }: { athlete: Athlete }) {
+  const training = useAsyncData(() => fetchTraining(athlete.id), `training:${athlete.id}`)
+
+  return (
+    <>
+      <section className="card">
+        <div className="card-head">
+          <h2>최근 훈련</h2>
+          <span className="badge badge-quiet">{athleteStatusLabel(athlete.status)}</span>
+        </div>
+        <TrainingList rows={training.data} loading={training.loading} error={training.error} />
+      </section>
+
+      {athlete.hasAthleteUser ? (
+        <section className="card">
+          <h2>기록 입력</h2>
+          <p className="hint">
+            선수 계정이 있어 코치는 이 기록을 쓰지 않습니다. 훈련과 경기 기록은 선수가 직접
+            입력합니다.
+          </p>
+        </section>
+      ) : (
+        <RecordForm athleteId={athlete.id} onSaved={training.reload} />
+      )}
     </>
   )
 }
 
 function CoachHome({ membership, user }: { membership: Membership; user: SessionUser }) {
+  const athletes = useAsyncData(() => fetchAthletes(membership.orgId), `athletes:${membership.orgId}`)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const list = athletes.data ?? []
+  const selected = list.find((athlete) => athlete.id === selectedId) ?? list[0] ?? null
+
   return (
     <>
       <p className="eyebrow">코치</p>
@@ -88,23 +175,47 @@ function CoachHome({ membership, user }: { membership: Membership; user: Session
         {user.name}님은 {membership.orgName}에서 담당 선수의 훈련과 경기 기록을 정리합니다.
       </p>
 
-      <div className="card-grid">
-        <article className="card">
-          <h2>담당 선수</h2>
-          <p className="empty">선수 목록은 다음 단계에서 연결합니다.</p>
-        </article>
-        <article className="card">
-          <h2>이번 주 입력</h2>
-          <p className="empty">기록 API를 연결하면 최근 입력이 이 자리에 표시됩니다.</p>
-        </article>
-      </div>
+      <section className="card">
+        <h2>담당 선수</h2>
+        {athletes.loading ? (
+          <p className="hint">담당 선수를 불러오는 중입니다.</p>
+        ) : athletes.error ? (
+          <p className="alert" role="alert">
+            {athletes.error}
+          </p>
+        ) : list.length === 0 ? (
+          <p className="empty">배정된 선수가 없습니다. 기관 관리자에게 배정을 요청해 주세요.</p>
+        ) : (
+          <ul className="athlete-list">
+            {list.map((athlete) => (
+              <li key={athlete.id}>
+                <button
+                  type="button"
+                  className={
+                    athlete.id === selected?.id ? 'athlete-option is-selected' : 'athlete-option'
+                  }
+                  onClick={() => setSelectedId(athlete.id)}
+                  aria-pressed={athlete.id === selected?.id}
+                >
+                  <span className="membership-org">{athlete.displayName}</span>
+                  <span className="badge badge-quiet">
+                    {athlete.teamName ?? athleteStatusLabel(athlete.status)}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-      <RecordForm />
+      {selected ? <CoachAthletePanel key={selected.id} athlete={selected} /> : null}
     </>
   )
 }
 
 function OrgAdminHome({ membership, user }: { membership: Membership; user: SessionUser }) {
+  const members = useAsyncData(() => fetchMembers(membership.orgId), `members:${membership.orgId}`)
+
   return (
     <>
       <p className="eyebrow">기관 관리자</p>
@@ -127,9 +238,30 @@ function OrgAdminHome({ membership, user }: { membership: Membership; user: Sess
             </div>
           </dl>
         </article>
+
         <article className="card">
           <h2>구성원</h2>
-          <p className="empty">구성원 관리 API는 다음 단계에서 연결합니다.</p>
+          {members.loading ? (
+            <p className="hint">구성원을 불러오는 중입니다.</p>
+          ) : members.error ? (
+            <p className="alert" role="alert">
+              {members.error}
+            </p>
+          ) : members.data && members.data.length > 0 ? (
+            <ul className="data-list">
+              {members.data.map((member) => (
+                <li key={member.id} className="data-row">
+                  <div className="data-row-main">
+                    <span className="data-row-title">{member.name}</span>
+                    <span className="badge badge-quiet">{roleLabel(member.role)}</span>
+                  </div>
+                  <span className="data-row-meta">{member.email}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty">등록된 구성원이 없습니다.</p>
+          )}
         </article>
       </div>
     </>

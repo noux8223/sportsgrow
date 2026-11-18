@@ -520,6 +520,144 @@ button {
   margin-top: 1.2rem;
 }
 
+/* data lists */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.stat {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fbfdfc;
+}
+
+.stat dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.stat dd {
+  margin-top: 0.15rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.data-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.data-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.8rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fbfdfc;
+}
+
+.data-row-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.7rem;
+}
+
+.data-row-title {
+  font-weight: 600;
+}
+
+.data-row-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.data-memo {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.report-detail {
+  flex-basis: 100%;
+}
+
+.report-detail div {
+  padding-bottom: 0.3rem;
+}
+
+.report-goals,
+.report-notes {
+  flex-basis: 100%;
+  display: grid;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.report-goals li::before,
+.report-notes li::before {
+  content: '· ';
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.toolbar select {
+  width: auto;
+  min-width: 190px;
+}
+
+.athlete-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.athlete-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fbfdfc;
+  text-align: left;
+}
+
+.athlete-option:hover {
+  border-color: var(--accent);
+}
+
+.athlete-option.is-selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 @media (max-width: 760px) {
   .auth-shell {
     grid-template-columns: minmax(0, 1fr);

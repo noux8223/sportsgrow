@@ -47,7 +47,7 @@ API는 `server/`의 Node 22, TypeScript, Fastify, PostgreSQL 16입니다. Next.j
 
 ## 에이전트
 
-규칙 정본은 루트 `AGENTS.md`입니다. 워커 기동은 `docs/ops/multi_agent_setup.md`입니다. 빌더는 `deepseek/deepseek-v4.1-flash`, 리뷰어는 `z-ai/glm-5.3-flash`입니다.
+규칙 정본은 루트 `AGENTS.md`입니다. 워커 기동은 `docs/ops/multi_agent_setup.md`입니다. 빌더는 `deepseek/deepseek-v4.1-flash`, 리뷰어는 `z-ai/glm-5.3-flash`입니다. 브라우저 확인 전에 `.agents/skills/dev-servers`가 API 3000, 웹 5173, 루트 정적 8765을 엽니다.
 
 ## 손대지 않는 것
 
