@@ -67,10 +67,14 @@ function sanitizeHtml(html, { login = false, adminLogin = false, pilotBuild = fa
 }
 
 function apiOnlyDashboard(html) {
-  return html.replace(/<body\b([^>]*)>([\s\S]*?)<\/body>/i, (_match, attrs, body) => {
+  const replaced = html.replace(/<body\b([^>]*)>([\s\S]*?)<\/body>/i, (_match, attrs, body) => {
     const scripts = Array.from(body.matchAll(/<script\b[\s\S]*?<\/script>/gi), (script) => script[0]).join('\n');
     return `<body${attrs} data-deployment="pilot"><main class="sg-api-loading" role="status">Sports Grow 계정과 서버 데이터를 확인하고 있습니다.</main>${scripts}</body>`;
   });
+  if (!/href=["']css\/app\.css["']/.test(replaced)) {
+    return replaced.replace('</head>', '<link rel="stylesheet" href="css/app.css">\n</head>');
+  }
+  return replaced;
 }
 
 async function readTree(dir, base = dir) {

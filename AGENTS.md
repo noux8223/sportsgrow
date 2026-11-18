@@ -26,7 +26,9 @@
 
 Sports Grow는 유소년 선수(데모의 김하람, `p-haram`)의 훈련·경기·목표를 학생, 학부모, 코치, 아카데미, 운영자가 보는 제품입니다.
 
-화면은 vanilla HTML/CSS/JS IIFE입니다. 유료 파일럿 API는 `server/`의 Fastify + TypeScript + PostgreSQL입니다. `js/env.js`의 `api`가 꺼져 있으면 데모 원장 `sportsgrow.demo.v1`이 그대로 동작해야 합니다. 데모 원장을 운영 데이터로 옮기지 않습니다.
+클라이언트는 셋입니다. 루트 화면은 지금처럼 vanilla HTML/CSS/JS IIFE입니다. `web/`은 로그인한 웹을 위한 Vite React 골격이고 세션은 쿠키입니다. `mobile/`은 Expo 골격이고 세션은 Bearer 토큰입니다. `web/`과 `mobile/`은 루트 HTML을 대체하지 않습니다. 루트 역할 페이지를 React로 다시 쓰지 않습니다.
+
+유료 파일럿 API는 `server/`의 Node 22, TypeScript, Fastify, PostgreSQL 16입니다. `js/env.js`의 `api`가 꺼져 있으면 데모 원장 `sportsgrow.demo.v1`이 그대로 동작해야 합니다. 데모 원장을 운영 데이터로 옮기지 않습니다.
 
 원격은 `https://github.com/noux8223/sportsgrow.git`의 `main`입니다. 작업 폴더는 이 저장소 루트입니다.
 
@@ -36,11 +38,13 @@ Sports Grow는 유소년 선수(데모의 김하람, `p-haram`)의 훈련·경�
 
 | 영역 | 기술 |
 | --- | --- |
-| 화면 | vanilla IIFE, `"use strict"`. 프레임워크와 새 프론트 의존성 없음 |
+| 루트 화면 | vanilla IIFE, `"use strict"`. 프레임워크와 새 프론트 의존성 없음. 데모 원장 `sportsgrow.demo.v1` |
+| `web/` | Vite, React 19, TypeScript. 로그인한 웹용 골격이고 세션은 `credentials: 'include'` 쿠키 |
+| `mobile/` | Expo, React Native, Expo Router. 세션은 `expo-secure-store`의 Bearer 토큰 |
 | API | Node.js 22, TypeScript, Fastify |
 | DB | PostgreSQL 16, `pg`, `server/sql/`의 `$1` 파라미터 SQL. ORM 없음 |
 | 비밀번호 | argon2id, 메모리 19456 KiB, iterations 2, parallelism 1 |
-| 세션 | HttpOnly 쿠키 `sg_session`. 역할 문자열을 권한으로 쓰지 않음 |
+| 세션 | 웹은 HttpOnly 쿠키 `sg_session`, `mobile/`은 Bearer 토큰. 역할 문자열을 권한으로 쓰지 않음 |
 | 미디어 | 서버 JPEG 재인코딩, EXIF 제거. 영상과 공개 프로필은 첫 유료 범위 밖 |
 | 청구 | 아카데미 월 구독 하나. 수동 입금. PG SDK 없음. 웹훅은 501 |
 | 로컬 DB | 컨테이너 `sportsgrow-db-1`, `localhost:5432`, 데이터베이스 `sportsgrow` |
@@ -54,7 +58,7 @@ Next.js, NestJS, Redis, Prisma, Drizzle, Kysely는 파일럿 경로가 아닙니
 1. 대화와 문서는 한국어. 코드, 변수, 환경 변수는 영어.
 2. 코드 주석, 커밋 메시지, 문서에 이모지를 쓰지 않습니다.
 3. 파일 경로는 저장소 루트 기준 상대 경로입니다.
-4. 브라우저 코드는 IIFE와 `"use strict"`를 유지합니다. 데모 날짜는 실행 시점의 로컬 날짜에서 뺀 값입니다.
+4. 루트 브라우저 코드는 IIFE와 `"use strict"`를 유지합니다. 데모 날짜는 실행 시점의 로컬 날짜에서 뺀 값입니다.
 5. `env.api === false`이면 지금 데모 화면과 같아야 합니다.
 6. API 모드의 화면은 `js/api.js`를 통합니다. 역할 페이지를 새 프레임워크로 다시 만들지 않습니다.
 7. 서버 테스트는 맡은 파일만 실행합니다. `cd server && node --import tsx --test test/<file>.test.ts`. 끝나면 `pool`과 `jobPool`을 `end`합니다.
@@ -134,7 +138,7 @@ Next.js, NestJS, Redis, Prisma, Drizzle, Kysely는 파일럿 경로가 아닙니
 | 스킬 | 경로 | 언제 |
 | --- | --- | --- |
 | `pilot-server` | `.agents/skills/pilot-server/` | `server/` API, SQL, 테스트 |
-| `demo-client` | `.agents/skills/demo-client/` | HTML, `js/`, 서비스 워커 |
+| `demo-client` | `.agents/skills/demo-client/` | 루트 HTML, `js/`, 서비스 워커. `web/`과 `mobile/`은 이 스킬 밖 |
 | `minor-athlete-data` | `.agents/skills/minor-athlete-data/` | 동의, 활성화, 사진, 가시성 |
 | `local-postgres` | `.agents/skills/local-postgres/` | 로컬 Postgres, 마이그레이션 |
 | `orca-coordination` | `.agents/skills/orca-coordination/` | 워커 분할과 기동 |

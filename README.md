@@ -118,7 +118,7 @@
 
 ## 실행 방법
 
-정적 HTML/CSS/JS 사이트이므로 별도 빌드가 필요 없습니다. 로컬 서버로 여는 것을 권장합니다.
+루트 데모 화면은 정적 HTML/CSS/JS이므로 별도 빌드가 필요 없습니다. 로컬 서버로 여는 것을 권장합니다. `web/`과 `mobile/`은 각각 `web/`에서 `npm run dev`(Vite), `mobile/`에서 `npm start`(Expo)로 실행합니다.
 
 ```powershell
 # 프로젝트 루트에서 (Python이 있는 경우)
@@ -179,7 +179,7 @@ SPORTSGROW_OPS_URL=https://ops.example.com npm run build:pilot
 
 ## 디자인·기술 메모
 
-- 순수 HTML/CSS/JavaScript로 구현했으며 프레임워크나 차트 라이브러리를 사용하지 않습니다.
+- 루트 화면은 순수 HTML/CSS/JavaScript(IIFE)로 구현했으며 프레임워크나 차트 라이브러리를 사용하지 않습니다. `web/`은 로그인한 웹을 위한 Vite React 19 골격이고 쿠키 세션을 쓰며, `mobile/`은 Expo/React Native 골격이고 Bearer 토큰 세션을 씁니다. 둘은 루트 HTML을 대체하지 않습니다.
 - 차트는 CSS 막대, 인라인 SVG 라인, `conic-gradient` 도넛으로 표현합니다.
 - 모바일(≤720px), 태블릿(≤980px), 데스크톱 레이아웃에 대응합니다.
 - 관리자 보고서와 선수 명단, 운영 콘솔의 회원·입금·훈련 데이터는 UTF-8(BOM) CSV로 내보냅니다.
@@ -234,6 +234,9 @@ sportsgrow/
 │  ├─ coach.js
 │  ├─ academy.js
 │  └─ admin.js      # 관리자 데이터·렌더링·필터·CSV·설정
+├─ server/          # Fastify API(선택) — Node 22, TypeScript, PostgreSQL 16
+├─ web/             # 로그인한 웹 골격 — Vite, React 19, 쿠키 세션 (루트 HTML 대체 아님)
+├─ mobile/          # 모바일 골격 — Expo, React Native, Bearer 세션 (루트 HTML 대체 아님)
 ├─ docs/            # 사업계획서 정리 문서
 └─ _legacy/         # 이전 사이트 보존본
 ```

@@ -4,6 +4,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { pool } from './db.js';
 
 const COOKIE = 'sg_session';
+const NATIVE_HEADER = 'x-sg-client';
 const IDLE_MS = 12 * 60 * 60 * 1000;
 const ABSOLUTE_MS = 14 * 24 * 60 * 60 * 1000;
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -14,8 +15,18 @@ const dummyPasswordHash = digestPassword(randomBytes(32).toString('base64url'));
 const fail = (reply: { code: (code: number) => { send: (body: unknown) => unknown } }, status: number, error: string, message: string) =>
   reply.code(status).send({ error, message });
 
+function bearerToken(request: FastifyRequest) {
+  const header = request.headers.authorization;
+  if (typeof header !== 'string' || !header.startsWith('Bearer ')) return null;
+  const token = header.slice('Bearer '.length);
+  if (!token || /\s/.test(token)) return null;
+  return token;
+}
+
+const isNativeClient = (request: FastifyRequest) => request.headers[NATIVE_HEADER] === 'native';
+
 async function currentSession(request: FastifyRequest) {
-  const token = request.cookies[COOKIE];
+  const token = request.cookies[COOKIE] || bearerToken(request);
   if (!token) return null;
   const result = await pool.query(`
     SELECT s.id, s.user_id, s.active_membership_id, u.email, u.name
@@ -53,11 +64,13 @@ export async function registerIdentityRoutes(app: FastifyInstance) {
     await pool.query('INSERT INTO sessions(user_id,token_hash,active_membership_id,idle_expires_at,absolute_expires_at,user_agent,ip) VALUES($1,$2,$3,LEAST(now()+interval \'12 hours\',$4),$4,$5,$6)', [userId, hash(token), active, expires, request.headers['user-agent'] ?? null, clientIp]);
     reply.setCookie(COOKIE, token, { httpOnly: true, secure: process.env.APP_ENV === 'pilot' || process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', expires });
     await pool.query("INSERT INTO audit_events(actor_user_id,action,object_type,object_id,ip) VALUES($1::uuid,'auth.login','user',$1::uuid::text,$2)", [userId, clientIp]);
-    return { user: { id: userId, email, name: found.rows[0].name }, memberships: memberships.rows.map((m) => ({ id: m.id, orgId: m.org_id, orgName: m.org_name, role: m.role, athleteIds: m.athlete_id ? [m.athlete_id] : [] })), activeMembershipId: active, platformStaff: Boolean(staff.rowCount) };
+    const platformStaff = Boolean(staff.rowCount);
+    const body = { user: { id: userId, email, name: found.rows[0].name, platformStaff }, memberships: memberships.rows.map((m) => ({ id: m.id, orgId: m.org_id, orgName: m.org_name, role: m.role, athleteIds: m.athlete_id ? [m.athlete_id] : [] })), activeMembershipId: active, platformStaff };
+    return isNativeClient(request) ? { ...body, sessionToken: token } : body;
   });
 
   app.post('/api/auth/logout', async (request, reply) => {
-    const token = request.cookies[COOKIE];
+    const token = request.cookies[COOKIE] || bearerToken(request);
     if (token) await pool.query('DELETE FROM sessions WHERE token_hash=$1', [hash(token)]);
     reply.clearCookie(COOKIE, { path: '/', httpOnly: true, sameSite: 'lax' });
     return reply.code(204).send();
