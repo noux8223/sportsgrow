@@ -1,0 +1,46 @@
+schema: SPORTSGROW_TASK_CAPSULE
+version: "1.0.0"
+mode: worker
+role: builder
+
+objective: >
+  완료 상태를 한 문단으로 적습니다.
+
+why_now: >
+  이 작업이 지금 필요한 이유를 한 문장으로 적습니다.
+
+ground_truth:
+  - "재조사 불필요: 제품 규칙의 정본은 AGENTS.md 이고, 설계 정본은 docs/상용화-유료배포-설계서.md 이다."
+  - "재조사 불필요: env.api 가 꺼져 있으면 데모 화면이 유지되어야 한다."
+
+allowed_read_files:
+  - ".agents/templates/task_capsule.yaml"
+  - "server/src/..."
+
+allowed_write_files:
+  - "server/src/..."
+  - "server/test/..."
+
+forbidden:
+  - "현재 작업 디렉터리를 벗어나지 말 것"
+  - "허용 파일 밖을 수정하지 말 것"
+  - "git commit 과 git push 를 하지 말 것"
+  - "docker compose up, 컨테이너 재생성, 마이그레이션 적용을 하지 말 것"
+  - "refac_bid_box 워크트리와 그 Docker 스택을 수정하지 말 것"
+  - "새 npm 의존성을 넣지 말 것"
+  - "server/.env 값을 문서나 출력에 남기지 말 것"
+
+shared_resources:
+  - resource: sportsgrow-db-1
+    ownership: read_only
+
+verification_commands:
+  - "cd server && node --import tsx --test test/<이 작업 테스트>.test.ts"
+
+acceptance:
+  - "검증 명령의 통과와 실패 건수를 실행 출력 그대로 적었다."
+  - "변경 파일 목록이 allowed_write_files 안에 있다."
+
+escalate_when:
+  - "ground_truth 와 코드가 다르면 범위를 넓히지 말고 질문한다."
+  - "데이터베이스가 꺼져 있으면 docker compose 로 올리지 말고 질문한다."

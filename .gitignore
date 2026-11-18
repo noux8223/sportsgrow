@@ -29,3 +29,7 @@ infra/backend.hcl
 
 # Local-only test pages
 _view-preview.html
+
+# Agent local state
+.commandcode/
+.orca/
