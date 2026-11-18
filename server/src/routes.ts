@@ -5,6 +5,20 @@ import { currentSession, digestPassword, fail } from './identity.js';
 
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const validId = (s: unknown): s is string => typeof s === 'string' && /^[0-9a-f-]{36}$/i.test(s);
+export const currentPrivacyPolicySql = "(SELECT id FROM policy_versions WHERE kind='privacy' AND effective_at<=now() ORDER BY effective_at DESC LIMIT 1)";
+type Queryable = { query: (text: string, values?: any[]) => Promise<{ rows: any[] }> };
+async function currentPrivacyPolicy(queryable: Queryable) {
+  const { rows } = await queryable.query("SELECT id,counsel_reviewed FROM policy_versions WHERE kind='privacy' AND effective_at<=now() ORDER BY effective_at DESC LIMIT 1");
+  return rows[0] ?? null;
+}
+async function seatUsage(queryable: Queryable, orgId: string, role: string, athleteId: string | null, ignoreInviteId?: string) {
+  if (role !== 'coach' && role !== 'org_admin' && role !== 'guardian') return 0;
+  const ignore = ignoreInviteId ?? null;
+  const { rows } = role === 'guardian'
+    ? await queryable.query("SELECT (SELECT count(*) FROM guardian_links WHERE org_id=$1 AND athlete_id=$2)::int+(SELECT count(*) FROM invites WHERE org_id=$1 AND athlete_id=$2 AND role='guardian' AND accepted_at IS NULL AND expires_at>now() AND ($3::uuid IS NULL OR id<>$3))::int AS used", [orgId, athleteId, ignore])
+    : await queryable.query("SELECT (SELECT count(*) FROM memberships WHERE org_id=$1 AND role=$2)::int+(SELECT count(*) FROM invites WHERE org_id=$1 AND role=$2 AND accepted_at IS NULL AND expires_at>now() AND ($3::uuid IS NULL OR id<>$3))::int AS used", [orgId, role, ignore]);
+  return rows[0].used as number;
+}
 async function membership(request: FastifyRequest, orgId: string, roles: string[]) {
   const session = await currentSession(request);
   if (!session?.active_membership_id) return null;
@@ -20,7 +34,7 @@ export async function athleteContext(request: FastifyRequest, athleteId: string,
   const { rows: staff } = await pool.query('SELECT 1 FROM platform_staff WHERE user_id=$1', [session.user_id]);
   if (staff.length) {
     if (!ticketId) return { error: 'not_found' as const };
-    const ticket = await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open'", [ticketId]);
+    const ticket = await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open' AND org_id=$2 AND athlete_id=$3", [ticketId, athlete.org_id, athlete.id]);
     if (!ticket.rowCount) return { error: 'not_found' as const };
     await pool.query("INSERT INTO audit_events(actor_user_id,org_id,athlete_id,ticket_id,action,object_type,object_id,ip) VALUES($1,$2,$3,$4,'support.athlete.read','athlete',$3,$5)", [session.user_id, athlete.org_id, athlete.id, ticketId, request.ip]);
     return { session, athlete, role: 'platform_staff' };
@@ -42,7 +56,7 @@ export async function activeGate(athlete: { id: string; org_id: string; birth_da
   if (athlete.status !== 'active') return false;
   const age = await pool.query("SELECT date_part('year', age((now() AT TIME ZONE 'Asia/Seoul')::date, $1::date))::int AS years", [athlete.birth_date]);
   if (age.rows[0].years >= 14) return true;
-  const grant = await pool.query("SELECT ce.granted FROM consent_events ce JOIN policy_versions pv ON pv.id=ce.policy_version_id WHERE ce.athlete_id=$1 AND ce.purpose='child_account' AND pv.kind='privacy' AND pv.effective_at<=now() ORDER BY ce.created_at DESC LIMIT 1", [athlete.id]);
+  const grant = await pool.query(`SELECT ce.granted FROM consent_events ce WHERE ce.athlete_id=$1 AND ce.purpose='child_account' AND ce.policy_version_id=${currentPrivacyPolicySql} ORDER BY ce.created_at DESC LIMIT 1`, [athlete.id]);
   return grant.rows[0]?.granted === true;
 }
 function bodyText(v: unknown, max = 2000) { return typeof v === 'string' && v.trim().length > 0 && v.length <= max; }
@@ -110,12 +124,18 @@ export async function registerProductRoutes(app: FastifyInstance) {
     if (!bodyText(displayName, 100) || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate ?? '') || !validId(teamId)) return fail(reply, 400, 'invalid_input', '선수 이름, 생년월일, 팀을 확인해 주세요.');
     const team = await pool.query('SELECT 1 FROM teams WHERE id=$1 AND org_id=$2', [teamId, request.params.orgId]);
     if (!team.rowCount) return fail(reply, 404, 'not_found', '팀을 찾을 수 없습니다.');
-    const count = await pool.query("SELECT count(*)::int n FROM athletes WHERE org_id=$1 AND status<>'erased'", [request.params.orgId]);
-    const org = await pool.query('SELECT seat_athletes FROM orgs WHERE id=$1', [request.params.orgId]);
-    if (count.rows[0].n >= org.rows[0].seat_athletes) return fail(reply, 409, 'seat_limit', '선수 좌석 한도에 도달했습니다.');
-    const { rows } = await pool.query('INSERT INTO athletes(org_id,team_id,display_name,birth_date) VALUES($1,$2,$3,$4) RETURNING id,display_name,birth_date,status,team_id', [request.params.orgId, teamId, String(displayName).trim(), String(birthDate)]);
-    if (ctx.member.role === 'coach') await pool.query('INSERT INTO coach_assignments(org_id,coach_user_id,athlete_id) VALUES($1,$2,$3)', [request.params.orgId, ctx.session.user_id, rows[0].id]);
-    return reply.code(201).send({ id: rows[0].id, displayName: rows[0].display_name, birthDate: rows[0].birth_date, status: rows[0].status, teamId: rows[0].team_id });
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const org = await client.query('SELECT seat_athletes FROM orgs WHERE id=$1 FOR UPDATE', [request.params.orgId]);
+      if (!org.rowCount) { await client.query('ROLLBACK'); return fail(reply, 404, 'not_found', '기관을 찾을 수 없습니다.'); }
+      const count = await client.query("SELECT count(*)::int n FROM athletes WHERE org_id=$1 AND status<>'erased'", [request.params.orgId]);
+      if (count.rows[0].n >= org.rows[0].seat_athletes) { await client.query('ROLLBACK'); return fail(reply, 409, 'seat_limit', '선수 좌석 한도에 도달했습니다.'); }
+      const { rows } = await client.query('INSERT INTO athletes(org_id,team_id,display_name,birth_date) VALUES($1,$2,$3,$4) RETURNING id,display_name,birth_date,status,team_id', [request.params.orgId, teamId, String(displayName).trim(), String(birthDate)]);
+      if (ctx.member.role === 'coach') await client.query('INSERT INTO coach_assignments(org_id,coach_user_id,athlete_id) VALUES($1,$2,$3)', [request.params.orgId, ctx.session.user_id, rows[0].id]);
+      await client.query('COMMIT');
+      return reply.code(201).send({ id: rows[0].id, displayName: rows[0].display_name, birthDate: rows[0].birth_date, status: rows[0].status, teamId: rows[0].team_id });
+    } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
   });
   app.post<{ Params: { orgId: string }; Body: { email?: string; role?: string; athleteId?: string } }>('/api/orgs/:orgId/invites', async (request, reply) => {
     const ctx = await membership(request, request.params.orgId, ['org_admin']);
@@ -127,18 +147,24 @@ export async function registerProductRoutes(app: FastifyInstance) {
     const sub = await pool.query("SELECT status FROM subscriptions WHERE org_id=$1 AND status<>'canceled' ORDER BY created_at DESC LIMIT 1", [request.params.orgId]);
     if (sub.rowCount && ['past_due','incomplete'].includes(sub.rows[0].status)) return fail(reply, 409, 'subscription_required', '재계약 후 멤버를 초대할 수 있습니다.');
     if (['guardian','athlete'].includes(role ?? '') && !(await pool.query('SELECT 1 FROM athletes WHERE id=$1 AND org_id=$2', [athleteId, request.params.orgId])).rowCount) return fail(reply, 404, 'not_found', '선수를 찾을 수 없습니다.');
-    const limits = await pool.query('SELECT seat_coaches,seat_org_admins FROM orgs WHERE id=$1', [request.params.orgId]);
-    const count = await pool.query('SELECT count(*)::int n FROM memberships WHERE org_id=$1 AND role=$2', [request.params.orgId, role]);
-    if (role === 'coach' && count.rows[0].n >= limits.rows[0].seat_coaches || role === 'org_admin' && count.rows[0].n >= limits.rows[0].seat_org_admins) return fail(reply, 409, 'seat_limit', '해당 역할의 좌석 한도에 도달했습니다.');
-    if (role === 'guardian') {
-      const guardianCount = await pool.query('SELECT count(*)::int n FROM guardian_links WHERE athlete_id=$1', [athleteId]);
-      const guardianLimit = await pool.query('SELECT seat_guardians_per_athlete FROM orgs WHERE id=$1', [request.params.orgId]);
-      if (guardianCount.rows[0].n >= guardianLimit.rows[0].seat_guardians_per_athlete) return fail(reply, 409, 'seat_limit', '선수의 보호자 좌석 한도에 도달했습니다.');
-    }
     const raw = randomBytes(32).toString('base64url');
-    const { rows } = await pool.query('INSERT INTO invites(org_id,role,email,athlete_id,token_hash,expires_at) VALUES($1,$2,$3,$4,$5,now()+interval \'7 days\') RETURNING id,expires_at', [request.params.orgId, role, email.toLowerCase(), athleteId ?? null, sha(raw)]);
-    await pool.query("INSERT INTO email_outbox(idempotency_key,to_email,template,payload,status) VALUES($1,$2,'organization_invite',jsonb_build_object('token',$3),'queued')", [`invite:${rows[0].id}`, email.toLowerCase(), raw]);
-    return reply.code(201).send({ id: rows[0].id, expiresAt: rows[0].expires_at });
+    if (role !== 'coach' && role !== 'org_admin' && role !== 'guardian') {
+      const { rows } = await pool.query('INSERT INTO invites(org_id,role,email,athlete_id,token_hash,expires_at) VALUES($1,$2,$3,$4,$5,now()+interval \'7 days\') RETURNING id,expires_at', [request.params.orgId, role, email.toLowerCase(), athleteId ?? null, sha(raw)]);
+      await pool.query("INSERT INTO email_outbox(idempotency_key,to_email,template,payload,status) VALUES($1,$2,'organization_invite',jsonb_build_object('token',$3),'queued')", [`invite:${rows[0].id}`, email.toLowerCase(), raw]);
+      return reply.code(201).send({ id: rows[0].id, expiresAt: rows[0].expires_at });
+    }
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const org = await client.query('SELECT seat_coaches,seat_org_admins,seat_guardians_per_athlete FROM orgs WHERE id=$1 FOR UPDATE', [request.params.orgId]);
+      if (!org.rowCount) { await client.query('ROLLBACK'); return fail(reply, 404, 'not_found', '기관을 찾을 수 없습니다.'); }
+      const limit = role === 'coach' ? org.rows[0].seat_coaches : role === 'org_admin' ? org.rows[0].seat_org_admins : org.rows[0].seat_guardians_per_athlete;
+      if (await seatUsage(client, request.params.orgId, role, role === 'guardian' ? athleteId ?? null : null) >= limit) { await client.query('ROLLBACK'); return fail(reply, 409, 'seat_limit', role === 'guardian' ? '선수의 보호자 좌석 한도에 도달했습니다.' : '해당 역할의 좌석 한도에 도달했습니다.'); }
+      const { rows } = await client.query('INSERT INTO invites(org_id,role,email,athlete_id,token_hash,expires_at) VALUES($1,$2,$3,$4,$5,now()+interval \'7 days\') RETURNING id,expires_at', [request.params.orgId, role, email.toLowerCase(), athleteId ?? null, sha(raw)]);
+      await client.query("INSERT INTO email_outbox(idempotency_key,to_email,template,payload,status) VALUES($1,$2,'organization_invite',jsonb_build_object('token',$3),'queued')", [`invite:${rows[0].id}`, email.toLowerCase(), raw]);
+      await client.query('COMMIT');
+      return reply.code(201).send({ id: rows[0].id, expiresAt: rows[0].expires_at });
+    } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
   });
   app.post<{ Body: { token?: string; password?: string; name?: string } }>('/api/invites/accept', async (request, reply) => {
     const { token, password, name } = request.body ?? {};
@@ -149,6 +175,7 @@ export async function registerProductRoutes(app: FastifyInstance) {
       const found = await client.query("SELECT * FROM invites WHERE token_hash=$1 AND accepted_at IS NULL AND expires_at>now() FOR UPDATE", [sha(token)]);
       if (!found.rowCount) { await client.query('ROLLBACK'); return fail(reply, 400, 'invite_invalid', '초대 링크가 만료되었거나 이미 사용되었습니다.'); }
       const inv = found.rows[0];
+      if (['coach','org_admin','guardian'].includes(inv.role)) await client.query('SELECT id FROM orgs WHERE id=$1 FOR UPDATE', [inv.org_id]);
       if (inv.role === 'athlete') {
         const age = await client.query("SELECT date_part('year',age((now() AT TIME ZONE 'Asia/Seoul')::date,a.birth_date))::int years FROM athletes a WHERE id=$1", [inv.athlete_id]);
         if (!age.rowCount || age.rows[0].years < 14) { await client.query('ROLLBACK'); return fail(reply, 400, 'athlete_account_not_allowed', '만 14세 미만 선수 계정은 만들 수 없습니다.'); }
@@ -157,6 +184,16 @@ export async function registerProductRoutes(app: FastifyInstance) {
       if (!user.rowCount) {
         if (!password) { await client.query('ROLLBACK'); return fail(reply, 400, 'password_required', '새 계정 비밀번호를 입력해 주세요.'); }
         user = await client.query('INSERT INTO users(email,password_hash,name) VALUES($1,$2,$3) RETURNING id', [inv.email, await digestPassword(password), String(name).trim()]);
+      }
+      if (['coach','org_admin','guardian'].includes(inv.role)) {
+        const existing = inv.role === 'guardian'
+          ? await client.query('SELECT 1 FROM guardian_links WHERE org_id=$1 AND guardian_user_id=$2 AND athlete_id=$3', [inv.org_id, user.rows[0].id, inv.athlete_id])
+          : await client.query('SELECT 1 FROM memberships WHERE org_id=$1 AND user_id=$2 AND role=$3', [inv.org_id, user.rows[0].id, inv.role]);
+        if (!existing.rowCount) {
+          const limits = await client.query('SELECT seat_coaches,seat_org_admins,seat_guardians_per_athlete FROM orgs WHERE id=$1', [inv.org_id]);
+          const limit = inv.role === 'coach' ? limits.rows[0].seat_coaches : inv.role === 'org_admin' ? limits.rows[0].seat_org_admins : limits.rows[0].seat_guardians_per_athlete;
+          if (await seatUsage(client, inv.org_id, inv.role, inv.athlete_id, inv.id) >= limit) { await client.query('ROLLBACK'); return fail(reply, 409, 'seat_limit', '좌석 한도에 도달해 초대를 수락할 수 없습니다.'); }
+        }
       }
       const member = inv.role === 'athlete'
         ? await client.query('INSERT INTO memberships(org_id,user_id,role,athlete_id) VALUES($1,$2,$3,$4) ON CONFLICT(org_id,user_id,role) DO UPDATE SET athlete_id=EXCLUDED.athlete_id WHERE memberships.athlete_id IS NULL OR memberships.athlete_id=EXCLUDED.athlete_id RETURNING id', [inv.org_id, user.rows[0].id, inv.role, inv.athlete_id])
@@ -200,8 +237,11 @@ export async function registerProductRoutes(app: FastifyInstance) {
     const under14 = age.rows[0].years < 14;
     if (under14 && role !== 'guardian') return fail(reply, 403, 'guardian_required', '보호자 계정에서 동의를 완료해 주세요.');
     if (!under14 && !['athlete','org_admin'].includes(role)) return fail(reply, 403, 'forbidden', '활성화 권한이 없습니다.');
-    if (under14 && !(await pool.query("SELECT ce.granted FROM consent_events ce JOIN policy_versions p ON p.id=ce.policy_version_id WHERE ce.athlete_id=$1 AND ce.guardian_user_id=$2 AND ce.purpose='child_account' AND p.kind='privacy' ORDER BY ce.created_at DESC LIMIT 1", [athlete.id, session.user_id])).rows[0]?.granted) return fail(reply, 409, 'athlete_not_active', '보호자 동의가 확인되지 않았습니다.');
-    if (process.env.APP_ENV === 'pilot' && !(await pool.query("SELECT 1 FROM policy_versions WHERE kind='privacy' AND counsel_reviewed=true AND effective_at<=now() ORDER BY effective_at DESC LIMIT 1")).rowCount) return fail(reply, 409, 'counsel_pending', '개인정보 처리방침의 검토가 완료되지 않았습니다.');
+    if (under14 && !(await pool.query(`SELECT ce.granted FROM consent_events ce WHERE ce.athlete_id=$1 AND ce.guardian_user_id=$2 AND ce.purpose='child_account' AND ce.policy_version_id=${currentPrivacyPolicySql} ORDER BY ce.created_at DESC LIMIT 1`, [athlete.id, session.user_id])).rows[0]?.granted) return fail(reply, 409, 'athlete_not_active', '보호자 동의가 확인되지 않았습니다.');
+    if (process.env.APP_ENV === 'pilot') {
+      const current = await currentPrivacyPolicy(pool);
+      if (!current || current.counsel_reviewed !== true) return fail(reply, 409, 'counsel_pending', '개인정보 처리방침의 검토가 완료되지 않았습니다.');
+    }
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
@@ -218,8 +258,13 @@ export async function registerProductRoutes(app: FastifyInstance) {
     if (ctx.role !== 'guardian') return fail(reply, 403, 'forbidden', '보호자만 동의를 제출할 수 있습니다.');
     const { policyVersionId, purposes } = request.body ?? {};
     if (!validId(policyVersionId) || !Array.isArray(purposes) || purposes.some(p => !['child_account','portrait','report_email'].includes(p))) return fail(reply, 400, 'invalid_input', '동의 항목을 확인해 주세요.');
-    const policy = await pool.query("SELECT id FROM policy_versions WHERE id=$1 AND kind='privacy' AND effective_at<=now()", [policyVersionId]);
-    if (!policy.rowCount) return fail(reply, 400, 'policy_version_invalid', '유효한 약관 버전을 확인할 수 없습니다.');
+    if (process.env.APP_ENV === 'pilot') {
+      const current = await currentPrivacyPolicy(pool);
+      if (!current || current.counsel_reviewed !== true) return fail(reply, 409, 'counsel_pending', '개인정보 처리방침의 검토가 완료되지 않았습니다.');
+      if (current.id !== policyVersionId) return fail(reply, 400, 'policy_version_invalid', '유효한 약관 버전을 확인할 수 없습니다.');
+    } else if (!(await pool.query("SELECT id FROM policy_versions WHERE id=$1 AND kind='privacy' AND effective_at<=now()", [policyVersionId])).rowCount) {
+      return fail(reply, 400, 'policy_version_invalid', '유효한 약관 버전을 확인할 수 없습니다.');
+    }
     const client = await pool.connect();
     try {
       await client.query('BEGIN');

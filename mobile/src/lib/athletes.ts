@@ -4,7 +4,7 @@ import { apiErrorMessage, fetchOrgAthletes, type AthleteSummary, type Membership
 import { readSessionToken } from './secure-session';
 import { useSession } from './session';
 
-export type AthleteScopeStatus = 'loading' | 'ready' | 'error';
+export type AthleteScopeStatus = 'loading' | 'ready' | 'choose' | 'error';
 
 export type AthleteScope = {
   status: AthleteScopeStatus;
@@ -16,17 +16,17 @@ export type AthleteScope = {
   select: (athleteId: string) => void;
 };
 
+export const MEMBERSHIP_CHOICE_MESSAGE = '소속을 선택해 주세요.';
+
 export function useAthleteScope(): AthleteScope {
   const { session } = useSession();
 
   const membership = useMemo(() => {
     if (!session) return null;
-    return (
-      session.memberships.find((item) => item.id === session.activeMembershipId) ??
-      session.memberships[0] ??
-      null
-    );
+    return session.memberships.find((item) => item.id === session.activeMembershipId) ?? null;
   }, [session]);
+
+  const needsChoice = session !== null && membership === null && session.memberships.length > 0;
 
   const [token, setToken] = useState<string | null>(null);
   const [athletes, setAthletes] = useState<AthleteSummary[]>([]);
@@ -39,7 +39,7 @@ export function useAthleteScope(): AthleteScope {
       setToken(null);
       setAthletes([]);
       setSelectedId(null);
-      setStatus('ready');
+      setStatus(needsChoice ? 'choose' : 'ready');
       setError(null);
       return;
     }
@@ -84,7 +84,7 @@ export function useAthleteScope(): AthleteScope {
     return () => {
       cancelled = true;
     };
-  }, [membership]);
+  }, [membership, needsChoice]);
 
   const select = useCallback((athleteId: string) => setSelectedId(athleteId), []);
 

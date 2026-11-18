@@ -2,6 +2,9 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ApiError } from '../api'
 
+const LOCAL_EMAIL = 'academy@sportsgrow.local'
+const LOCAL_PASSWORD = 'local-academy-1234'
+
 interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<void>
   bootError: string | null
@@ -49,6 +52,36 @@ export default function LoginPage({ onLogin, bootError }: LoginPageProps) {
       <section className="auth-card">
         <h2>로그인</h2>
         <p className="lead">아카데미 계정으로 로그인해 주세요.</p>
+
+        {import.meta.env.DEV ? (
+          <div className="hint" role="note">
+            <p>로컬 확인 계정</p>
+            <p>이메일 {LOCAL_EMAIL}</p>
+            <p>비밀번호 {LOCAL_PASSWORD}</p>
+            <button
+              type="button"
+              className="primary"
+              disabled={pending}
+              onClick={() => {
+                setEmail(LOCAL_EMAIL)
+                setPassword(LOCAL_PASSWORD)
+                setError(null)
+                setPending(true)
+                onLogin(LOCAL_EMAIL, LOCAL_PASSWORD)
+                  .catch((loginError: unknown) => {
+                    setError(
+                      loginError instanceof ApiError
+                        ? loginError.message
+                        : '로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+                    )
+                  })
+                  .finally(() => setPending(false))
+              }}
+            >
+              이 계정으로 로그인
+            </button>
+          </div>
+        ) : null}
 
         {bootError ? (
           <p className="alert" role="alert">

@@ -1,9 +1,10 @@
 import { Link, router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { SessionGate } from '../components/SessionGate';
-import { Body, Card, Muted, Screen, SectionTitle } from '../components/ui';
-import { roleLabel, type Membership } from '../lib/api';
+import { Body, Card, ErrorText, Muted, Screen, SectionTitle } from '../components/ui';
+import { apiErrorMessage, roleLabel, type Membership } from '../lib/api';
 import { useSession } from '../lib/session';
 import { colors, radius, spacing } from '../lib/theme';
 
@@ -16,16 +17,32 @@ export default function HomeScreen() {
 }
 
 function HomeContent() {
-  const { session, signOut } = useSession();
+  const { session, message, signOut, selectMembership } = useSession();
+  const [choiceError, setChoiceError] = useState<string | null>(null);
+  const [choicePending, setChoicePending] = useState(false);
 
   async function handleSignOut() {
     await signOut();
     router.replace('/login');
   }
 
+  async function handleChoose(membershipId: string) {
+    setChoiceError(null);
+    setChoicePending(true);
+    try {
+      await selectMembership(membershipId);
+    } catch (error) {
+      setChoiceError(apiErrorMessage(error, '소속을 선택하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
+    } finally {
+      setChoicePending(false);
+    }
+  }
+
   if (!session) return null;
 
   const { user, memberships, activeMembershipId } = session;
+  const needsChoice = memberships.length > 1 && !activeMembershipId;
+  const switchable = memberships.length > 1;
 
   return (
     <Screen>
@@ -38,17 +55,29 @@ function HomeContent() {
 
       <Card>
         <SectionTitle>소속과 역할</SectionTitle>
+        {needsChoice ? (
+          <Muted>여러 소속에 속해 있습니다. 사용할 소속을 선택해 주세요.</Muted>
+        ) : null}
+        {message ? <ErrorText>{message}</ErrorText> : null}
         {memberships.length === 0 ? (
           <Muted>등록된 소속이 없습니다.</Muted>
         ) : (
-          memberships.map((membership) => (
-            <MembershipRow
-              key={membership.id}
-              membership={membership}
-              active={membership.id === activeMembershipId}
-            />
-          ))
+          memberships.map((membership) => {
+            const active = membership.id === activeMembershipId;
+            return (
+              <MembershipRow
+                key={membership.id}
+                membership={membership}
+                active={active}
+                selectable={!active && (switchable || (memberships.length === 1 && !activeMembershipId))}
+                selectLabel={activeMembershipId ? '눌러서 전환' : '눌러서 선택'}
+                pending={choicePending}
+                onChoose={handleChoose}
+              />
+            );
+          })
         )}
+        {choiceError ? <ErrorText>{choiceError}</ErrorText> : null}
       </Card>
 
       <Link href="/records" asChild>
@@ -75,18 +104,52 @@ function HomeContent() {
   );
 }
 
-function MembershipRow({ membership, active }: { membership: Membership; active: boolean }) {
-  return (
-    <View style={styles.membership}>
+function MembershipRow({
+  membership,
+  active,
+  selectable,
+  selectLabel,
+  pending,
+  onChoose,
+}: {
+  membership: Membership;
+  active: boolean;
+  selectable: boolean;
+  selectLabel: string;
+  pending: boolean;
+  onChoose: (membershipId: string) => void;
+}) {
+  const body = (
+    <>
       <View style={styles.membershipHeader}>
         <Text style={styles.orgName}>{membership.orgName}</Text>
         {active ? <Text style={styles.activeTag}>선택된 소속</Text> : null}
+        {selectable ? <Text style={styles.activeTag}>{selectLabel}</Text> : null}
       </View>
       <Text style={styles.role}>{roleLabel(membership.role)}</Text>
       {membership.athleteIds.length > 0 ? (
         <Muted>선수 {membership.athleteIds.length}명</Muted>
       ) : null}
-    </View>
+    </>
+  );
+
+  if (!selectable) {
+    return <View style={styles.membership}>{body}</View>;
+  }
+
+  return (
+    <Pressable
+      onPress={() => onChoose(membership.id)}
+      disabled={pending}
+      style={({ pressed }) => [
+        styles.membership,
+        styles.membershipSelectable,
+        pending ? styles.membershipPending : null,
+        pressed ? styles.navPressed : null,
+      ]}
+    >
+      {body}
+    </Pressable>
   );
 }
 
@@ -113,6 +176,16 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     gap: 2,
+  },
+  membershipSelectable: {
+    borderRadius: radius.control,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.sm,
+  },
+  membershipPending: {
+    opacity: 0.5,
   },
   membershipHeader: {
     flexDirection: 'row',

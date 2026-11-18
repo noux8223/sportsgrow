@@ -132,6 +132,14 @@ function toSession(payload: LoginPayload): Session | null {
   };
 }
 
+export async function selectMembership(token: string, membershipId: string): Promise<void> {
+  await request<{ activeMembershipId: string }>('/api/session/active-membership', {
+    method: 'POST',
+    body: { membershipId },
+    token,
+  });
+}
+
 export async function logout(token: string): Promise<void> {
   await request<null>('/api/auth/logout', { method: 'POST', token });
 }

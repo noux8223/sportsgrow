@@ -1,7 +1,7 @@
 import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
 import type { FastifyInstance } from 'fastify';
 import { connectJob, jobQuery, pool } from './db.js';
-import { activeGate, athleteContext } from './routes.js';
+import { activeGate, athleteContext, currentPrivacyPolicySql } from './routes.js';
 
 const ses=new SESv2Client({region:process.env.AWS_REGION??'ap-northeast-2'});
 const escapeHtml=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
@@ -35,7 +35,7 @@ export async function runEmailOutbox(){
       const content=mailContent(row.template,row.payload??{});
       await ses.send(new SendEmailCommand({FromEmailAddress:process.env.MAIL_FROM,Destination:{ToAddresses:[row.to_email]},Content:{Simple:{Subject:{Data:content.subject,Charset:'UTF-8'},Body:{Text:{Data:content.text,Charset:'UTF-8'},Html:{Data:content.html,Charset:'UTF-8'}}}}}));
       await jobQuery("UPDATE email_outbox SET status='sent',last_error=NULL,payload=CASE WHEN template IN ('password_reset','organization_invite') THEN '{}'::jsonb ELSE payload END WHERE id=$1",[row.id]);
-    }catch(error){const msg=error instanceof Error?error.message:'mail delivery failed';await jobQuery("UPDATE email_outbox SET status=CASE WHEN attempts>=5 THEN 'failed' ELSE 'retry' END,last_error=$2 WHERE id=$1",[row.id,msg.slice(0,500)]);}
+    }catch(error){const msg=error instanceof Error?error.message:'mail delivery failed';await jobQuery("UPDATE email_outbox SET status=CASE WHEN attempts>=5 THEN 'failed' ELSE 'retry' END,last_error=$2,payload=CASE WHEN attempts>=5 AND template IN ('password_reset','organization_invite') THEN '{}'::jsonb ELSE payload END WHERE id=$1",[row.id,msg.slice(0,500)]);}
   }
   await jobQuery("DELETE FROM email_outbox WHERE status='sent' AND created_at<now()-interval '30 days'");
 }
@@ -43,7 +43,7 @@ export async function runEmailOutbox(){
 type SqlQuery = (text: string, params?: unknown[]) => Promise<{ rows: Array<{ allowed?: boolean }> }>;
 
 export async function hasCurrentReportConsent(athleteId:string,guardianUserId:string,query:SqlQuery=pool.query.bind(pool)){
-  const result=await query("SELECT EXISTS(SELECT 1 FROM guardian_links gl JOIN athletes a ON a.id=gl.athlete_id AND a.status='active' JOIN LATERAL(SELECT c.granted FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=gl.athlete_id AND c.guardian_user_id=gl.guardian_user_id AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1) latest ON latest.granted=true WHERE gl.athlete_id=$1 AND gl.guardian_user_id=$2) allowed",[athleteId,guardianUserId]);
+  const result=await query(`SELECT EXISTS(SELECT 1 FROM guardian_links gl JOIN athletes a ON a.id=gl.athlete_id AND a.status='active' JOIN LATERAL(SELECT c.granted FROM consent_events c WHERE c.athlete_id=gl.athlete_id AND c.guardian_user_id=gl.guardian_user_id AND c.purpose='report_email' AND c.policy_version_id=${currentPrivacyPolicySql} ORDER BY c.created_at DESC LIMIT 1) latest ON latest.granted=true WHERE gl.athlete_id=$1 AND gl.guardian_user_id=$2) allowed`,[athleteId,guardianUserId]);
   return result.rows[0]?.allowed===true;
 }
 
@@ -51,10 +51,10 @@ export async function runWeeklyReports(now = new Date()){
   const gate=await jobQuery("SELECT ($1::timestamptz AT TIME ZONE 'Asia/Seoul') < date_trunc('week', $1::timestamptz AT TIME ZONE 'Asia/Seoul') + time '07:00' AS before_window, (date_trunc('week', $1::timestamptz AT TIME ZONE 'Asia/Seoul')::date - 7)::text AS week_start",[now]);
   if(gate.rows[0].before_window)return;
   const date=String(gate.rows[0].week_start).slice(0,10);
-  const athletes=await jobQuery("SELECT a.id,a.org_id,a.display_name FROM athletes a WHERE a.status='active' AND EXISTS(SELECT 1 FROM LATERAL(SELECT c.granted FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=a.id AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1) latest WHERE latest.granted)");
+  const athletes=await jobQuery(`SELECT a.id,a.org_id,a.display_name FROM athletes a WHERE a.status='active' AND EXISTS(SELECT 1 FROM LATERAL(SELECT c.granted FROM consent_events c WHERE c.athlete_id=a.id AND c.purpose='report_email' AND c.policy_version_id=${currentPrivacyPolicySql} ORDER BY c.created_at DESC LIMIT 1) latest WHERE latest.granted)`);
   for(const athlete of athletes.rows){
     if((await jobQuery('SELECT 1 FROM weekly_reports WHERE athlete_id=$1 AND week_start=$2',[athlete.id,date])).rowCount)continue;
-    const consent=await jobQuery("SELECT c.granted FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=$1 AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1",[athlete.id]);
+    const consent=await jobQuery(`SELECT c.granted FROM consent_events c WHERE c.athlete_id=$1 AND c.purpose='report_email' AND c.policy_version_id=${currentPrivacyPolicySql} ORDER BY c.created_at DESC LIMIT 1`,[athlete.id]);
     if(consent.rows[0]?.granted!==true)continue;
     const values=await jobQuery("SELECT coalesce((SELECT sum(minutes) FROM training_sessions WHERE org_id=$1 AND athlete_id=$2 AND trained_on >= $3::date AND trained_on < $3::date+7),0)::int training_minutes,coalesce((SELECT count(DISTINCT trained_on) FROM training_sessions WHERE org_id=$1 AND athlete_id=$2 AND trained_on >= $3::date AND trained_on < $3::date+7),0)::int training_days,coalesce((SELECT count(*) FROM game_appearances WHERE org_id=$1 AND athlete_id=$2 AND played_on >= $3::date AND played_on < $3::date+7),0)::int games,coalesce((SELECT sum(hits) FROM game_appearances WHERE org_id=$1 AND athlete_id=$2 AND played_on >= $3::date AND played_on < $3::date+7),0)::int hits,coalesce((SELECT sum(at_bats) FROM game_appearances WHERE org_id=$1 AND athlete_id=$2 AND played_on >= $3::date AND played_on < $3::date+7),0)::int at_bats",[athlete.org_id,athlete.id,date]);
     const notes=await jobQuery('SELECT body,created_at FROM coach_notes WHERE org_id=$1 AND athlete_id=$2 AND visible_to_guardian=true AND created_at >= $3::date AND created_at < $3::date+7',[athlete.org_id,athlete.id,date]);
@@ -77,7 +77,7 @@ export async function runWeeklyReports(now = new Date()){
     if(goals.length)body.goals=goals;
     if(visibility.profile_visibility==='team')body.photoCount=(await jobQuery("SELECT count(*)::int n FROM media_assets WHERE org_id=$1 AND athlete_id=$2 AND deleted_at IS NULL",[athlete.org_id,athlete.id])).rows[0].n;
     await jobQuery('INSERT INTO weekly_reports(org_id,athlete_id,week_start,body_json) VALUES($1,$2,$3,$4) ON CONFLICT(athlete_id,week_start) DO UPDATE SET body_json=EXCLUDED.body_json',[athlete.org_id,athlete.id,date,JSON.stringify(body)]);
-    const guardians=await jobQuery("SELECT u.id,u.email FROM guardian_links gl JOIN users u ON u.id=gl.guardian_user_id JOIN LATERAL(SELECT c.granted FROM consent_events c JOIN policy_versions p ON p.id=c.policy_version_id WHERE c.athlete_id=gl.athlete_id AND c.guardian_user_id=gl.guardian_user_id AND c.purpose='report_email' AND p.kind='privacy' ORDER BY c.created_at DESC LIMIT 1) consent ON consent.granted=true WHERE gl.org_id=$1 AND gl.athlete_id=$2",[athlete.org_id,athlete.id]);
+    const guardians=await jobQuery(`SELECT u.id,u.email FROM guardian_links gl JOIN users u ON u.id=gl.guardian_user_id JOIN LATERAL(SELECT c.granted FROM consent_events c WHERE c.athlete_id=gl.athlete_id AND c.guardian_user_id=gl.guardian_user_id AND c.purpose='report_email' AND c.policy_version_id=${currentPrivacyPolicySql} ORDER BY c.created_at DESC LIMIT 1) consent ON consent.granted=true WHERE gl.org_id=$1 AND gl.athlete_id=$2`,[athlete.org_id,athlete.id]);
     for(const guardian of guardians.rows)await jobQuery("INSERT INTO email_outbox(idempotency_key,to_email,template,payload,status) VALUES($1,$2,'weekly_report',$3,'queued') ON CONFLICT(idempotency_key) DO NOTHING",[`weekly-report:${athlete.id}:${date}:${guardian.id}`,guardian.email,JSON.stringify({...body,athleteId:athlete.id,guardianUserId:guardian.id})]);
   }
 }

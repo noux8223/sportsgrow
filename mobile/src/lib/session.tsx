@@ -8,7 +8,14 @@ import {
   type ReactNode,
 } from 'react';
 
-import { ApiError, fetchMe, login as requestLogin, logout as requestLogout, type Session } from './api';
+import {
+  ApiError,
+  fetchMe,
+  login as requestLogin,
+  logout as requestLogout,
+  selectMembership as requestSelectMembership,
+  type Session,
+} from './api';
 import { clearSessionToken, readSessionToken, writeSessionToken } from './secure-session';
 
 export type SessionStatus = 'loading' | 'signed_in' | 'signed_out';
@@ -21,13 +28,31 @@ type SessionContextValue = {
   message: string | null;
   signIn: (email: string, password: string) => Promise<SignInResult>;
   signOut: () => Promise<void>;
+  selectMembership: (membershipId: string) => Promise<void>;
   reload: () => Promise<void>;
 };
 
 export const NO_NATIVE_SESSION_MESSAGE =
   '로그인 정보를 받지 못했습니다. 잠시 후 다시 시도해 주세요.';
+const MEMBERSHIP_SELECTION_FAILED_MESSAGE =
+  '소속을 선택하지 못했습니다. 아래 소속을 다시 눌러 주세요.';
 
 const SessionContext = createContext<SessionContextValue | null>(null);
+
+async function writeSingleMembership(
+  token: string,
+  session: Session,
+): Promise<{ session: Session; selectionFailed: boolean }> {
+  if (session.activeMembershipId || session.memberships.length !== 1) {
+    return { session, selectionFailed: false };
+  }
+  try {
+    await requestSelectMembership(token, session.memberships[0].id);
+    return { session: await fetchMe(token), selectionFailed: false };
+  } catch {
+    return { session, selectionFailed: true };
+  }
+}
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<SessionStatus>('loading');
@@ -44,9 +69,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const next = await fetchMe(token);
-      setSession(next);
-      setMessage(null);
+      const result = await writeSingleMembership(token, await fetchMe(token));
+      setSession(result.session);
+      setMessage(result.selectionFailed ? MEMBERSHIP_SELECTION_FAILED_MESSAGE : null);
       setStatus('signed_in');
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -78,9 +103,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       await writeSessionToken(result.token);
 
       try {
-        const next = await fetchMe(result.token);
-        setSession(next);
-        setMessage(null);
+        const selection = await writeSingleMembership(result.token, await fetchMe(result.token));
+        setSession(selection.session);
+        setMessage(selection.selectionFailed ? MEMBERSHIP_SELECTION_FAILED_MESSAGE : null);
         setStatus('signed_in');
         return { ok: true };
       } catch (error) {
@@ -93,8 +118,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           return { ok: false, message: text };
         }
         if (result.session) {
-          setSession(result.session);
-          setMessage(null);
+          const selection = await writeSingleMembership(result.token, result.session);
+          setSession(selection.session);
+          setMessage(
+            selection.selectionFailed ? MEMBERSHIP_SELECTION_FAILED_MESSAGE : null,
+          );
           setStatus('signed_in');
           return { ok: true };
         }
@@ -111,6 +139,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const selectMembership = useCallback(async (membershipId: string) => {
+    const token = await readSessionToken();
+    if (!token) throw new Error('로그인이 필요합니다.');
+    await requestSelectMembership(token, membershipId);
+    const next = await fetchMe(token);
+    setSession(next);
+    setMessage(null);
+    setStatus('signed_in');
+  }, []);
+
   const signOut = useCallback(async () => {
     const token = await readSessionToken();
     if (token) {
@@ -125,8 +163,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<SessionContextValue>(
-    () => ({ status, session, message, signIn, signOut, reload }),
-    [message, reload, session, signIn, signOut, status],
+    () => ({ status, session, message, signIn, signOut, selectMembership, reload }),
+    [message, reload, session, selectMembership, signIn, signOut, status],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

@@ -11,6 +11,7 @@ import { registerPrivacyRoutes, runExportJobs } from './privacy.js';
 import { registerReportRoutes, runEmailOutbox, runWeeklyReports } from './reports.js';
 import { runDailyJobs } from './jobs.js';
 import { currentSession } from './identity.js';
+import { isBillingExempt } from './billing-gate.js';
 import type { FastifyRequest } from 'fastify';
 
 export async function buildApp() {
@@ -96,7 +97,7 @@ app.addHook('onRequest',async(request,reply)=>{
 
 app.addHook('preHandler',async(request,reply)=>{
   if(process.env.BILLING_ENFORCEMENT!=='true'||!request.url.startsWith('/api/'))return;
-  if(request.url.startsWith('/api/ops/')||request.url.startsWith('/api/me/export')||request.url.startsWith('/api/athletes/')&&(/\/erasure$|\/consents$/.test(request.url))||request.url==='/api/tickets'||request.url.includes('/subscription')||request.url.includes('/invoices'))return;
+  if(isBillingExempt(request.url))return;
   const session=await currentSession(request);if(!session)return;
   if((await pool.query('SELECT 1 FROM platform_staff WHERE user_id=$1',[session.user_id])).rowCount)return;
   let orgId:string|undefined;

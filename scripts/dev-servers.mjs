@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { createWriteStream } from 'node:fs';
+import { closeSync, openSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import net from 'node:net';
 import path from 'node:path';
@@ -112,6 +112,17 @@ async function database() {
   return { container: 'sportsgrow-db-1', state: ready.code === 0 ? 'started' : 'starting' };
 }
 
+async function inspectDatabase() {
+  const inspect = await run('docker', ['inspect', '-f', '{{.State.Running}}', 'sportsgrow-db-1']);
+  if (inspect.code !== 0) {
+    return { container: 'sportsgrow-db-1', state: 'missing' };
+  }
+  return {
+    container: 'sportsgrow-db-1',
+    state: inspect.stdout.trim() === 'true' ? 'running' : 'stopped',
+  };
+}
+
 async function waitHealth(url) {
   const deadline = Date.now() + 25000;
   while (Date.now() < deadline) {
@@ -128,16 +139,29 @@ async function waitHealth(url) {
 
 async function startOwned(service) {
   await mkdir(stateDir, { recursive: true });
-  const logPath = path.join(stateDir, `${service.name}.log`);
-  const log = createWriteStream(logPath, { flags: 'a' });
+  const logFd = openSync(path.join(stateDir, `${service.name}.log`), 'a');
   const child = spawn(service.command, service.args, {
     cwd: service.cwd,
     detached: true,
-    stdio: ['ignore', log, log],
+    stdio: ['ignore', logFd, logFd],
   });
   child.unref();
-  log.end();
+  closeSync(logFd);
   return child.pid;
+}
+
+async function reportStatus() {
+  const report = { database: await inspectDatabase() };
+  for (const service of services) {
+    const open = await portOpen(service.port);
+    report[service.name] = {
+      url: service.url,
+      port: service.port,
+      state: open ? 'already_running' : 'stopped',
+      health: open ? await waitHealth(service.health) : 'stopped',
+    };
+  }
+  process.stdout.write(JSON.stringify(report, null, 2) + '\n');
 }
 
 async function startAll() {
@@ -199,7 +223,9 @@ async function stopOwned() {
 const command = process.argv[2] ?? 'start';
 if (command === 'stop') {
   await stopOwned();
-} else if (command === 'start' || command === 'status') {
+} else if (command === 'status') {
+  await reportStatus();
+} else if (command === 'start') {
   await startAll();
 } else {
   process.stderr.write('usage: node scripts/dev-servers.mjs [start|stop]\n');

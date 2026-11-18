@@ -18,7 +18,7 @@ import {
   type CoachNote,
   type WeeklyReport,
 } from '../lib/api';
-import { useAthleteScope } from '../lib/athletes';
+import { useAthleteScope, MEMBERSHIP_CHOICE_MESSAGE } from '../lib/athletes';
 import { formatDate, formatIsoDate, formatTimestamp, weekRangeLabel } from '../lib/date';
 import { colors, spacing } from '../lib/theme';
 
@@ -102,6 +102,12 @@ function ReportsContent() {
       {status === 'loading' ? (
         <Card>
           <Muted>선수 정보를 불러오는 중입니다.</Muted>
+        </Card>
+      ) : null}
+
+      {status === 'choose' ? (
+        <Card>
+          <Muted>{MEMBERSHIP_CHOICE_MESSAGE}</Muted>
         </Card>
       ) : null}
 

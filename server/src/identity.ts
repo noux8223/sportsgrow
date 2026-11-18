@@ -79,12 +79,20 @@ export async function registerIdentityRoutes(app: FastifyInstance) {
   app.post<{ Body: { email?: string } }>('/api/auth/password/forgot', async (request, reply) => {
     const email = request.body?.email?.trim().toLowerCase();
     if (email && email.length <= 320) {
-      const user = await pool.query('SELECT id FROM users WHERE email=$1', [email]);
-      if (user.rowCount) {
-        const token = randomBytes(32).toString('base64url');
-        await pool.query('INSERT INTO password_reset_tokens(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval \'1 hour\')', [hash(token), user.rows[0].id]);
-        await pool.query("INSERT INTO email_outbox(idempotency_key,to_email,template,payload,status) VALUES($1,$2,'password_reset',jsonb_build_object('token',$3),'queued') ON CONFLICT(idempotency_key) DO NOTHING", [`password-reset:${hash(token)}`, email, token]);
-      }
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const user = await client.query('SELECT id FROM users WHERE email=$1 FOR UPDATE', [email]);
+        if (user.rowCount) {
+          const recent = await client.query("SELECT count(*)::int AS count FROM email_outbox WHERE template='password_reset' AND to_email=$1 AND created_at > now()-interval '1 hour'", [email]);
+          if ((recent.rows[0].count as number) < 5) {
+            const token = randomBytes(32).toString('base64url');
+            await client.query('INSERT INTO password_reset_tokens(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval \'1 hour\')', [hash(token), user.rows[0].id]);
+            await client.query("INSERT INTO email_outbox(idempotency_key,to_email,template,payload,status) VALUES($1,$2,'password_reset',jsonb_build_object('token',$3),'queued') ON CONFLICT(idempotency_key) DO NOTHING", [`password-reset:${hash(token)}`, email, token]);
+          }
+        }
+        await client.query('COMMIT');
+      } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
     }
     return reply.code(202).send({ message: '계정이 확인되면 비밀번호 재설정 안내를 보내드립니다.' });
   });

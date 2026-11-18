@@ -32,6 +32,7 @@ let coach: Session;
 let admin: Session;
 let staff: Session;
 let athleteUser: Session;
+let unlinkedAuthor: Session;
 
 type Session = { userId: string; membershipId: string | null; cookie: string; email: string };
 
@@ -94,6 +95,7 @@ before(async () => {
   admin = await createUser('admin', 'org_admin');
   staff = await createUser('staff', undefined, undefined, true);
   athleteUser = await createUser('athlete', 'athlete', adultId);
+  unlinkedAuthor = await createUser('unlinked-author');
   await pool.query('INSERT INTO guardian_links(org_id,guardian_user_id,athlete_id) VALUES($1,$2,$3),($1,$4,$3)', [orgId, guardianA.userId, minorCrossId, guardianB.userId]);
   await pool.query('INSERT INTO guardian_links(org_id,guardian_user_id,athlete_id) VALUES($1,$2,$3),($1,$4,$3)', [orgId, guardianA.userId, minorLatestId, guardianB.userId]);
   await pool.query('INSERT INTO guardian_links(org_id,guardian_user_id,athlete_id) VALUES($1,$2,$3),($1,$4,$3)', [orgId, guardianA.userId, minorNoConsentId, guardianB.userId]);
@@ -180,11 +182,26 @@ test('a coach who did not create the photo and has no role in it is 403', async 
   assert.equal(response.json().error, 'forbidden');
 });
 
+test('a coach author without an athlete assignment is 403', async () => {
+  const id = await newMedia(adultId, coach.userId);
+  const response = await app.inject({ method: 'DELETE', url: `/api/media/${id}`, headers: { cookie: coach.cookie } });
+  assert.equal(response.statusCode, 403, response.body);
+  assert.equal(response.json().error, 'forbidden');
+});
+
 test('a guardian not linked to the athlete is 403', async () => {
   const id = await newMedia(adultId, admin.userId);
   const response = await app.inject({ method: 'DELETE', url: `/api/media/${id}`, headers: { cookie: guardianB.cookie } });
   assert.equal(response.statusCode, 403, response.body);
   assert.equal(response.json().error, 'forbidden');
+});
+
+test('a photo author without an active membership is 403', async () => {
+  const id = await newMedia(adultId, unlinkedAuthor.userId);
+  const response = await app.inject({ method: 'DELETE', url: `/api/media/${id}`, headers: { cookie: unlinkedAuthor.cookie } });
+  assert.equal(response.statusCode, 403, response.body);
+  assert.equal(response.json().error, 'forbidden');
+  assert.equal(response.json().message, '연결된 선수의 사진을 삭제할 권한이 없습니다.');
 });
 
 test('platform staff delete without a ticketId is 404', async () => {
@@ -205,9 +222,9 @@ test('platform staff delete with an unknown or closed ticket is 404', async () =
   assert.equal((await pool.query('SELECT 1 FROM media_assets WHERE id=$1 AND deleted_at IS NOT NULL', [id])).rowCount, 0);
 });
 
-test('platform staff delete with an open ticket succeeds and records the ticket in the audit row', async () => {
+test('platform staff delete with an open ticket for the photo athlete succeeds and records the ticket in the audit row', async () => {
   const id = await newMedia(adultId, admin.userId);
-  const ticketId = (await pool.query("INSERT INTO tickets(org_id,user_id,title,body,category,status) VALUES($1,$2,'media open','body','other','open') RETURNING id", [orgId, admin.userId])).rows[0].id as string;
+  const ticketId = (await pool.query("INSERT INTO tickets(org_id,user_id,athlete_id,title,body,category,status) VALUES($1,$2,$3,'media open','body','other','open') RETURNING id", [orgId, admin.userId, adultId])).rows[0].id as string;
   const response = await app.inject({ method: 'DELETE', url: `/api/media/${id}?ticketId=${ticketId}`, headers: { cookie: staff.cookie } });
   assert.equal(response.statusCode, 204, response.body);
   assert.equal((await pool.query('SELECT 1 FROM media_assets WHERE id=$1 AND deleted_at IS NOT NULL', [id])).rowCount, 1);
@@ -217,7 +234,33 @@ test('platform staff delete with an open ticket succeeds and records the ticket 
   assert.equal(audit.rows[0].ticket_id, ticketId);
 });
 
-test('author, org_admin, linked guardian and athlete account delete without a ticket', async () => {
+test('platform staff delete is 404 when the open ticket is not for that athlete and org', async () => {
+  const id = await newMedia(adultId, admin.userId);
+  const otherAthleteTicket = (await pool.query("INSERT INTO tickets(org_id,user_id,athlete_id,title,body,category,status) VALUES($1,$2,$3,'media other athlete','body','other','open') RETURNING id", [orgId, admin.userId, minorNoConsentId])).rows[0].id as string;
+  const wrongAthlete = await app.inject({ method: 'DELETE', url: `/api/media/${id}?ticketId=${otherAthleteTicket}`, headers: { cookie: staff.cookie } });
+  assert.equal(wrongAthlete.statusCode, 404, wrongAthlete.body);
+  assert.equal(wrongAthlete.json().error, 'not_found');
+
+  const noAthleteTicket = (await pool.query("INSERT INTO tickets(org_id,user_id,title,body,category,status) VALUES($1,$2,'media no athlete','body','other','open') RETURNING id", [orgId, admin.userId])).rows[0].id as string;
+  const missingAthlete = await app.inject({ method: 'DELETE', url: `/api/media/${id}?ticketId=${noAthleteTicket}`, headers: { cookie: staff.cookie } });
+  assert.equal(missingAthlete.statusCode, 404, missingAthlete.body);
+  assert.equal(missingAthlete.json().error, 'not_found');
+
+  const otherOrgId = (await maintenancePool.query('INSERT INTO orgs(name) VALUES($1) RETURNING id', [`Media auth other ${suffix}`])).rows[0].id as string;
+  try {
+    const otherOrgTicket = (await maintenancePool.query("INSERT INTO tickets(org_id,user_id,athlete_id,title,body,category,status) VALUES($1,$2,$3,'media other org','body','other','open') RETURNING id", [otherOrgId, admin.userId, adultId])).rows[0].id as string;
+    const wrongOrg = await app.inject({ method: 'DELETE', url: `/api/media/${id}?ticketId=${otherOrgTicket}`, headers: { cookie: staff.cookie } });
+    assert.equal(wrongOrg.statusCode, 404, wrongOrg.body);
+    assert.equal(wrongOrg.json().error, 'not_found');
+    assert.equal((await pool.query('SELECT 1 FROM media_assets WHERE id=$1 AND deleted_at IS NOT NULL', [id])).rowCount, 0);
+  } finally {
+    await maintenancePool.query('DELETE FROM tickets WHERE org_id=$1', [otherOrgId]);
+    await maintenancePool.query('DELETE FROM orgs WHERE id=$1', [otherOrgId]);
+  }
+});
+
+test('assigned coach author, org_admin, linked guardian and athlete account delete without a ticket', async () => {
+  await pool.query('INSERT INTO coach_assignments(org_id,coach_user_id,athlete_id) VALUES($1,$2,$3)', [orgId, coach.userId, adultId]);
   const byAuthor = await newMedia(adultId, coach.userId);
   assert.equal((await app.inject({ method: 'DELETE', url: `/api/media/${byAuthor}`, headers: { cookie: coach.cookie } })).statusCode, 204);
 

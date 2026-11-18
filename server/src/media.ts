@@ -5,7 +5,7 @@ import sharp from 'sharp';
 import type { FastifyInstance } from 'fastify';
 import { pool } from './db.js';
 import { currentSession, fail } from './identity.js';
-import { activeGate, athleteContext } from './routes.js';
+import { activeGate, athleteContext, currentPrivacyPolicySql } from './routes.js';
 
 const bucket = process.env.MEDIA_BUCKET;
 const s3 = new S3Client({ region: process.env.AWS_REGION ?? 'ap-northeast-2', ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT, forcePathStyle: true } : {}) });
@@ -24,7 +24,7 @@ export async function portraitGranted(athleteId: string, userId: string) {
   const age = await pool.query("SELECT date_part('year',age((now() AT TIME ZONE 'Asia/Seoul')::date,birth_date))::int years FROM athletes WHERE id=$1", [athleteId]);
   if (!age.rowCount) return false;
   if (age.rows[0].years >= 18) return true;
-  const grant = await pool.query("SELECT ce.granted FROM consent_events ce JOIN policy_versions p ON p.id=ce.policy_version_id WHERE ce.athlete_id=$1 AND ce.guardian_user_id=$2 AND ce.purpose='portrait' AND p.kind='privacy' ORDER BY ce.created_at DESC LIMIT 1", [athleteId, userId]);
+  const grant = await pool.query(`SELECT ce.granted FROM consent_events ce WHERE ce.athlete_id=$1 AND ce.guardian_user_id=$2 AND ce.purpose='portrait' AND ce.policy_version_id=${currentPrivacyPolicySql} ORDER BY ce.created_at DESC LIMIT 1`, [athleteId, userId]);
   return grant.rows[0]?.granted === true;
 }
 
@@ -94,12 +94,13 @@ export async function registerMediaRoutes(app: FastifyInstance) {
     const staff=Boolean((await pool.query('SELECT 1 FROM platform_staff WHERE user_id=$1',[session.user_id])).rowCount);
     const linkedGuardian=role==='guardian'&&Boolean((await pool.query('SELECT 1 FROM guardian_links WHERE org_id=$1 AND guardian_user_id=$2 AND athlete_id=$3',[item.org_id,session.user_id,item.athlete_id])).rowCount);
     const athleteOwner=role==='athlete'&&membership.rows[0]?.athlete_id===item.athlete_id;
-    const directDelete=item.created_by===session.user_id||role==='org_admin'||linkedGuardian||athleteOwner;
+    const assignedCoach=role==='coach'&&item.created_by===session.user_id&&Boolean((await pool.query('SELECT 1 FROM coach_assignments WHERE org_id=$1 AND coach_user_id=$2 AND athlete_id=$3',[item.org_id,session.user_id,item.athlete_id])).rowCount);
+    const directDelete=role==='org_admin'||linkedGuardian||athleteOwner||assignedCoach;
     let ticketId:string|undefined;
     if(staff&&!directDelete){
       ticketId=request.query.ticketId;
       if(typeof ticketId!=='string'||!/^[0-9a-f-]{36}$/i.test(ticketId))return fail(reply,404,'not_found','사진을 찾을 수 없습니다.');
-      if(!(await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open'",[ticketId])).rowCount)return fail(reply,404,'not_found','사진을 찾을 수 없습니다.');
+      if(!(await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open' AND org_id=$2 AND athlete_id=$3",[ticketId,item.org_id,item.athlete_id])).rowCount)return fail(reply,404,'not_found','사진을 찾을 수 없습니다.');
     }
     if(!directDelete&&!ticketId)return fail(reply,403,'forbidden','연결된 선수의 사진을 삭제할 권한이 없습니다.');
     await s3.send(new DeleteObjectCommand({Bucket:bucket,Key:item.bucket_key}));

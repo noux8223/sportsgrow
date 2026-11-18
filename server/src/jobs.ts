@@ -18,8 +18,9 @@ export async function runDailyJobs(now = new Date()) {
   const minutes = Number(parts.hour) * 60 + Number(parts.minute);
   if (!Number.isFinite(minutes) || minutes < 10) return;
   running = true;
-  const client = await connectJob();
+  let client: PoolClient | null = null;
   try {
+    client = await connectJob();
     await client.query('BEGIN');
     const claim = await client.query('UPDATE platform_settings SET daily_job_on=$1::date WHERE id=true AND (daily_job_on IS NULL OR daily_job_on < $1::date) RETURNING id', [localDate]);
     if (!claim.rowCount) {
@@ -28,6 +29,7 @@ export async function runDailyJobs(now = new Date()) {
     }
     await client.query("DELETE FROM login_attempts WHERE created_at < now()-interval '2 hours'");
     await client.query("DELETE FROM sessions WHERE absolute_expires_at < now()-interval '1 day' OR idle_expires_at < now()-interval '1 day'");
+    await client.query("DELETE FROM password_reset_tokens WHERE expires_at<now() OR used_at IS NOT NULL AND used_at<now()-interval '1 day'");
     await client.query("DELETE FROM email_outbox WHERE status='sent' AND created_at < now()-interval '30 days'");
     await client.query("DELETE FROM webhook_events WHERE processed_at < now()-interval '90 days'");
     await client.query('SELECT purge_expired_audit_events()');
@@ -39,10 +41,10 @@ export async function runDailyJobs(now = new Date()) {
     await client.query("UPDATE subscriptions SET status='canceled',read_until=cancel_at+interval '30 days',export_until=cancel_at+interval '60 days' WHERE status<>'canceled' AND cancel_at IS NOT NULL AND cancel_at<=now()");
     await client.query('COMMIT');
   } catch (error) {
-    await client.query('ROLLBACK');
+    if (client) await client.query('ROLLBACK');
     throw error;
   } finally {
-    client.release();
+    if (client) client.release();
     running = false;
   }
 }

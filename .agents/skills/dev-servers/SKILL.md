@@ -11,7 +11,10 @@ description: 세션에서 브라우저로 Sports Grow 화면을 확인할 때 AP
 
 ```bash
 node scripts/dev-servers.mjs
+node scripts/dev-servers.mjs status
 ```
+
+`status`는 포트와 준비 상태만 출력하고 서버와 데이터베이스를 시작하지 않습니다.
 
 종료는 이 스킬이 기록한 프로세스만 대상으로 합니다.
 

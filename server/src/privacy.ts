@@ -9,6 +9,13 @@ import { athleteContext } from './routes.js';
 const bucket = process.env.EXPORT_BUCKET;
 const mediaBucket = process.env.MEDIA_BUCKET;
 const s3 = new S3Client({ region: process.env.AWS_REGION ?? 'ap-northeast-2', ...(process.env.S3_ENDPOINT ? { endpoint: process.env.S3_ENDPOINT, forcePathStyle: true } : {}) });
+const photoLimit = 40;
+const photoBytesLimit = 80 * 1024 * 1024;
+
+async function exportWindowClosed(orgId: string) {
+  const { rows } = await pool.query("SELECT status,export_until IS NULL OR export_until<=now() lapsed FROM subscriptions WHERE org_id=$1 ORDER BY created_at DESC LIMIT 1", [orgId]);
+  return Boolean(rows[0] && rows[0].status === 'canceled' && rows[0].lapsed);
+}
 
 async function makeArchive(athleteId: string, orgId: string) {
   const queries: Record<string,string> = {
@@ -25,6 +32,7 @@ async function makeArchive(athleteId: string, orgId: string) {
   const data: Record<string,unknown> = {};
   for(const [key,sql] of Object.entries(queries)) data[key]=(await pool.query(sql,[athleteId,orgId])).rows;
   const media=(await pool.query("SELECT id,kind,caption,created_at,bucket_key FROM media_assets WHERE org_id=$1 AND athlete_id=$2 AND deleted_at IS NULL ORDER BY created_at",[orgId,athleteId])).rows;
+  if(media.length>photoLimit)throw new Error('export photo count limit exceeded');
   data.media=media.map(({bucket_key:_bucketKey,...item})=>item);
   return new Promise<Buffer>((resolve,reject)=>{
     const zip=new yazl.ZipFile();const chunks:Buffer[]=[];
@@ -32,11 +40,16 @@ async function makeArchive(athleteId: string, orgId: string) {
     zip.outputStream.on('error',reject);
     zip.outputStream.on('end',()=>resolve(Buffer.concat(chunks)));
     void (async()=>{
-      zip.addBuffer(Buffer.from(JSON.stringify({generatedAt:new Date().toISOString(),data},null,2)),'sportsgrow-export.json');
+      const jsonBuffer=Buffer.from(JSON.stringify({generatedAt:new Date().toISOString(),data},null,2));
+      if(jsonBuffer.length>8*1024*1024)throw new Error('export json byte limit exceeded');
+      zip.addBuffer(jsonBuffer,'sportsgrow-export.json');
+      let photoBytes=0;
       for(const item of media){
         if(!mediaBucket)throw new Error('media bucket required for photo export');
         const object=await s3.send(new GetObjectCommand({Bucket:mediaBucket,Key:item.bucket_key}));
         const bytes=Buffer.from(await object.Body!.transformToByteArray());
+        if(photoBytes+bytes.length>photoBytesLimit)throw new Error('export photo byte limit exceeded');
+        photoBytes+=bytes.length;
         zip.addBuffer(bytes,`photos/${item.id}.jpg`);
       }
       zip.end();
@@ -113,19 +126,26 @@ export async function registerPrivacyRoutes(app:FastifyInstance){
     if(!['guardian','org_admin','athlete','platform_staff'].includes(ctx.role))return fail(reply,403,'forbidden','데이터를 내보낼 권한이 없습니다.');
     if(['erasure_pending','erased'].includes(ctx.athlete.status))return fail(reply,409,'athlete_not_active','파기 중이거나 파기된 선수의 데이터를 내보낼 수 없습니다.');
     if(ctx.role==='platform_staff'&&!ticketId)return fail(reply,404,'not_found','요청을 찾을 수 없습니다.');
+    if(await exportWindowClosed(ctx.athlete.org_id))return fail(reply,403,'export_window_closed','내보내기 기간이 끝났습니다.');
     if(!bucket)return fail(reply,503,'export_unconfigured','데이터 내보내기가 아직 설정되지 않았습니다.');
     const {rows}=await pool.query("INSERT INTO export_jobs(requester_user_id,org_id,athlete_id,ticket_id,status,expires_at) VALUES($1,$2,$3,$4,'queued',now()+interval '24 hours') RETURNING id,status,expires_at",[session.user_id,ctx.athlete.org_id,ctx.athlete.id,ticketId??null]);
     return reply.code(202).send(rows[0]);
   });
   app.get<{Params:{id:string}}>('/api/me/exports/:id',async(request,reply)=>{
     const session=await currentSession(request);if(!session)return fail(reply,401,'unauthenticated','로그인이 필요합니다.');
-    const {rows}=await pool.query('SELECT id,status,bucket_key,expires_at,ticket_id FROM export_jobs WHERE id=$1 AND requester_user_id=$2',[request.params.id,session.user_id]);
-    if(!rows[0])return fail(reply,404,'not_found','내보내기 요청을 찾을 수 없습니다.');
-    if(rows[0].ticket_id&&!(await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open'",[rows[0].ticket_id])).rowCount)return fail(reply,404,'not_found','내보내기 요청을 찾을 수 없습니다.');
-    if(rows[0].expires_at<=new Date()&&rows[0].status==='ready'){await pool.query("UPDATE export_jobs SET status='expired' WHERE id=$1 AND status='ready'",[rows[0].id]);return {id:rows[0].id,status:'expired'};}
-    if(rows[0].status!=='ready'||!bucket)return {id:rows[0].id,status:rows[0].status,expiresAt:rows[0].expires_at};
-    const downloadUrl=await getSignedUrl(s3,new GetObjectCommand({Bucket:bucket,Key:rows[0].bucket_key,ResponseContentType:'application/zip',ResponseContentDisposition:'attachment; filename="sportsgrow-export.zip"'}),{expiresIn:600});
-    return {id:rows[0].id,status:'ready',downloadUrl,downloadExpiresIn:600};
+    const {rows}=await pool.query('SELECT id,athlete_id,status,bucket_key,expires_at,ticket_id FROM export_jobs WHERE id=$1 AND requester_user_id=$2',[request.params.id,session.user_id]);
+    const job=rows[0];
+    if(!job)return fail(reply,404,'not_found','내보내기 요청을 찾을 수 없습니다.');
+    if(job.ticket_id&&!(await pool.query("SELECT 1 FROM tickets WHERE id=$1 AND status='open'",[job.ticket_id])).rowCount)return fail(reply,404,'not_found','내보내기 요청을 찾을 수 없습니다.');
+    const ctx=job.athlete_id?await athleteContext(request,job.athlete_id,job.ticket_id??undefined):{error:'not_found' as const};
+    if('error'in ctx)return fail(reply,404,'not_found','내보내기 요청을 찾을 수 없습니다.');
+    if(!['guardian','org_admin','athlete','platform_staff'].includes(ctx.role))return fail(reply,404,'not_found','내보내기 요청을 찾을 수 없습니다.');
+    if(['erasure_pending','erased'].includes(ctx.athlete.status)){await pool.query("UPDATE export_jobs SET status='expired' WHERE id=$1 AND status='ready'",[job.id]);return {id:job.id,status:'expired'};}
+    if(await exportWindowClosed(ctx.athlete.org_id))return fail(reply,403,'export_window_closed','내보내기 기간이 끝났습니다.');
+    if(job.expires_at<=new Date()&&job.status==='ready'){await pool.query("UPDATE export_jobs SET status='expired' WHERE id=$1 AND status='ready'",[job.id]);return {id:job.id,status:'expired'};}
+    if(job.status!=='ready'||!bucket)return {id:job.id,status:job.status,expiresAt:job.expires_at};
+    const downloadUrl=await getSignedUrl(s3,new GetObjectCommand({Bucket:bucket,Key:job.bucket_key,ResponseContentType:'application/zip',ResponseContentDisposition:'attachment; filename="sportsgrow-export.zip"'}),{expiresIn:600});
+    return {id:job.id,status:'ready',downloadUrl,downloadExpiresIn:600};
   });
   app.post<{Params:{id:string}}>('/api/athletes/:id/erasure',async(request,reply)=>{
     const manifestBucket=process.env.ERASURE_MANIFEST_BUCKET;

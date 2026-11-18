@@ -23,7 +23,7 @@ import {
   type GameRecord,
   type TrainingRecord,
 } from '../lib/api';
-import { useAthleteScope } from '../lib/athletes';
+import { MEMBERSHIP_CHOICE_MESSAGE, useAthleteScope } from '../lib/athletes';
 import { formatIsoDate, toDateInput } from '../lib/date';
 import { colors, spacing } from '../lib/theme';
 
@@ -108,6 +108,13 @@ function RecordsContent() {
       {status === 'loading' ? (
         <Card>
           <Muted>선수 정보를 불러오는 중입니다.</Muted>
+        </Card>
+      ) : null}
+
+      {status === 'choose' ? (
+        <Card>
+          <SectionTitle>기록</SectionTitle>
+          <Muted>{MEMBERSHIP_CHOICE_MESSAGE}</Muted>
         </Card>
       ) : null}
 
